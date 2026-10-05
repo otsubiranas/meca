@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mecazombis - Joc de mecanografia</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="game-header">
+      <a class="back-link" href="../index.html">← Tornar als jocs</a>
+      <h1>🧟 Mecazombis</h1>
+      <div class="score-box" aria-live="polite">
+        <span>Eliminats</span>
+        <strong id="score">0</strong>
+      </div>
+    </header>
+
+    <section class="instructions">
+      <p>Prem la tecla que correspon al zombi per disparar-li una fletxa.</p>
+      <p class="hint">Tecles: <strong>A S D F G H J K L Ñ</strong></p>
+    </section>
+
+    <section id="game" class="game" tabindex="0" aria-label="Zona de joc de Mecazombis">
+      <div class="sky"></div>
+      <div id="zombies" class="zombies"></div>
+      <div id="arrows" class="arrows"></div>
+
+      <div class="danger-line" aria-hidden="true"></div>
+
+      <div class="columns" aria-hidden="true">
+        <div>A</div><div>S</div><div>D</div><div>F</div><div>G</div>
+        <div>H</div><div>J</div><div>K</div><div>L</div><div>Ñ</div>
+      </div>
+
+      <div id="start-screen" class="overlay">
+        <div class="overlay-card">
+          <div class="big-emoji">🧟</div>
+          <h2>Mecazombis</h2>
+          <p>Elimina tants zombis com puguis abans que arribin a terra.</p>
+          <button id="start-button" class="primary-button">Començar</button>
+        </div>
+      </div>
+
+      <div id="game-over" class="overlay hidden">
+        <div class="overlay-card">
+          <div class="big-emoji">💀</div>
+          <h2>Game Over</h2>
+          <p>Has eliminat</p>
+          <div id="final-score" class="final-score">0</div>
+          <p>zombis</p>
+          <button id="restart-button" class="primary-button">Torna a jugar</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="keyboard" aria-label="Teclat del joc">
+      <button data-key="a">A</button>
+      <button data-key="s">S</button>
+      <button data-key="d">D</button>
+      <button data-key="f">F</button>
+      <button data-key="g">G</button>
+      <button data-key="h">H</button>
+      <button data-key="j">J</button>
+      <button data-key="k">K</button>
+      <button data-key="l">L</button>
+      <button data-key="ñ">Ñ</button>
+    </div>
+
+    <p class="footer-note">Només poden volar dues fletxes alhora.</p>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
