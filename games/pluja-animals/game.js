@@ -267,68 +267,6 @@ function spawnAnimal() {
 
     element.className = "falling-animal";
 
-/* =========================================
-   PARALLAX
-   ========================================= */
-const parallaxLayers = [
-    {
-        element: document.querySelector(".sky"),
-        speed: 0.02
-    },
-    {
-        element: document.querySelector(".mountains"),
-        speed: 0.05
-    },
-    {
-        element: document.querySelector(".trees"),
-        speed: 0.10
-    },
-    {
-        element: document.querySelector(".clouds"),
-        speed: 0.25
-    },
-    {
-        element: document.querySelector(".grass"),
-        speed: 0.03
-    }
-];
-
-
-let parallaxPosition = 0;
-
-
-function animateParallax() {
-
-    parallaxPosition += 1;
-
-
-    parallaxLayers.forEach(layer => {
-
-        if (!layer.element) return;
-
-
-        const strips =
-            layer.element.querySelectorAll(".parallax-strip");
-
-
-        const movement =
-            (parallaxPosition * layer.speed) % 100;
-
-
-        strips[0].style.transform =
-            `translateX(${-movement}%)`;
-
-        strips[1].style.transform =
-            `translateX(${-movement}%)`;
-    });
-
-
-    requestAnimationFrame(animateParallax);
-}
-
-
-animateParallax();
-   
     
     // Sprite
     const sprite = document.createElement("div");
