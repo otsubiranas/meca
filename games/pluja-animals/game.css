@@ -53,13 +53,80 @@
     height: 620px;
     overflow: hidden;
 
-    background:
-        linear-gradient(
-            to bottom,
-            #84cbc9 0%,
-            #b8e5e3 70%,
-            #ffffff 100%
-        );
+/* ================================
+   ESCENARI
+   ================================ */
+
+#game {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ================================
+   FONS PARALLAX
+   ================================ */
+
+#parallax-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  /* Important: darrere dels animals */
+  z-index: 0;
+
+  pointer-events: none;
+}
+
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
+  background-size: auto 100%;
+
+  /* Pixel art nítid */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  will-change: transform;
+}
+
+/* De lluny a prop */
+
+.sky {
+  background-image: url("sky.png");
+  z-index: 1;
+}
+
+.mountains {
+  background-image: url("mountains.png");
+  z-index: 2;
+}
+
+.trees {
+  background-image: url("trees.png");
+  z-index: 3;
+}
+
+.clouds {
+  background-image: url("clouds.png");
+  z-index: 4;
+}
+
+.grass {
+  background-image: url("grass.png");
+  z-index: 5;
+}
+
+/* Animals sempre per davant */
+
+#animals {
+  position: relative;
+  z-index: 10;
+}
 
 
 
