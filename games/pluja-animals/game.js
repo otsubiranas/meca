@@ -271,64 +271,47 @@ function spawnAnimal() {
    PARALLAX
    ========================================= */
 
-const parallaxLayers = [
-    {
-        element: document.querySelector(".sky"),
-        speed: 0.02
-    },
-    {
-        element: document.querySelector(".mountains"),
-        speed: 0.05
-    },
-    {
-        element: document.querySelector(".trees"),
-        speed: 0.10
-    },
-    {
-        element: document.querySelector(".clouds"),
-        speed: 0.25
-    },
-    {
-        element: document.querySelector(".grass"),
-        speed: 0.03
-    }
+const layers = [
+  {
+    element: document.querySelector(".sky"),
+    speed: 0.02
+  },
+  {
+    element: document.querySelector(".mountains"),
+    speed: 0.05
+  },
+  {
+    element: document.querySelector(".trees"),
+    speed: 0.10
+  },
+  {
+    element: document.querySelector(".clouds"),
+    speed: 0.25
+  },
+  {
+    element: document.querySelector(".grass"),
+    speed: 0.03
+  }
 ];
 
-
-let parallaxPosition = 0;
-
+let parallaxX = 0;
 
 function animateParallax() {
+  parallaxX += 1;
 
-    parallaxPosition += 1;
+  layers.forEach(layer => {
+    if (!layer.element) return;
 
+    const x = -(parallaxX * layer.speed);
 
-    parallaxLayers.forEach(layer => {
+    layer.element.style.transform = `translate3d(${x}px, 0, 0)`;
+  });
 
-        if (!layer.element) return;
-
-
-        const strips =
-            layer.element.querySelectorAll(".parallax-strip");
-
-
-        const movement =
-            (parallaxPosition * layer.speed) % 100;
-
-
-        strips[0].style.transform =
-            `translateX(${-movement}%)`;
-
-        strips[1].style.transform =
-            `translateX(${-movement}%)`;
-    });
-
-
-    requestAnimationFrame(animateParallax);
+  requestAnimationFrame(animateParallax);
 }
 
-
 animateParallax();
+   
     
     // Sprite
     const sprite = document.createElement("div");
