@@ -231,3 +231,79 @@
     }
 
 }
+.falling-animal {
+    position: absolute;
+    width: 110px;
+    height: 125px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.animal-sprite {
+    width: 100px;
+    height: 92px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.animal-word {
+    margin-top: 2px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    background: #09101d;
+    color: white;
+    border: 2px solid #84cbc9;
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.falling-animal.typing-match .animal-word {
+    background: #84cbc9;
+    color: #09101d;
+}
+
+.falling-animal.animal-correct {
+    transform: scale(1.2);
+    opacity: 0;
+    transition: 0.12s ease;
+}
+
+.life-lost {
+    animation: lifeLost 0.18s ease;
+}
+
+.level-up {
+    animation: levelUp 0.5s ease;
+}
+
+@keyframes lifeLost {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    75% {
+        transform: translateX(8px);
+    }
+}
+
+@keyframes levelUp {
+    0% {
+        box-shadow: inset 0 0 0 0 #84cbc9;
+    }
+
+    50% {
+        box-shadow: inset 0 0 40px 10px rgba(132, 203, 201, 0.35);
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 0 #84cbc9;
+    }
+}
