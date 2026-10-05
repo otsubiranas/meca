@@ -104,6 +104,9 @@
   const scoreElement =
     document.getElementById("score");
 
+   const bestScoreElement =
+    document.getElementById("best-score");
+
   const startScreen =
     document.getElementById("start-screen");
 
@@ -142,6 +145,15 @@
   let nextZombieId = 1;
 
   let spawnTimer = null;
+
+    let bestScore = 0;
+
+  try {
+    bestScore =
+      parseInt(localStorage.getItem("mecazombis-best"), 10) || 0;
+  } catch (e) {}
+
+  bestScoreElement.textContent = bestScore;
 
 
   // ------------------------------------------------------------
@@ -865,6 +877,14 @@
     finalScoreElement.textContent =
       score;
 
+        if (score > bestScore) {
+      bestScore = score;
+      bestScoreElement.textContent = bestScore;
+
+      try {
+        localStorage.setItem("mecazombis-best", bestScore);
+      } catch (e) {}
+    }
 
     gameOverScreen.classList.remove(
       "hidden"
