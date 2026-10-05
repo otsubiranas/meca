@@ -69,58 +69,83 @@
    ================================ */
 
 #parallax-background {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
 
-  /* Important: darrere dels animals */
-  z-index: 0;
-
-  pointer-events: none;
+    overflow: hidden;
+    pointer-events: none;
 }
+
 
 .parallax-layer {
-  position: absolute;
-  inset: 0;
+    position: absolute;
+    inset: 0;
 
-  background-repeat: repeat-x;
-  background-position: 0 bottom;
-  background-size: auto 100%;
+    overflow: hidden;
 
-  /* Pixel art nítid */
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-
-  will-change: transform;
+    pointer-events: none;
 }
 
-/* De lluny a prop */
 
-.sky {
-  background-image: url("sky.png");
-  z-index: 1;
+/* Cada imatge ocupa exactament
+   una pantalla */
+
+.parallax-strip {
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    width: 100%;
+
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: cover;
+
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+
+    will-change: transform;
 }
 
-.mountains {
-  background-image: url("mountains.png");
-  z-index: 2;
+
+/* Primera còpia */
+
+.parallax-strip:nth-child(1) {
+    left: 0;
 }
 
-.trees {
-  background-image: url("trees.png");
-  z-index: 3;
+
+/* Segona còpia, immediatament
+   després de la primera */
+
+.parallax-strip:nth-child(2) {
+    left: 100%;
 }
 
-.clouds {
-  background-image: url("clouds.png");
-  z-index: 4;
+
+/* IMATGES */
+
+.sky .parallax-strip {
+    background-image: url("sky.png");
 }
 
-.grass {
-  background-image: url("grass.png");
-  z-index: 5;
+.mountains .parallax-strip {
+    background-image: url("mountains.png");
 }
 
+.trees .parallax-strip {
+    background-image: url("trees.png");
+}
+
+.clouds .parallax-strip {
+    background-image: url("clouds.png");
+}
+
+.grass .parallax-strip {
+    background-image: url("grass.png");
+}
 
 /* SÒL */
 
