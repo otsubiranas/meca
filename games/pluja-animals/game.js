@@ -267,7 +267,51 @@ function spawnAnimal() {
 
     element.className = "falling-animal";
 
+/* =========================================
+   PARALLAX
+   ========================================= */
 
+const layers = [
+  {
+    element: document.querySelector(".sky"),
+    speed: 0.02
+  },
+  {
+    element: document.querySelector(".mountains"),
+    speed: 0.05
+  },
+  {
+    element: document.querySelector(".trees"),
+    speed: 0.10
+  },
+  {
+    element: document.querySelector(".clouds"),
+    speed: 0.25
+  },
+  {
+    element: document.querySelector(".grass"),
+    speed: 0.03
+  }
+];
+
+let parallaxX = 0;
+
+function animateParallax() {
+  parallaxX += 1;
+
+  layers.forEach(layer => {
+    if (!layer.element) return;
+
+    const x = -(parallaxX * layer.speed);
+
+    layer.element.style.transform = `translate3d(${x}px, 0, 0)`;
+  });
+
+  requestAnimationFrame(animateParallax);
+}
+
+animateParallax();
+    
     // Sprite
     const sprite = document.createElement("div");
 
