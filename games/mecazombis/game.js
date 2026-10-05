@@ -50,13 +50,13 @@
     maxArrows: 2,
 
     // Temps inicial entre aparicions.
-    firstSpawnDelay: 900,
+    firstSpawnDelay: 1100,
 
     // Límit mínim entre aparicions.
-    minimumSpawnDelay: 220,
+    minimumSpawnDelay: 250,
 
     // Cada zombi eliminat redueix el temps d'aparició.
-    spawnAcceleration: 16,
+    spawnAcceleration: 5,
 
     // Velocitat de les fletxes.
     arrowSpeed: 520,
