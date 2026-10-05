@@ -333,7 +333,7 @@ function spawnAnimal() {
 
 function getFallSpeed() {
 
-    return 45;
+    return 35;
 
 }
 
@@ -345,8 +345,8 @@ function getFallSpeed() {
 function getSpawnInterval() {
 
     return Math.max(
-        650,
-        1500 - (level - 1) * 130
+        1500,
+        2100 - (level - 1) * 100
     );
 
 }
