@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pluja d'animals</title>
+
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="game.css">
+</head>
+
+<body>
+
+<header class="site-header">
+    <div class="container nav">
+
+        <a href="../../index.html" class="brand">
+            <img src="../../logo.png" alt="Logo">
+        </a>
+
+        <a href="../../index.html" class="button">
+            ← Tornar als jocs
+        </a>
+
+    </div>
+</header>
+
+
+<main class="game-page">
+
+    <section class="game-intro container">
+
+        <p class="eyebrow">JOC DE VELOCITAT</p>
+
+        <h1>Pluja d'animals</h1>
+
+        <p>
+            Escriu el nom dels animals abans que arribin a terra.
+            Cada vegada seran més difícils!
+        </p>
+
+    </section>
+
+
+    <section class="game-container container">
+
+        <div class="game-info">
+
+            <div class="info-box">
+                <span>Puntuació</span>
+                <strong id="score">0</strong>
+            </div>
+
+            <div class="info-box">
+                <span>Nivell</span>
+                <strong id="level">1</strong>
+            </div>
+
+            <div class="info-box">
+                <span>Vides</span>
+                <strong id="lives">❤️❤️❤️</strong>
+            </div>
+
+            <div class="info-box">
+                <span>Rècord</span>
+                <strong id="best-score">0</strong>
+            </div>
+
+        </div>
+
+
+        <div id="game-area" class="game-area">
+
+            <div id="start-screen" class="start-screen">
+
+                <div class="start-icon">🐾</div>
+
+                <h2>Preparat?</h2>
+
+                <p>
+                    Escriu ràpidament els noms dels animals
+                    que van caient.
+                </p>
+
+                <button id="start-button" class="button game-button">
+                    Començar
+                </button>
+
+            </div>
+
+
+            <div id="game-over-screen" class="start-screen hidden">
+
+                <div class="start-icon">🏆</div>
+
+                <h2>Partida acabada!</h2>
+
+                <p>
+                    Has aconseguit
+                    <strong id="final-score">0</strong>
+                    punts.
+                </p>
+
+                <button id="restart-button" class="button game-button">
+                    Tornar a jugar
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="typing-area">
+
+            <label for="word-input">
+                Escriu el nom de l'animal:
+            </label>
+
+            <input
+                id="word-input"
+                type="text"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                placeholder="Comença a escriure..."
+                disabled
+            >
+
+            <p id="message" class="game-message">
+                Prem "Començar" per jugar.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="game.js"></script>
+
+</body>
+</html>
