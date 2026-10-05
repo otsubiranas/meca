@@ -7,266 +7,435 @@
     <title>Jocs de mecanografia</title>
 
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        body {
+            background: #09101d;
+            color: white;
+        }
+
+        .catalog-page {
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .catalog-header {
+            width: min(1200px, 90%);
+            margin: 0 auto;
+            padding: 28px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .catalog-header img {
+            width: 150px;
+            height: auto;
+        }
+
+        /* HERO */
+        .catalog-hero {
+            width: min(1200px, 90%);
+            margin: 60px auto 70px;
+        }
+
+        .catalog-hero h1 {
+            margin: 0 0 20px;
+            font-size: clamp(2.8rem, 6vw, 5.5rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        .catalog-hero h1 span {
+            color: #84cbc9;
+        }
+
+        .catalog-hero p {
+            max-width: 650px;
+            margin: 0;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* CATALOG */
+        .catalog {
+            width: min(1200px, 90%);
+            margin: 0 auto 80px;
+        }
+
+        .catalog-title {
+            margin-bottom: 28px;
+        }
+
+        .catalog-title h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* 3 x 3 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* GAME CARD */
+        .game-card {
+            aspect-ratio: 1 / 1;
+            background: #101927;
+            border: 1px solid rgba(132, 203, 201, 0.18);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none;
+            color: white;
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            background: #132131;
+            border-color: #84cbc9;
+        }
+
+        .game-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: #84cbc9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .game-info h3 {
+            margin: 0 0 10px;
+            font-size: 1.35rem;
+        }
+
+        .game-info p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .game-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .game-status {
+            font-size: 0.8rem;
+            color: #84cbc9;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .game-arrow {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* PRÒXIMAMENT */
+        .game-card.disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .game-card.disabled:hover {
+            transform: none;
+            background: #101927;
+            border-color: rgba(132, 203, 201, 0.18);
+        }
+
+        .game-card.disabled .game-icon {
+            background: #202a38;
+        }
+
+        .game-card.disabled .game-status {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        /* TABLET */
+        @media (max-width: 850px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* MÒBIL */
+        @media (max-width: 560px) {
+            .catalog-header {
+                padding: 20px 0;
+            }
+
+            .catalog-header img {
+                width: 120px;
+            }
+
+            .catalog-hero {
+                margin: 40px auto 50px;
+            }
+
+            .catalog-hero h1 {
+                font-size: 3rem;
+            }
+
+            .catalog-hero p {
+                font-size: 1rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card {
+                aspect-ratio: auto;
+                min-height: 300px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- CAPÇALERA -->
-    <header class="site-header">
-        <div class="container nav">
+<div class="catalog-page">
 
-            <a href="index.html" class="brand">
-                <img src="logo.png" alt="Logo">
-            </a>
-
-        </div>
+    <!-- HEADER -->
+    <header class="catalog-header">
+        <a href="index.html">
+            <img src="logo.png" alt="Logo">
+        </a>
     </header>
 
 
-    <!-- CONTINGUT PRINCIPAL -->
-    <main>
+    <!-- HERO -->
+    <section class="catalog-hero">
 
-        <!-- HERO -->
-        <section class="section">
-            <div class="container">
+        <h1>
+            Jocs de<br>
+            <span>mecanografia.</span>
+        </h1>
 
-                <h1>Jocs de mecanografia.</h1>
+        <p>
+            Una col·lecció de jocs pensats per practicar
+            mecanografia d'una manera divertida.
+        </p>
 
-                <p>
-                    Una col·lecció de jocs pensats per practicar mecanografia
-                    d'una manera divertida.
-                </p>
+    </section>
 
-            </div>
-        </section>
 
+    <!-- CATÀLEG -->
+    <main class="catalog">
 
-        <!-- CATÀLEG -->
-        <section class="section">
-            <div class="container">
+        <div class="catalog-title">
+            <h2>Tria el teu joc:</h2>
+        </div>
 
-                <h2>Tria el teu joc:</h2>
 
-                <div class="games-grid">
+        <div class="games-grid">
 
-                    <!-- JOC 1 -->
-                    <article class="game-card">
+            <!-- 1 -->
+            <a class="game-card" href="games/pluja-animals/">
 
-                        <div class="game-card-icon">
-                            🐾
-                        </div>
+                <div class="game-icon">🐾</div>
 
-                        <div class="game-card-content">
+                <div class="game-info">
+                    <h3>Pluja d'animals</h3>
+                    <p>
+                        Escriu els noms dels animals
+                        abans que arribin a terra.
+                    </p>
+                </div>
 
-                            <h3>Pluja d'animals</h3>
+                <div class="game-bottom">
+                    <span class="game-status">Jugar</span>
+                    <span class="game-arrow">→</span>
+                </div>
 
-                            <p>
-                                Escriu els noms dels animals abans que arribin
-                                a terra.
-                            </p>
+            </a>
 
-                            <div class="game-card-meta">
-                                <span>Progressiu</span>
-                                <span>Velocitat</span>
-                                <span>Precisió</span>
-                            </div>
 
-                            <a
-                                href="games/pluja-animals/"
-                                class="button"
-                            >
-                                Jugar
-                            </a>
+            <!-- 2 -->
+            <div class="game-card disabled">
 
-                        </div>
+                <div class="game-icon">⌨️</div>
 
-                    </article>
+                <div class="game-info">
+                    <h3>Pluja de paraules</h3>
+                    <p>
+                        Escriu les paraules que
+                        van apareixent.
+                    </p>
+                </div>
 
-
-                    <!-- JOC 2 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            ☁️
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Pluja de paraules</h3>
-
-                            <p>
-                                Escriu les paraules que cauen abans que
-                                desapareguin.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Velocitat</span>
-                                <span>Precisió</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- JOC 3 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            ⏱️
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Carrera contra el temps</h3>
-
-                            <p>
-                                Escriu tantes paraules com puguis abans que
-                                s'acabi el temps.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Velocitat</span>
-                                <span>Temps</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- JOC 4 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            🔤
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Frases en cadena</h3>
-
-                            <p>
-                                Completa frases sense perdre el ritme.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Precisió</span>
-                                <span>Frases</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- JOC 5 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            🎯
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Caçador de tecles</h3>
-
-                            <p>
-                                Troba i prem les tecles correctes tan ràpid
-                                com puguis.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Reflexos</span>
-                                <span>Precisió</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- JOC 6 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            🧠
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Mode paraules difícils</h3>
-
-                            <p>
-                                Practica amb paraules cada vegada més
-                                complicades.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Difícil</span>
-                                <span>Precisió</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- JOC 7 -->
-                    <article class="game-card">
-
-                        <div class="game-card-icon">
-                            💬
-                        </div>
-
-                        <div class="game-card-content">
-
-                            <h3>Repte de frases</h3>
-
-                            <p>
-                                Supera diferents reptes escrivint frases
-                                correctament.
-                            </p>
-
-                            <div class="game-card-meta">
-                                <span>Frases</span>
-                                <span>Repte</span>
-                            </div>
-
-                            <span class="button button-disabled">
-                                Pròximament
-                            </span>
-
-                        </div>
-
-                    </article>
-
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
                 </div>
 
             </div>
-        </section>
+
+
+            <!-- 3 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">⏱️</div>
+
+                <div class="game-info">
+                    <h3>Carrera contra el temps</h3>
+                    <p>
+                        Escriu tan ràpid com puguis
+                        abans que s'acabi el temps.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 4 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">🎯</div>
+
+                <div class="game-info">
+                    <h3>Caçador de tecles</h3>
+                    <p>
+                        Troba i escriu les tecles
+                        correctes.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 5 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">🔥</div>
+
+                <div class="game-info">
+                    <h3>Paraules difícils</h3>
+                    <p>
+                        Un repte per millorar
+                        la teva precisió.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 6 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">📝</div>
+
+                <div class="game-info">
+                    <h3>Repte de frases</h3>
+                    <p>
+                        Escriu frases cada vegada
+                        més complicades.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 7 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">⚡</div>
+
+                <div class="game-info">
+                    <h3>Mode velocitat</h3>
+                    <p>
+                        Posa a prova la teva
+                        velocitat d'escriptura.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 8 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">🧠</div>
+
+                <div class="game-info">
+                    <h3>Repte mental</h3>
+                    <p>
+                        Concentra't i escriu
+                        sense cometre errors.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+
+            <!-- 9 -->
+            <div class="game-card disabled">
+
+                <div class="game-icon">🏆</div>
+
+                <div class="game-info">
+                    <h3>Gran repte</h3>
+                    <p>
+                        El repte definitiu de
+                        mecanografia.
+                    </p>
+                </div>
+
+                <div class="game-bottom">
+                    <span class="game-status">Pròximament</span>
+                </div>
+
+            </div>
+
+        </div>
 
     </main>
+
+</div>
 
 </body>
 </html>
