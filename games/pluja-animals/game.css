@@ -53,12 +53,21 @@
     height: 620px;
     overflow: hidden;
 
-    background:
+body {
+    background-color: #09101d;
+
+    background-image:
         linear-gradient(
-            to bottom,
-            #84cbc9 0%,
-            #b8e5e3 70%,
-            #ffffff 100%
+            90deg,
+            rgba(132, 203, 201, 0.035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            rgba(132, 203, 201, 0.035) 1px,
+            transparent 1px
+        );
+
+    background-size: 16px 16px;
         );
 
     border: 3px solid #09101d;
