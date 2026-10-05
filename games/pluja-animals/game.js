@@ -333,7 +333,7 @@ function spawnAnimal() {
 
 function getFallSpeed() {
 
-    return 45 + (level - 1) * 12;
+    return 45;
 
 }
 
