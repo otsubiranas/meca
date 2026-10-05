@@ -3,7 +3,13 @@ const SPRITESHEET = "animals.png";
 const COLUMNS = 8;
 const ROWS = 5;
 
+
+// ─────────────────────────────
+// ANIMALS DEL SPRITESHEET
+// ─────────────────────────────
+
 const animals = [
+
     // Fila 1
     { name: "gat", col: 0, row: 0 },
     { name: "gos", col: 1, row: 0 },
@@ -53,6 +59,7 @@ const animals = [
     { name: "pop", col: 5, row: 4 },
     { name: "papallona", col: 6, row: 4 },
     { name: "cocodril", col: 7, row: 4 }
+
 ];
 
 
@@ -61,6 +68,7 @@ const animals = [
 // ─────────────────────────────
 
 const levels = {
+
     1: [
         "gat",
         "gos",
@@ -68,24 +76,24 @@ const levels = {
         "porc",
         "peix",
         "oca",
-        "foca",
-        "pop"
+        "pop",
+        "mico"
     ],
 
     2: [
-        "ovella",
-        "cavall",
-        "conill",
+        "foca",
         "cabra",
         "lloro",
         "zebra",
+        "ovella",
         "abella",
-        "gallina"
+        "gallina",
+        "colom"
     ],
 
     3: [
-        "elefant",
-        "girafa",
+        "cavall",
+        "conill",
         "guineu",
         "tigre",
         "llop",
@@ -97,23 +105,27 @@ const levels = {
     4: [
         "tortuga",
         "ratpenat",
-        "cocodril",
-        "papallona",
         "cranc",
-        "colom",
-        "esquirol"
-    ],
-
-    5: [
-        "cavall",
+        "esquirol",
         "elefant",
-        "papallona",
+        "girafa",
         "cocodril",
-        "ratpenat",
-        "esquirol"
+        "papallona"
     ],
 
-    // TOTS els animals amb accent
+    // Nivell 5: paraules més llargues
+    5: [
+        "ratpenat",
+        "esquirol",
+        "elefant",
+        "cocodril",
+        "papallona",
+        "tortuga",
+        "gallina",
+        "conill"
+    ],
+
+    // Nivell 6: TOTS els animals amb accent
     6: [
         "ànec",
         "ós",
@@ -124,6 +136,7 @@ const levels = {
         "pingüí",
         "dofí"
     ]
+
 };
 
 
@@ -131,22 +144,42 @@ const levels = {
 // ELEMENTS HTML
 // ─────────────────────────────
 
-const gameArea = document.getElementById("gameArea");
-const typingInput = document.getElementById("typingInput");
+const gameArea = document.getElementById("game-area");
+const typingInput = document.getElementById("word-input");
 
 const scoreElement = document.getElementById("score");
 const levelElement = document.getElementById("level");
 const livesElement = document.getElementById("lives");
-const bestScoreElement = document.getElementById("bestScore");
+const bestScoreElement = document.getElementById("best-score");
 
-const startScreen = document.getElementById("startScreen");
-const gameOverScreen = document.getElementById("gameOverScreen");
+const startScreen = document.getElementById("start-screen");
+const gameOverScreen = document.getElementById("game-over-screen");
 
-const startButton = document.getElementById("startButton");
-const restartButton = document.getElementById("restartButton");
+const startButton = document.getElementById("start-button");
+const restartButton = document.getElementById("restart-button");
 
-const finalScore = document.getElementById("finalScore");
-const finalBest = document.getElementById("finalBest");
+const finalScore = document.getElementById("final-score");
+
+
+// ─────────────────────────────
+// COMPROVACIÓ
+// ─────────────────────────────
+
+if (
+    !gameArea ||
+    !typingInput ||
+    !scoreElement ||
+    !levelElement ||
+    !livesElement ||
+    !bestScoreElement ||
+    !startScreen ||
+    !gameOverScreen ||
+    !startButton ||
+    !restartButton ||
+    !finalScore
+) {
+    console.error("Pluja d'animals: falta algun element HTML.");
+}
 
 
 // ─────────────────────────────
@@ -158,10 +191,16 @@ let level = 1;
 let lives = 3;
 
 let gameRunning = false;
+
 let lastTime = 0;
 let spawnTimer = 0;
 
 let fallingAnimals = [];
+
+
+// ─────────────────────────────
+// RÈCORD
+// ─────────────────────────────
 
 let bestScore = Number(
     localStorage.getItem("plujaAnimalsBestScore") || 0
@@ -175,12 +214,15 @@ bestScoreElement.textContent = bestScore;
 // ─────────────────────────────
 
 function getAvailableAnimals() {
+
     let available = [];
 
     for (let i = 1; i <= level; i++) {
+
         if (levels[i]) {
             available.push(...levels[i]);
         }
+
     }
 
     return available;
@@ -188,7 +230,10 @@ function getAvailableAnimals() {
 
 
 function getAnimalByName(name) {
-    return animals.find(animal => animal.name === name);
+
+    return animals.find(
+        animal => animal.name === name
+    );
 }
 
 
@@ -206,7 +251,9 @@ function spawnAnimal() {
 
     const randomName =
         availableNames[
-            Math.floor(Math.random() * availableNames.length)
+            Math.floor(
+                Math.random() * availableNames.length
+            )
         ];
 
     const animal = getAnimalByName(randomName);
@@ -215,47 +262,68 @@ function spawnAnimal() {
         return;
     }
 
+
     const element = document.createElement("div");
 
     element.className = "falling-animal";
 
+
+    // Sprite
     const sprite = document.createElement("div");
 
     sprite.className = "animal-sprite";
 
-    sprite.style.backgroundImage = `url("${SPRITESHEET}")`;
+    sprite.style.backgroundImage =
+        `url("${SPRITESHEET}")`;
 
-    sprite.style.backgroundSize = `${COLUMNS * 100}% ${ROWS * 100}%`;
+    sprite.style.backgroundSize =
+        `${COLUMNS * 100}% ${ROWS * 100}%`;
 
     sprite.style.backgroundPosition =
         `${(animal.col / (COLUMNS - 1)) * 100}% ` +
         `${(animal.row / (ROWS - 1)) * 100}%`;
 
+
+    // Nom
     const word = document.createElement("div");
 
     word.className = "animal-word";
+
     word.textContent = animal.name;
+
 
     element.appendChild(sprite);
     element.appendChild(word);
 
+
+    // Posició inicial
     const areaWidth = gameArea.clientWidth;
 
-    const maxX = Math.max(0, areaWidth - 120);
+    const maxX =
+        Math.max(0, areaWidth - 120);
 
-    const x = Math.random() * maxX;
+    const x =
+        Math.random() * maxX;
 
     element.style.left = `${x}px`;
     element.style.top = "-130px";
 
+
     gameArea.appendChild(element);
 
+
     fallingAnimals.push({
-        element,
+
+        element: element,
+
         name: animal.name,
+
         y: -130,
+
         speed: getFallSpeed()
+
     });
+
 }
 
 
@@ -265,9 +333,8 @@ function spawnAnimal() {
 
 function getFallSpeed() {
 
-    const baseSpeed = 45;
+    return 45 + (level - 1) * 12;
 
-    return baseSpeed + (level - 1) * 12;
 }
 
 
@@ -281,11 +348,12 @@ function getSpawnInterval() {
         650,
         1500 - (level - 1) * 130
     );
+
 }
 
 
 // ─────────────────────────────
-// ACTUALITZAR JOC
+// BUCLE DEL JOC
 // ─────────────────────────────
 
 function updateGame(timestamp) {
@@ -294,44 +362,76 @@ function updateGame(timestamp) {
         return;
     }
 
+
     const deltaTime =
-        Math.min(timestamp - lastTime, 50) / 1000;
+        Math.min(
+            timestamp - lastTime,
+            50
+        ) / 1000;
 
     lastTime = timestamp;
 
-    spawnTimer += deltaTime * 1000;
 
-    if (spawnTimer >= getSpawnInterval()) {
+    // Crear animals
+    spawnTimer +=
+        deltaTime * 1000;
+
+
+    if (
+        spawnTimer >=
+        getSpawnInterval()
+    ) {
 
         spawnAnimal();
 
         spawnTimer = 0;
+
     }
 
 
-    const areaHeight = gameArea.clientHeight;
+    // Fer caure animals
+    const areaHeight =
+        gameArea.clientHeight;
 
-    for (let i = fallingAnimals.length - 1; i >= 0; i--) {
 
-        const animal = fallingAnimals[i];
+    for (
+        let i = fallingAnimals.length - 1;
+        i >= 0;
+        i--
+    ) {
 
-        animal.y += animal.speed * deltaTime;
+        const animal =
+            fallingAnimals[i];
+
+
+        animal.y +=
+            animal.speed * deltaTime;
+
 
         animal.element.style.transform =
             `translateY(${animal.y}px)`;
 
 
-        if (animal.y > areaHeight - 20) {
+        // Ha arribat a terra
+        if (
+            animal.y >
+            areaHeight - 20
+        ) {
 
             removeAnimal(i);
 
             loseLife();
+
         }
+
     }
+
 
     updateHighlights();
 
+
     requestAnimationFrame(updateGame);
+
 }
 
 
@@ -341,15 +441,18 @@ function updateGame(timestamp) {
 
 function removeAnimal(index) {
 
-    const animal = fallingAnimals[index];
+    const animal =
+        fallingAnimals[index];
 
     if (!animal) {
         return;
     }
 
+
     animal.element.remove();
 
     fallingAnimals.splice(index, 1);
+
 }
 
 
@@ -357,22 +460,38 @@ function removeAnimal(index) {
 // VIDES
 // ─────────────────────────────
 
+function updateLivesDisplay() {
+
+    livesElement.textContent =
+        "❤️".repeat(lives);
+
+}
+
+
 function loseLife() {
 
     lives--;
 
-    livesElement.textContent = lives;
+    updateLivesDisplay();
 
-    gameArea.classList.remove("life-lost");
+
+    gameArea.classList.remove(
+        "life-lost"
+    );
 
     void gameArea.offsetWidth;
 
-    gameArea.classList.add("life-lost");
+    gameArea.classList.add(
+        "life-lost"
+    );
 
 
     if (lives <= 0) {
+
         endGame();
+
     }
+
 }
 
 
@@ -380,41 +499,66 @@ function loseLife() {
 // ESCRIURE
 // ─────────────────────────────
 
-typingInput.addEventListener("input", () => {
+typingInput.addEventListener(
+    "input",
+    () => {
 
-    if (!gameRunning) {
-        return;
+        if (!gameRunning) {
+            return;
+        }
+
+
+        const typed =
+            typingInput.value
+                .trim()
+                .toLowerCase();
+
+
+        updateHighlights();
+
+
+        if (!typed) {
+            return;
+        }
+
+
+        const index =
+            fallingAnimals.findIndex(
+                animal =>
+                    animal.name
+                        .toLowerCase() === typed
+            );
+
+
+        if (index !== -1) {
+
+            const animal =
+                fallingAnimals[index];
+
+
+            animal.element.classList.add(
+                "animal-correct"
+            );
+
+
+            score++;
+
+            scoreElement.textContent =
+                score;
+
+
+            removeAnimal(index);
+
+
+            typingInput.value = "";
+
+
+            checkLevel();
+
+        }
+
     }
-
-    const typed = typingInput.value.trim().toLowerCase();
-
-    updateHighlights();
-
-    if (!typed) {
-        return;
-    }
-
-    const index = fallingAnimals.findIndex(
-        animal => animal.name.toLowerCase() === typed
-    );
-
-    if (index !== -1) {
-
-        const animal = fallingAnimals[index];
-
-        animal.element.classList.add("animal-correct");
-
-        score++;
-
-        scoreElement.textContent = score;
-
-        removeAnimal(index);
-
-        typingInput.value = "";
-
-        checkLevel();
-    }
-});
+);
 
 
 // ─────────────────────────────
@@ -424,46 +568,73 @@ typingInput.addEventListener("input", () => {
 function updateHighlights() {
 
     const typed =
-        typingInput.value.trim().toLowerCase();
+        typingInput.value
+            .trim()
+            .toLowerCase();
 
-    fallingAnimals.forEach(animal => {
 
-        if (
-            typed &&
-            animal.name.toLowerCase().startsWith(typed)
-        ) {
+    fallingAnimals.forEach(
+        animal => {
 
-            animal.element.classList.add("typing-match");
+            if (
+                typed &&
+                animal.name
+                    .toLowerCase()
+                    .startsWith(typed)
+            ) {
 
-        } else {
+                animal.element.classList.add(
+                    "typing-match"
+                );
 
-            animal.element.classList.remove("typing-match");
+            } else {
+
+                animal.element.classList.remove(
+                    "typing-match"
+                );
+
+            }
+
         }
-    });
+    );
+
 }
 
 
 // ─────────────────────────────
-// NIVELL
+// CANVI DE NIVELL
 // ─────────────────────────────
 
 function checkLevel() {
 
     const newLevel =
-        Math.min(6, Math.floor(score / 5) + 1);
+        Math.min(
+            6,
+            Math.floor(score / 5) + 1
+        );
+
 
     if (newLevel > level) {
 
         level = newLevel;
 
-        levelElement.textContent = level;
 
-        gameArea.classList.remove("level-up");
+        levelElement.textContent =
+            level;
+
+
+        gameArea.classList.remove(
+            "level-up"
+        );
 
         void gameArea.offsetWidth;
 
-        gameArea.classList.add("level-up");
+        gameArea.classList.add(
+            "level-up"
+        );
+
     }
+
 }
 
 
@@ -479,26 +650,51 @@ function startGame() {
 
     gameRunning = true;
 
-    lastTime = performance.now();
+    lastTime =
+        performance.now();
+
     spawnTimer = 0;
 
-    scoreElement.textContent = score;
-    levelElement.textContent = level;
-    livesElement.textContent = lives;
 
-    gameOverScreen.classList.add("hidden");
-    startScreen.classList.add("hidden");
+    scoreElement.textContent =
+        "0";
 
-    fallingAnimals.forEach(animal => {
-        animal.element.remove();
-    });
+    levelElement.textContent =
+        "1";
+
+    updateLivesDisplay();
+
+
+    startScreen.classList.add(
+        "hidden"
+    );
+
+    gameOverScreen.classList.add(
+        "hidden"
+    );
+
+
+    // Eliminar animals antics
+    fallingAnimals.forEach(
+        animal => {
+            animal.element.remove();
+        }
+    );
 
     fallingAnimals = [];
 
+
     typingInput.value = "";
+
+    typingInput.disabled = false;
+
     typingInput.focus();
 
-    requestAnimationFrame(updateGame);
+
+    requestAnimationFrame(
+        updateGame
+    );
+
 }
 
 
@@ -510,24 +706,37 @@ function endGame() {
 
     gameRunning = false;
 
+
     if (score > bestScore) {
 
         bestScore = score;
+
 
         localStorage.setItem(
             "plujaAnimalsBestScore",
             bestScore
         );
+
     }
 
-    bestScoreElement.textContent = bestScore;
 
-    finalScore.textContent = score;
-    finalBest.textContent = bestScore;
+    bestScoreElement.textContent =
+        bestScore;
 
-    gameOverScreen.classList.remove("hidden");
+
+    finalScore.textContent =
+        score;
+
+
+    gameOverScreen.classList.remove(
+        "hidden"
+    );
+
+
+    typingInput.disabled = true;
 
     typingInput.blur();
+
 }
 
 
@@ -535,6 +744,13 @@ function endGame() {
 // BOTONS
 // ─────────────────────────────
 
-startButton.addEventListener("click", startGame);
+startButton.addEventListener(
+    "click",
+    startGame
+);
 
-restartButton.addEventListener("click", startGame);
+
+restartButton.addEventListener(
+    "click",
+    startGame
+);
