@@ -1,788 +1,557 @@
-const gameArea = document.getElementById("game-area");
-const input = document.getElementById("word-input");
+const gameArea = document.getElementById("gameArea");
+const typingInput = document.getElementById("typingInput");
 
-const scoreElement = document.getElementById("score");
-const levelElement = document.getElementById("level");
-const livesElement = document.getElementById("lives");
-const bestScoreElement = document.getElementById("best-score");
+const scoreEl = document.getElementById("score");
+const levelEl = document.getElementById("level");
+const livesEl = document.getElementById("lives");
+const bestScoreEl = document.getElementById("bestScore");
 
-const messageElement = document.getElementById("message");
+const startScreen = document.getElementById("startScreen");
+const gameOverScreen = document.getElementById("gameOverScreen");
 
-const startScreen = document.getElementById("start-screen");
-const gameOverScreen = document.getElementById("game-over-screen");
+const startButton = document.getElementById("startButton");
+const restartButton = document.getElementById("restartButton");
 
-const startButton = document.getElementById("start-button");
-const restartButton = document.getElementById("restart-button");
-
-const finalScoreElement = document.getElementById("final-score");
-
-
-/* =========================
-   CONFIGURACIÓ
-========================= */
-
-let score = 0;
-let lives = 3;
-let level = 1;
-
-let gameRunning = false;
-
-let animals = [];
-
-let lastTime = 0;
-let spawnTimer = 0;
-
-let animationFrame;
+const finalScoreEl = document.getElementById("finalScore");
+const finalBestEl = document.getElementById("finalBest");
 
 
-/* =========================
-   ANIMALS
-========================= */
+// ======================================================
+// CONFIGURACIÓ DEL SPRITESHEET
+// ======================================================
 
-const animalLevels = [
+const SPRITESHEET = "animals.png";
 
-    // NIVELL 1
-    [
-        {
-            name: "gat",
-            color: "#f2a65a"
-        },
-        {
-            name: "gos",
-            color: "#9b7653"
-        },
-        {
-            name: "vaca",
-            color: "#eeeeee"
-        },
-        {
-            name: "gall",
-            color: "#e76f51"
-        },
-        {
-            name: "peix",
-            color: "#4ea8de"
-        }
-    ],
+const COLUMNS = 8;
+const ROWS = 5;
 
-    // NIVELL 2
-    [
-        {
-            name: "ovella",
-            color: "#ffffff"
-        },
-        {
-            name: "cavall",
-            color: "#8d5524"
-        },
-        {
-            name: "conill",
-            color: "#d8c3a5"
-        },
-        {
-            name: "granota",
-            color: "#65a30d"
-        },
-        {
-            name: "tortuga",
-            color: "#588157"
-        }
-    ],
 
-    // NIVELL 3
-    [
-        {
-            name: "elefant",
-            color: "#9ca3af"
-        },
-        {
-            name: "girafa",
-            color: "#e9b949"
-        },
-        {
-            name: "guineu",
-            color: "#e76f51"
-        },
-        {
-            name: "esquirol",
-            color: "#a16207"
-        },
-        {
-            name: "papallona",
-            color: "#c084fc"
-        }
-    ],
+// ======================================================
+// ANIMALS
+// ======================================================
 
-    // NIVELL 4
-    [
-        {
-            name: "hipopòtam",
-            color: "#9f8f9f"
-        },
-        {
-            name: "rinoceront",
-            color: "#737373"
-        },
-        {
-            name: "orangutan",
-            color: "#b45309"
-        },
-        {
-            name: "salamandra",
-            color: "#ef4444"
-        },
-        {
-            name: "llangardaix",
-            color: "#65a30d"
-        }
-    ],
+const animals = [
+    // Fila 1
+    { name: "gat", col: 0, row: 0 },
+    { name: "gos", col: 1, row: 0 },
+    { name: "cavall", col: 2, row: 0 },
+    { name: "vaca", col: 3, row: 0 },
+    { name: "conill", col: 4, row: 0 },
+    { name: "porc", col: 5, row: 0 },
+    { name: "ovella", col: 6, row: 0 },
+    { name: "lloro", col: 7, row: 0 },
 
-    // NIVELL 5
-    [
-        {
-            name: "ornitorinc",
-            color: "#78716c"
-        },
-        {
-            name: "hipopòtam",
-            color: "#9f8f9f"
-        },
-        {
-            name: "rinoceront",
-            color: "#737373"
-        },
-        {
-            name: "llangardaix",
-            color: "#65a30d"
-        },
-        {
-            name: "salamandra",
-            color: "#ef4444"
-        }
-    ]
+    // Fila 2
+    { name: "abella", col: 0, row: 1 },
+    { name: "gallina", col: 1, row: 1 },
+    { name: "cabra", col: 2, row: 1 },
+    { name: "ànec", col: 3, row: 1 },
+    { name: "ós", col: 4, row: 1 },
+    { name: "ratolí", col: 5, row: 1 },
+    { name: "peix", col: 6, row: 1 },
+    { name: "guineu", col: 7, row: 1 },
 
+    // Fila 3
+    { name: "colom", col: 0, row: 2 },
+    { name: "mico", col: 1, row: 2 },
+    { name: "oca", col: 2, row: 2 },
+    { name: "lleó", col: 3, row: 2 },
+    { name: "tigre", col: 4, row: 2 },
+    { name: "elefant", col: 5, row: 2 },
+    { name: "girafa", col: 6, row: 2 },
+    { name: "zebra", col: 7, row: 2 },
+
+    // Fila 4
+    { name: "serp", col: 0, row: 3 },
+    { name: "granota", col: 1, row: 3 },
+    { name: "tortuga", col: 2, row: 3 },
+    { name: "mussol", col: 3, row: 3 },
+    { name: "ratpenat", col: 4, row: 3 },
+    { name: "llop", col: 5, row: 3 },
+    { name: "cérvol", col: 6, row: 3 },
+    { name: "esquirol", col: 7, row: 3 },
+
+    // Fila 5
+    { name: "eriçó", col: 0, row: 4 },
+    { name: "pingüí", col: 1, row: 4 },
+    { name: "foca", col: 2, row: 4 },
+    { name: "dofí", col: 3, row: 4 },
+    { name: "cranc", col: 4, row: 4 },
+    { name: "pop", col: 5, row: 4 },
+    { name: "papallona", col: 6, row: 4 },
+    { name: "cocodril", col: 7, row: 4 }
 ];
 
 
-/* =========================
-   MILLOR PUNTUACIÓ
-========================= */
+// ======================================================
+// NIVELLS
+// ======================================================
 
-let bestScore = Number(
-    localStorage.getItem("plujaAnimalsBestScore")
-) || 0;
+// NIVELLS 1-5: només noms SENSE accents
 
-bestScoreElement.textContent = bestScore;
-
-
-/* =========================
-   PIXEL ART
-========================= */
-
-const pixelAnimals = {
-
-    gat: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "101101",
-        "011110"
+const levelAnimals = {
+    1: [
+        "gat",
+        "gos",
+        "vaca",
+        "porc",
+        "peix",
+        "oca",
+        "foca",
+        "pop"
     ],
 
-    gos: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "101101",
-        "011110"
+    2: [
+        "ovella",
+        "cavall",
+        "conill",
+        "granota",
+        "tortuga",
+        "cabra",
+        "lloro",
+        "zebra"
     ],
 
-    vaca: [
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "101101",
-        "111111",
-        "011110"
+    3: [
+        "elefant",
+        "girafa",
+        "guineu",
+        "esquirol",
+        "gallina",
+        "abella",
+        "tigre",
+        "llop"
     ],
 
-    peix: [
-        "001100",
-        "011110",
-        "111111",
-        "111111",
-        "011110",
-        "001100"
+    4: [
+        "hipopòtam",
+        "serp",
+        "ratpenat",
+        "mussol",
+        "cocodril",
+        "papallona",
+        "cranc",
+        "colom"
     ],
 
-    gall: [
-        "001000",
-        "011100",
-        "111110",
-        "011111",
-        "011110",
-        "110011",
-        "011110"
+    5: [
+        "ornitorinc",
+        "salamandra",
+        "rinoceront",
+        "orangutan",
+        "llangardaix",
+        "dromedari",
+        "goril·la"
     ],
 
-    ovella: [
-        "011110",
-        "111111",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
+    // NIVELL 6: TOTS ELS ANIMALS AMB ACCENT
 
-    cavall: [
-        "001110",
-        "011111",
-        "111111",
-        "110011",
-        "111110",
-        "011110",
-        "001100"
-    ],
-
-    conill: [
-        "010010",
-        "110011",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    granota: [
-        "110011",
-        "111111",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    tortuga: [
-        "001100",
-        "011110",
-        "111111",
-        "111111",
-        "110011",
-        "011110",
-        "001100"
-    ],
-
-    elefant: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "011000"
-    ],
-
-    girafa: [
-        "001100",
-        "011110",
-        "011110",
-        "111111",
-        "110011",
-        "011110",
-        "001100"
-    ],
-
-    guineu: [
-        "100001",
-        "110011",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    esquirol: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    papallona: [
-        "110011",
-        "111111",
-        "011110",
-        "111111",
-        "011110",
-        "111111",
-        "001100"
-    ],
-
-    hipopòtam: [
-        "011110",
-        "111111",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    rinoceront: [
-        "001110",
-        "011111",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    orangutan: [
-        "011110",
-        "111111",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    salamandra: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    llangardaix: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
-    ],
-
-    ornitorinc: [
-        "001100",
-        "011110",
-        "111111",
-        "110011",
-        "111111",
-        "011110",
-        "001100"
+    6: [
+        "ós",
+        "dofí",
+        "ànec",
+        "lleó",
+        "ratolí",
+        "cérvol",
+        "eriçó",
+        "pingüí"
     ]
-
 };
 
 
-/* =========================
-   CREAR PIXEL ART
-========================= */
+// ======================================================
+// ESTAT DEL JOC
+// ======================================================
 
-function createPixelAnimal(animal) {
+let score = 0;
+let level = 1;
+let lives = 3;
 
-    const pixels = pixelAnimals[animal.name];
+let gameRunning = false;
+let lastSpawn = 0;
+let animationFrame = null;
 
-    const svg = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "svg"
-    );
+let fallingAnimals = [];
 
-    svg.setAttribute("width", "60");
-    svg.setAttribute("height", "60");
-    svg.setAttribute("viewBox", "0 0 60 60");
+let bestScore = Number(
+    localStorage.getItem("plujaAnimalsBestScore") || 0
+);
 
-    svg.classList.add("pixel-animal");
+bestScoreEl.textContent = bestScore;
 
-    pixels.forEach((row, y) => {
 
-        [...row].forEach((pixel, x) => {
+// ======================================================
+// FUNCIONS
+// ======================================================
 
-            if (pixel === "1") {
-
-                const rect = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "rect"
-                );
-
-                rect.setAttribute("x", x * 8);
-                rect.setAttribute("y", y * 8);
-
-                rect.setAttribute("width", "8");
-                rect.setAttribute("height", "8");
-
-                rect.setAttribute(
-                    "fill",
-                    animal.color
-                );
-
-                svg.appendChild(rect);
-            }
-
-        });
-
-    });
-
-    return svg;
+function getAnimalByName(name) {
+    return animals.find(animal => animal.name === name);
 }
 
 
-/* =========================
-   CREAR ANIMAL
-========================= */
+function getAvailableAnimals() {
+    let available = [];
 
-function createAnimal() {
+    for (let i = 1; i <= level; i++) {
+        if (levelAnimals[i]) {
+            available.push(...levelAnimals[i]);
+        }
+    }
 
-    const availableAnimals =
-        animalLevels[Math.min(level - 1, animalLevels.length - 1)];
+    return available;
+}
 
-    const animal =
-        availableAnimals[
-            Math.floor(Math.random() * availableAnimals.length)
+
+function getRandomAnimal() {
+    const availableNames = getAvailableAnimals();
+
+    const randomName =
+        availableNames[
+            Math.floor(Math.random() * availableNames.length)
         ];
+
+    return getAnimalByName(randomName);
+}
+
+
+// ======================================================
+// CREAR ANIMAL
+// ======================================================
+
+function spawnAnimal() {
+    const animal = getRandomAnimal();
+
+    if (!animal) return;
 
     const element = document.createElement("div");
 
-    element.classList.add("falling-animal");
+    element.className = "falling-animal";
+
+    const sprite = document.createElement("div");
+
+    sprite.className = "animal-sprite";
+
+    sprite.style.backgroundImage =
+        `url("${SPRITESHEET}")`;
+
+    sprite.style.backgroundSize =
+        `${COLUMNS * 100}% ${ROWS * 100}%`;
+
+    sprite.style.backgroundPosition =
+        `${animal.col * (100 / (COLUMNS - 1))}% ${animal.row * (100 / (ROWS - 1))}%`;
 
     const word = document.createElement("div");
 
-    word.classList.add("animal-word");
+    word.className = "animal-word";
     word.textContent = animal.name;
 
-    const pixelArt =
-        createPixelAnimal(animal);
-
+    element.appendChild(sprite);
     element.appendChild(word);
-    element.appendChild(pixelArt);
 
-    const maxX =
-        gameArea.clientWidth - 120;
+    const areaWidth = gameArea.clientWidth;
 
-    const x =
-        Math.max(
-            10,
-            Math.random() * maxX
-        );
+    const animalWidth = 110;
+
+    const x = Math.max(
+        10,
+        Math.random() * (areaWidth - animalWidth - 10)
+    );
 
     element.style.left = `${x}px`;
-    element.style.top = "-100px";
+    element.style.top = "-130px";
 
     gameArea.appendChild(element);
 
-    animals.push({
-        name: animal.name,
-        element: element,
-        y: -100,
+    const fallingAnimal = {
+        element,
+        animal,
+        x,
+        y: -130,
         speed: getFallSpeed()
-    });
+    };
+
+    fallingAnimals.push(fallingAnimal);
 }
 
 
-/* =========================
-   VELOCITAT
-========================= */
+// ======================================================
+// VELOCITAT
+// ======================================================
 
 function getFallSpeed() {
-
-    return 45 + (level - 1) * 10;
+    return 0.8 + (level - 1) * 0.18;
 }
 
 
-/* =========================
-   ACTUALITZAR NIVELL
-========================= */
+// ======================================================
+// INTERVAL DE SPAWN
+// ======================================================
 
-function updateLevel() {
-
-    level =
-        Math.floor(score / 5) + 1;
-
-    levelElement.textContent = level;
+function getSpawnInterval() {
+    return Math.max(
+        650,
+        1500 - (level - 1) * 130
+    );
 }
 
 
-/* =========================
-   ACTUALITZAR VIDES
-========================= */
+// ======================================================
+// ACTUALITZAR JOC
+// ======================================================
 
-function updateLives() {
-
-    livesElement.textContent =
-        "❤️".repeat(lives) +
-        "🖤".repeat(3 - lives);
-}
-
-
-/* =========================
-   ACTUALITZAR PUNTUACIÓ
-========================= */
-
-function updateScore() {
-
-    scoreElement.textContent = score;
-
-    updateLevel();
-}
-
-
-/* =========================
-   COMPROVAR INPUT
-========================= */
-
-input.addEventListener("input", () => {
+function updateGame(timestamp) {
 
     if (!gameRunning) return;
 
-    const typed =
-        input.value.toLowerCase().trim();
+    if (!lastSpawn) {
+        lastSpawn = timestamp;
+    }
 
-    if (!typed) {
-
-        animals.forEach(animal => {
-
-            animal.element
-                .querySelector(".animal-word")
-                .classList.remove("match");
-
-        });
-
-        return;
+    if (
+        timestamp - lastSpawn >=
+        getSpawnInterval()
+    ) {
+        spawnAnimal();
+        lastSpawn = timestamp;
     }
 
 
-    animals.forEach(animal => {
+    for (let i = fallingAnimals.length - 1; i >= 0; i--) {
 
-        const wordElement =
-            animal.element.querySelector(".animal-word");
+        const falling = fallingAnimals[i];
 
-        if (animal.name.startsWith(typed)) {
+        falling.y += falling.speed;
 
-            wordElement.classList.add("match");
+        falling.element.style.transform =
+            `translateY(${falling.y}px)`;
 
-        } else {
 
-            wordElement.classList.remove("match");
+        const bottom =
+            falling.y + falling.element.offsetHeight;
 
+
+        if (bottom >= gameArea.clientHeight) {
+
+            falling.element.remove();
+
+            fallingAnimals.splice(i, 1);
+
+            loseLife();
         }
-
-    });
-
-
-    const match =
-        animals.find(
-            animal => animal.name === typed
-        );
-
-
-    if (match) {
-
-        destroyAnimal(match);
-
-        score++;
-
-        updateScore();
-
-        input.value = "";
-
-        messageElement.textContent =
-            "Molt bé! +1 punt 🐾";
-
     }
-
-});
-
-
-/* =========================
-   ELIMINAR ANIMAL
-========================= */
-
-function destroyAnimal(animal) {
-
-    animal.element.remove();
-
-    animals =
-        animals.filter(
-            item => item !== animal
-        );
-}
-
-
-/* =========================
-   PERDRE VIDA
-========================= */
-
-function loseLife(animal) {
-
-    destroyAnimal(animal);
-
-    lives--;
-
-    updateLives();
-
-    messageElement.textContent =
-        "Un animal ha arribat a terra!";
-
-    if (lives <= 0) {
-
-        endGame();
-
-    }
-}
-
-
-/* =========================
-   BUCLE DEL JOC
-========================= */
-
-function gameLoop(timestamp) {
-
-    if (!gameRunning) return;
-
-    const delta =
-        (timestamp - lastTime) / 1000;
-
-    lastTime = timestamp;
-
-    spawnTimer += delta;
-
-
-    const spawnDelay =
-        Math.max(
-            0.7,
-            1.8 - level * 0.12
-        );
-
-
-    if (spawnTimer >= spawnDelay) {
-
-        createAnimal();
-
-        spawnTimer = 0;
-    }
-
-
-    animals.forEach(animal => {
-
-        animal.y +=
-            animal.speed * delta;
-
-        animal.element.style.top =
-            `${animal.y}px`;
-
-
-        if (
-            animal.y >
-            gameArea.clientHeight - 100
-        ) {
-
-            loseLife(animal);
-
-        }
-
-    });
 
 
     animationFrame =
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(updateGame);
 }
 
 
-/* =========================
-   COMENÇAR
-========================= */
+// ======================================================
+// PERDRE VIDA
+// ======================================================
+
+function loseLife() {
+
+    lives--;
+
+    livesEl.textContent = lives;
+
+    gameArea.classList.remove("life-lost");
+
+    void gameArea.offsetWidth;
+
+    gameArea.classList.add("life-lost");
+
+
+    if (lives <= 0) {
+        endGame();
+    }
+}
+
+
+// ======================================================
+// COMPROVAR NIVELL
+// ======================================================
+
+function checkLevel() {
+
+    const newLevel =
+        Math.min(6, Math.floor(score / 5) + 1);
+
+    if (newLevel > level) {
+
+        level = newLevel;
+
+        levelEl.textContent = level;
+
+        gameArea.classList.remove("level-up");
+
+        void gameArea.offsetWidth;
+
+        gameArea.classList.add("level-up");
+    }
+}
+
+
+// ======================================================
+// ACTUALITZAR PARAULA ESCRITA
+// ======================================================
+
+function updateMatches() {
+
+    const typed =
+        typingInput.value.toLowerCase().trim();
+
+
+    fallingAnimals.forEach(falling => {
+
+        const word =
+            falling.animal.name.toLowerCase();
+
+        if (
+            typed.length > 0 &&
+            word.startsWith(typed)
+        ) {
+            falling.element.classList.add(
+                "typing-match"
+            );
+        } else {
+            falling.element.classList.remove(
+                "typing-match"
+            );
+        }
+    });
+}
+
+
+// ======================================================
+// ESCRIURE
+// ======================================================
+
+typingInput.addEventListener(
+    "input",
+    () => {
+
+        updateMatches();
+
+        const typed =
+            typingInput.value.toLowerCase().trim();
+
+        if (!typed) return;
+
+
+        const matchingAnimal =
+            fallingAnimals.find(
+                falling =>
+                    falling.animal.name.toLowerCase() === typed
+            );
+
+
+        if (matchingAnimal) {
+
+            matchingAnimal.element.classList.add(
+                "animal-correct"
+            );
+
+            setTimeout(() => {
+                matchingAnimal.element.remove();
+            }, 120);
+
+
+            fallingAnimals =
+                fallingAnimals.filter(
+                    falling =>
+                        falling !== matchingAnimal
+                );
+
+
+            score++;
+
+            scoreEl.textContent = score;
+
+
+            if (score > bestScore) {
+
+                bestScore = score;
+
+                bestScoreEl.textContent =
+                    bestScore;
+
+                localStorage.setItem(
+                    "plujaAnimalsBestScore",
+                    bestScore
+                );
+            }
+
+
+            checkLevel();
+
+            typingInput.value = "";
+
+            updateMatches();
+        }
+    }
+);
+
+
+// ======================================================
+// COMENÇAR JOC
+// ======================================================
 
 function startGame() {
 
     score = 0;
-    lives = 3;
     level = 1;
+    lives = 3;
 
-    animals.forEach(animal => {
-        animal.element.remove();
-    });
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    livesEl.textContent = lives;
 
-    animals = [];
+    fallingAnimals.forEach(
+        falling => falling.element.remove()
+    );
 
-    updateScore();
-    updateLives();
+    fallingAnimals = [];
 
     startScreen.classList.add("hidden");
     gameOverScreen.classList.add("hidden");
 
-    input.disabled = false;
-    input.value = "";
-
-    input.focus();
-
-    messageElement.textContent =
-        "Escriu els noms dels animals!";
+    typingInput.value = "";
 
     gameRunning = true;
 
-    lastTime = performance.now();
-    spawnTimer = 0;
+    lastSpawn = 0;
 
-    cancelAnimationFrame(animationFrame);
+    typingInput.focus();
 
     animationFrame =
-        requestAnimationFrame(gameLoop);
+        requestAnimationFrame(updateGame);
 }
 
 
-/* =========================
-   FINAL DE LA PARTIDA
-========================= */
+// ======================================================
+// FINALITZAR JOC
+// ======================================================
 
 function endGame() {
 
     gameRunning = false;
 
-    cancelAnimationFrame(animationFrame);
-
-    input.disabled = true;
-
-    finalScoreElement.textContent =
-        score;
-
-    if (score > bestScore) {
-
-        bestScore = score;
-
-        localStorage.setItem(
-            "plujaAnimalsBestScore",
-            bestScore
-        );
-
-        bestScoreElement.textContent =
-            bestScore;
+    if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
     }
+
+    finalScoreEl.textContent = score;
+    finalBestEl.textContent = bestScore;
 
     gameOverScreen.classList.remove("hidden");
 }
 
 
-/* =========================
-   BOTONS
-========================= */
+// ======================================================
+// BOTONS
+// ======================================================
 
 startButton.addEventListener(
     "click",
@@ -793,18 +562,3 @@ restartButton.addEventListener(
     "click",
     startGame
 );
-
-
-/* =========================
-   TECLA ENTER
-========================= */
-
-input.addEventListener("keydown", event => {
-
-    if (event.key === "Enter") {
-
-        event.preventDefault();
-
-    }
-
-});
