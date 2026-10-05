@@ -86,6 +86,10 @@ a {
   line-height: 1.1;
 }
 
+.best-box {
+  right: 108px;
+}
+
 .instructions {
   text-align: center;
   margin: 8px 0 14px;
@@ -345,6 +349,10 @@ a {
     right: 0;
     top: 35px;
     transform: none;
+  }
+
+  .best-box {
+    right: 108px;
   }
 
   .game {
