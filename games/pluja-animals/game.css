@@ -256,3 +256,13 @@
     .game-info {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .game-area {
+        height: 540px;
+    }
+
+    .start-screen h2 {
+        font-size: 1.6rem;
+    }
+
+}
