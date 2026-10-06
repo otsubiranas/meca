@@ -1,0 +1,1 @@
+Per provar els mons avançats sense passar-te'ls tots, pots obrir la consola del navegador (F12) a la pàgina del joc i escriure localStorage.setItem('mecagat_w5','1'). Així tens l'univers desbloquejat. Els altres són mecagat_w2 fins a mecagat_w4, i localStorage.clear() ho esborra tot.
