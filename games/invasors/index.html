@@ -5,130 +5,160 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invasors de tecles · Jocs de mecanografia</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Special+Elite&display=swap');
 
+:root{--bg:#0a0420;--panel:#140a35;--mag:#ff3df0;--cyan:#3df0ff;--amber:#ffb000;--lime:#7dff6a;--red:#ff4a3d;--cream:#f6efdc;--lilac:#c08cff;--k:min(54px,7.4vw)}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:"DM Sans",sans-serif}
-body{background:#09101d;color:#fff;overflow-x:hidden}
+html,body{margin:0;min-height:100%;font-family:"Press Start 2P",monospace}
+body{background:var(--bg);color:var(--cream);overflow-x:hidden;image-rendering:pixelated}
 button{font:inherit}
 a{text-decoration:none;color:inherit}
 
 .game-page{min-height:100vh;display:flex;flex-direction:column}
-.topbar{width:min(1180px,92%);margin:0 auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.back{color:rgba(255,255,255,.72);font-size:.9rem;font-weight:700;transition:.2s}
-.back:hover{color:#84cbc9;transform:translateX(-3px)}
-.logo-title{font-family:"Space Grotesk";font-weight:700;letter-spacing:-.04em}
-.logo-title span{color:#84cbc9}
+.topbar{width:min(1180px,92%);margin:0 auto;padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:.62rem}
+.back{color:var(--cyan)}
+.back:hover{color:var(--amber)}
+.logo-title{color:var(--mag);text-shadow:2px 2px 0 #4a0f58}
+.logo-title span{color:var(--amber)}
 
-.hud{width:min(1180px,92%);margin:0 auto 20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px}
-.hud-box{background:#101927;border:1px solid rgba(132,203,201,.18);border-radius:14px;padding:12px 18px}
-.hud-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.48);display:block}
-.hud-value{font-family:"Space Grotesk";font-size:1.25rem;font-weight:700}
+.hud{width:min(1180px,92%);margin:0 auto 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.hud-box{background:var(--panel);border:3px solid var(--cyan);box-shadow:4px 4px 0 #1b6a73;padding:12px 14px}
+.hud-label{font-size:.55rem;color:var(--cyan);display:block;margin-bottom:8px}
+.hud-value{font-size:1.1rem;color:var(--amber);text-shadow:2px 2px 0 #5a3d00}
 .hud-center{text-align:center}
-.level{font-family:"Space Grotesk";font-size:1.8rem;font-weight:700}
-.level span{color:#84cbc9}
-.progress-wrap{width:190px;height:6px;background:#202a38;border-radius:99px;overflow:hidden;margin-top:5px}
-.progress{height:100%;width:0;background:#84cbc9;transition:width .2s}
+.level{font-size:1.2rem;color:var(--mag);text-shadow:3px 3px 0 #4a0f58}
+.level span{color:var(--cream)}
+.progress-wrap{width:200px;height:14px;background:#000;border:3px solid var(--mag);margin:10px auto 0;padding:2px}
+.progress{height:100%;width:0;background:repeating-linear-gradient(90deg,var(--lime) 0 8px,transparent 8px 10px)}
+
+.score-line{font-size:.6rem;color:var(--cyan);margin-top:10px}
+.score-line b{color:var(--amber);font-size:.8rem;margin-left:6px}
+#acc.good{color:var(--lime);text-shadow:2px 2px 0 #1f5a18}
+#acc.mid{color:var(--amber)}
+#acc.low{color:var(--red);text-shadow:2px 2px 0 #5a120d}
+
+/* Barra espai especial (l'"ovni") */
+.ufo{position:absolute;left:0;top:10px;width:calc(var(--k)*4.4);height:calc(var(--k)*.7);display:grid;place-items:center;z-index:6;border-radius:calc(var(--k)*.14);
+font-size:calc(var(--k)*.26);color:var(--red);text-shadow:0 2px 0 #000;letter-spacing:.1em;
+background:linear-gradient(145deg,#4d4d57,#2a2a30);
+box-shadow:0 calc(var(--k)*.1) 0 #0b0b0e,0 0 18px 5px rgba(255,61,240,.7),inset 0 0 0 calc(var(--k)*.07) #1f1f25,inset 0 2px 0 rgba(255,255,255,.2)}
+.pop{position:absolute;z-index:7;pointer-events:none;white-space:nowrap;font-size:.7rem;color:var(--lime);text-shadow:2px 2px 0 #000}
 
 .game-area{width:min(1180px,92%);margin:0 auto;flex:1;display:flex;flex-direction:column}
-.arena{position:relative;min-height:620px;flex:1;background:radial-gradient(circle at 50% 15%,rgba(132,203,201,.07),transparent 35%),#0d1624;border:1px solid rgba(132,203,201,.18);border-radius:24px;overflow:hidden}
-.stars{position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:
-radial-gradient(circle,rgba(255,255,255,.55) 1px,transparent 1px),
-radial-gradient(circle,rgba(132,203,201,.35) 1px,transparent 1px);
-background-size:91px 91px,137px 137px;background-position:15px 23px,64px 7px}
+.arena{position:relative;min-height:680px;flex:1;background:linear-gradient(#0a0420 0%,#1d0b45 70%,#34104f 100%);border:4px solid var(--mag);box-shadow:0 0 0 4px #000,0 0 40px rgba(255,61,240,.35);overflow:hidden}
+.stars{position:absolute;inset:0;pointer-events:none;background-image:
+radial-gradient(#fff 1.5px,transparent 1.5px),radial-gradient(var(--cyan) 1.5px,transparent 1.5px),radial-gradient(var(--amber) 1px,transparent 1px);
+background-size:97px 97px,151px 151px,63px 63px;background-position:11px 23px,70px 9px,30px 50px;animation:drift 8s steps(8) infinite;opacity:.7}
+@keyframes drift{to{background-position:11px 120px,70px 160px,30px 113px}}
+/* Pantalla CRT: línies de escaneig i vinyeta */
+.arena::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:20;background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.22) 2px 4px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45) 100%)}
 
-.invaders{position:absolute;left:50%;top:72px;transform:translateX(-50%);width:min(900px,90%);display:grid;grid-template-columns:repeat(10,1fr);gap:13px 12px;transition:top .18s linear}
-.key{aspect-ratio:1.15/1;border:1px solid rgba(132,203,201,.28);border-radius:11px;background:#142131;color:#fff;display:grid;place-items:center;font-family:"Space Grotesk";font-size:clamp(1rem,2.2vw,1.5rem);font-weight:700;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);transition:transform .12s,background .12s,border-color .12s,opacity .2s}
-.key.target{background:#84cbc9;color:#09101d;border-color:#b7f1ef;box-shadow:0 0 25px rgba(132,203,201,.45),inset 0 -3px 0 rgba(0,0,0,.12);transform:scale(1.08);animation:pulse .75s infinite alternate}
-.key.hit{animation:explode .28s forwards;pointer-events:none}
-.key.extra{border-color:rgba(255,255,255,.25);background:#182334}
-@keyframes pulse{to{box-shadow:0 0 38px rgba(132,203,201,.75),inset 0 -3px 0 rgba(0,0,0,.12)}}
-@keyframes explode{0%{transform:scale(1);opacity:1}100%{transform:scale(1.65);opacity:0}}
+.invaders{position:absolute;left:50%;top:56px;transform:translateX(-50%);width:min(900px,92%);display:flex;flex-direction:column;align-items:center;gap:calc(var(--k)*.3)}
+.keyboard-row{display:flex;justify-content:center;align-items:center;gap:calc(var(--k)*.3);width:100%}
+.keyboard-row.row-1{padding-left:calc(var(--k)*.55)}
+.keyboard-row.row-2{padding-left:calc(var(--k)*1.5)}
 
-.ship{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:3.1rem;filter:drop-shadow(0 0 13px rgba(132,203,201,.35));transition:.15s}
-.laser{position:absolute;width:4px;height:34px;background:#84cbc9;border-radius:5px;bottom:82px;opacity:0;left:50%;transform:translateX(-50%)}
-.laser.fire{animation:laser .22s linear}
-@keyframes laser{0%{bottom:82px;opacity:1}100%{bottom:calc(100% - 130px);opacity:0}}
+/* Tecla de teclat retro: cos fosc, cara còncava, lletra blanca o vermella */
+.key{width:var(--k);height:var(--k);border-radius:calc(var(--k)*.14);display:grid;place-items:center;font-family:"Press Start 2P",monospace;font-size:calc(var(--k)*.38);line-height:1;color:#fff;text-shadow:0 2px 0 #000;
+background:linear-gradient(145deg,#4d4d57,#2a2a30);
+box-shadow:0 calc(var(--k)*.13) 0 #0b0b0e,0 calc(var(--k)*.13) 0 1px #000,inset 0 2px 0 rgba(255,255,255,.2),inset 0 0 0 calc(var(--k)*.09) #1f1f25,inset 0 0 0 calc(var(--k)*.1) rgba(255,255,255,.07)}
+.key.accent{color:var(--cyan)}
+.key.uppercase{color:var(--amber)}
+.key.extra{color:var(--lilac)}
+.key.uppercase{text-transform:uppercase}
+.key.hit{visibility:hidden;pointer-events:none}
 
-.message{position:absolute;inset:0;display:grid;place-items:center;background:rgba(9,16,29,.76);backdrop-filter:blur(5px);z-index:5;padding:25px}
-.panel{text-align:center;max-width:620px}
-.panel .big{font-size:4rem;margin-bottom:8px}
-.panel h1{font-family:"Space Grotesk";font-size:clamp(2.3rem,6vw,4.6rem);line-height:1;margin:0 0 15px;letter-spacing:-.055em}
-.panel h1 span{color:#84cbc9}
-.panel p{color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.6;margin:0 auto 25px;max-width:520px}
-.primary{border:0;background:#84cbc9;color:#09101d;border-radius:10px;padding:14px 24px;font-weight:700;cursor:pointer;transition:.2s}
-.primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(132,203,201,.2)}
+/* Tecla objectiu: color propi i mirilla discreta */
+.key.target{position:relative;z-index:5;--ret:rgba(246,239,220,.5);color:#fff;background:linear-gradient(145deg,#3fcf3a,#1b7a17)}
+.key.target::before{content:"";position:absolute;inset:-22%;border:2px solid var(--ret);border-radius:50%;pointer-events:none;animation:lock 1s steps(3) infinite}
+.key.target::after{content:"";position:absolute;inset:-46%;pointer-events:none;
+background:
+linear-gradient(var(--ret),var(--ret)) center top/2px 18% no-repeat,
+linear-gradient(var(--ret),var(--ret)) center bottom/2px 18% no-repeat,
+linear-gradient(var(--ret),var(--ret)) left center/18% 2px no-repeat,
+linear-gradient(var(--ret),var(--ret)) right center/18% 2px no-repeat;
+animation:lock 1s steps(3) infinite}
+@keyframes lock{0%{transform:scale(1.15);opacity:.35}100%{transform:scale(1);opacity:.9}}
+/* Error: només la tecla objectiu i la nau */
+.key.target.err{--ret:var(--red);background:linear-gradient(145deg,#ff6a5e,#b3201a);color:#fff;animation:errshake .25s steps(4)}
+.ship.err{filter:sepia(1) saturate(8) hue-rotate(-50deg) drop-shadow(0 0 12px #ff4a3d)}
+.ship.err svg{animation:errshake .25s steps(4)}
+@keyframes errshake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* Cranc espacial */
+.ship{position:absolute;bottom:20px;left:50%;width:clamp(66px,9vw,90px);transform:translateX(-50%);transition:left .09s steps(3);z-index:3;filter:drop-shadow(0 0 10px rgba(125,255,106,.5))}
+.ship svg{display:block;width:100%;height:auto}
+.flame{animation:flame .18s steps(2) infinite}
+@keyframes flame{50%{opacity:0}}
+.ship.zap svg{animation:zap .12s steps(2) 2}
+@keyframes zap{50%{transform:translateY(-8px) scale(1.08)}}
+
+.laser{position:absolute;width:8px;transform:translateX(-50%);z-index:2;pointer-events:none;
+background:repeating-linear-gradient(#fff 0 6px,var(--cyan) 6px 12px);box-shadow:0 0 12px 3px var(--cyan)}
+.px{position:absolute;pointer-events:none;z-index:4}
+
+.message{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,4,32,.84);z-index:10;padding:25px}
+.panel{text-align:center;max-width:640px}
+.panel .big{font-size:3.4rem;margin-bottom:18px}
+.panel h1{font-size:clamp(1.3rem,4.6vw,2.6rem);line-height:1.35;margin:0 0 22px;color:var(--mag);text-shadow:4px 4px 0 #4a0f58}
+.panel h1 span{color:var(--amber);text-shadow:4px 4px 0 #5a3d00}
+.panel p{font-size:.7rem;line-height:2;color:var(--cream);margin:0 auto 30px;max-width:520px}
+.primary{border:4px solid var(--cream);background:var(--lime);color:#052a00;padding:16px 24px;font-size:.8rem;cursor:pointer;box-shadow:5px 5px 0 #2a6a1f;animation:blink2 1s steps(2) infinite}
+.primary:hover{background:var(--amber)}
+.primary:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #2a6a1f}
+@keyframes blink2{50%{background:#b8ffaa}}
 .hidden{display:none!important}
 
-.bottom-info{padding:17px 0 24px;display:flex;justify-content:space-between;gap:15px;color:rgba(255,255,255,.48);font-size:.8rem}
-.target-hint strong{color:#84cbc9;font-family:"Space Grotesk";font-size:1rem}
+.bottom-info{padding:16px 0 24px;display:flex;justify-content:space-between;gap:14px;color:rgba(246,239,220,.6);font-size:.55rem;line-height:1.8}
+.target-hint strong{color:var(--lime);font-size:.9rem}
 
-.shake{animation:shake .2s}
-@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-
+.menu-mini{position:absolute;left:14px;bottom:12px;z-index:11;background:transparent;border:2px solid var(--red);color:var(--red);font-size:.5rem;padding:8px 10px;cursor:pointer}
+.menu-mini:hover{background:var(--red);color:#fff}
+.enter-hint{margin-top:24px;font-size:.55rem;color:var(--cream);animation:hintblink 1s steps(2) infinite}
+@keyframes hintblink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.enter-hint{animation:none}}
+.mode-tag{font-size:.5rem;color:var(--cyan);margin-top:8px;letter-spacing:.1em}
+.modes{display:grid;gap:14px;margin:0 auto 6px;max-width:460px}
+.mode{display:block;width:100%;text-align:left;cursor:pointer;background:var(--panel);color:var(--cream);border:4px solid var(--mc,var(--cyan));box-shadow:5px 5px 0 #000;padding:14px 16px}
+.mode b{display:block;font-weight:400;font-size:.85rem;color:var(--mc,var(--cyan));margin-bottom:10px}
+.mode small{display:block;font-size:.55rem;line-height:1.8;color:rgba(246,239,220,.8)}
+.mode:hover,.mode:focus-visible{background:#22104f;transform:translate(-2px,-2px);box-shadow:7px 7px 0 #000;outline:none}
+.mode:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+.mode[data-mode=principiant]{--mc:var(--lime)}
+.mode[data-mode=avancat]{--mc:var(--amber)}
+.mode[data-mode=expert]{--mc:var(--red)}
+.secondary{border:4px solid var(--cyan);background:transparent;color:var(--cyan);padding:16px 20px;font-size:.8rem;cursor:pointer;margin:8px 7px 0;box-shadow:5px 5px 0 #1b6a73}
+.secondary:hover{color:var(--amber);border-color:var(--amber)}
 @media(max-width:700px){
-  .topbar{padding:16px 0}.hud{grid-template-columns:1fr 1fr}.hud-center{grid-column:1/-1;grid-row:1}.hud-box{padding:9px 13px}.arena{min-height:570px;border-radius:18px}.invaders{top:70px;grid-template-columns:repeat(7,1fr);gap:9px}.key{border-radius:8px}.bottom-info{flex-direction:column}.progress-wrap{width:150px;margin-inline:auto}
+  .hud{grid-template-columns:1fr 1fr}.hud-center{grid-column:1/-1;grid-row:1}
+  .arena{min-height:600px}.bottom-info{flex-direction:column}
+  .keyboard-row,.invaders{gap:calc(var(--k)*.22)}
+  .topbar,.logo-title{font-size:.5rem}
 }
-/* Alineació visual de les files com un teclat real. */
-
-
-
-.keyboard-row{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  width:100%;
-}
-.keyboard-row .key{
-  flex:0 0 9%;
-}
-.keyboard-row.row-0 .key{
-  flex-basis:9%;
-}
-.keyboard-row.row-1{
-  padding-left:4%;
-}
-.keyboard-row.row-1 .key{
-  flex-basis:9%;
-}
-.keyboard-row.row-2{
-  width:70%;
-}
-.keyboard-row.row-2 .key{
-  flex-basis:14%;
-}
-.punctuation-row{
-  width:auto;
-}
-.punctuation-row .key{
-  flex:0 0 90px;
-}
-.key.uppercase{
-  text-transform:uppercase;
-}
-
+@media(prefers-reduced-motion:reduce){.stars,.key.target::before,.key.target::after,.primary,.flame{animation:none}}
 </style>
 </head>
 <body>
 <div class="game-page">
   <header class="topbar">
-    <a class="back" href="../../index.html">← Tornar als jocs</a>
+    <a class="back" href="../../index.html">&lt; Tornar als jocs</a>
     <div class="logo-title">INVASORS <span>DE TECLES</span></div>
   </header>
 
   <section class="hud">
     <div class="hud-box">
-      <span class="hud-label">Puntuació</span>
-      <span class="hud-value" id="score">0</span>
+      <span class="hud-label">TEMPS</span>
+      <span class="hud-value" id="time">0:00.0</span>
     </div>
     <div class="hud-center">
-      <div class="level">Nivell <span id="level">1</span></div>
+      <div class="level">NIVELL <span id="level">1</span></div>
+      <div class="mode-tag" id="modeTag"></div>
       <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+      <div class="score-line">PUNTS<b id="score">0</b></div>
     </div>
     <div class="hud-box" style="text-align:right">
-      <span class="hud-label">Encerts</span>
-      <span class="hud-value"><span id="hits">0</span>/<span id="total">0</span></span>
+      <span class="hud-label">PRECISIÓ</span>
+      <span class="hud-value" id="acc">100%</span>
     </div>
   </section>
 
@@ -136,22 +166,28 @@ background-size:91px 91px,137px 137px;background-position:15px 23px,64px 7px}
     <div class="arena" id="arena">
       <div class="stars"></div>
       <div class="invaders" id="invaders"></div>
-      <div class="laser" id="laser"></div>
-      <div class="ship">🚀</div>
+      <div class="ship" id="ship"></div>
 
       <div class="message" id="message">
+        <button class="menu-mini hidden" id="menuMini">&lt; Menú principal</button>
         <div class="panel">
-          <div class="big">👾</div>
+          <div class="big">🚀</div>
           <h1>Invasors <span>de tecles</span></h1>
-          <p>Prem la tecla que s'il·lumina abans que desaparegui. Elimina totes les tecles per superar cada nivell.</p>
-          <button class="primary" id="startBtn">Començar</button>
+          <p>Prem la tecla que s'il·lumina i la teva nau la farà volar pels aires. Elimina totes les tecles per superar cada nivell.</p>
+          <div class="modes" id="modes">
+            <button class="mode" data-mode="principiant"><b>PRINCIPIANT</b><small>Lletres minúscules</small></button>
+            <button class="mode" data-mode="avancat"><b>AVANÇAT</b><small>Accents, majúscules i signes: ? , . ! : ;</small></button>
+            <button class="mode" data-mode="expert"><b>EXPERT</b><small>Tots els símbols i tecles molt més ràpides</small></button>
+          </div>
+          <button class="primary hidden" id="startBtn">Començar</button><button class="secondary hidden" id="menuBtn">Menú</button>
+          <div class="enter-hint hidden" id="enterHint">Prem INTRO per continuar</div>
         </div>
       </div>
     </div>
 
     <div class="bottom-info">
-      <div class="target-hint">Tecla objectiu: <strong id="targetHint">—</strong></div>
-      <div>Nivell 1: QWERTY · Nivell 2: 2 accents + 2 signes · Nivell 5+: 3 majúscules</div>
+      <div class="target-hint">Tecla objectiu: <strong id="targetHint">-</strong></div>
+      <div>Barra ESPAI voladora: -1 s i punts extra<br><span id="levelInfo"></span></div>
     </div>
   </main>
 </div>
@@ -163,8 +199,8 @@ background-size:91px 91px,137px 137px;background-position:15px 23px,64px 7px}
 (() => {
   const levelEl = document.getElementById('level');
   const scoreEl = document.getElementById('score');
-  const hitsEl = document.getElementById('hits');
-  const totalEl = document.getElementById('total');
+  const timeEl = document.getElementById('time');
+  const accEl = document.getElementById('acc');
   const progressEl = document.getElementById('progress');
   const invadersEl = document.getElementById('invaders');
   const messageEl = document.getElementById('message');
@@ -172,313 +208,525 @@ background-size:91px 91px,137px 137px;background-position:15px 23px,64px 7px}
   const input = document.getElementById('keyboardInput');
   const targetHint = document.getElementById('targetHint');
   const arena = document.getElementById('arena');
-  const laser = document.getElementById('laser');
+  const ship = document.getElementById('ship');
+  const modesEl = document.getElementById('modes');
+  const menuBtn = document.getElementById('menuBtn');
+  const menuMini = document.getElementById('menuMini');
+  const enterHint = document.getElementById('enterHint');
+  const modeTag = document.getElementById('modeTag');
+  const levelInfo = document.getElementById('levelInfo');
 
-  // Disposició fixa de teclat QWERTY.
-  const rows = [
-    [...'qwertyuiop'],
-    [...'asdfghjkl'],
-    [...'zxcvbnm']
+  // Nau espacial en pixel art (X cos, C cabina, W ales, F foc dels motors).
+  const SHIP = [
+    "......X......",
+    ".....XXX.....",
+    ".....XCX.....",
+    "W....XCX....W",
+    "WW..XXXXX..WW",
+    "WWXXXXXXXXXWW",
+    "WWXXXXXXXXXWW",
+    "WW.XX...XX.WW",
+    "....F...F...."
   ];
+  const SHIP_COLORS = { X:'#7dff6a', C:'#3df0ff', W:'#ff3df0', F:'#ffb000' };
+  ship.innerHTML = '<svg viewBox="0 0 13 9" shape-rendering="crispEdges">' +
+    SHIP.map((row, y) => [...row].map((c, x) =>
+      c === '.' ? '' : `<rect class="${c === 'F' ? 'flame' : ''}" x="${x}" y="${y}" width="1" height="1" fill="${SHIP_COLORS[c]}"/>`
+    ).join('')).join('') + '</svg>';
 
-  // A nivell 2 algunes vocals poden convertir-se en accentuades i
-  // apareixen signes de puntuació habituals.
-  const accented = {
-    a: ['à','á'],
-    e: ['é','è'],
-    i: ['í','ï'],
-    o: ['ò','ó'],
-    u: ['ú','ü']
+  // Accents catalans (substitueixen una vocal del teclat).
+  const accented = { a:['à'], e:['è','é'], i:['í'], o:['ò','ó'], u:['ú'] };
+  // ---------- Modes de joc ----------
+  const TOP = [...'qwertyuiop'], HOME = [...'asdfghjklñ'], HOME9 = [...'asdfghjkl'], BOTTOM = [...'zxcvbnm'];
+  const BASE_SPEED = 1.55;     // velocitat base de tots els modes (1 = original)
+  const EXPERT_BOOST = 2.3;   // Expert: encara més ràpid que Avançat
+  const fullRows = () => [{ r: 0, keys: TOP }, { r: 1, keys: HOME9 }, { r: 2, keys: BOTTOM }];
+  const COMMON = [',', '.', '?', '!'];
+  const HARD_EXPERT = ['ï', 'ü', 'ç', ';', ':', '%'];
+  const MODES = {
+    principiant: {
+      name: 'Principiant', special: false, rampFrom: 3, speedMul: BASE_SPEED,
+      rows: lv => [lv >= 2 && { r: 0, keys: TOP }, { r: 1, keys: HOME }, lv >= 3 && { r: 2, keys: BOTTOM }].filter(Boolean),
+      info: 'Nivell 1: fila del mig | 2: fila de dalt | 3: totes les lletres | 4+: velocitat',
+      hints: { 1: 'Ara arriba la fila de dalt!', 2: 'Ara tens totes les lletres!', 3: "A partir d'ara només augmenta la velocitat!" }
+    },
+    avancat: {
+      name: 'Avançat', special: true, rampFrom: 6, speedMul: BASE_SPEED, rows: fullRows,
+      common: COMMON, hard: [':', ';'], all: [...COMMON, ':', ';'],
+      info: 'Nivell 2: accents | 3: majúscules | 4: signes | 5-6: més signes | 7+: velocitat',
+      hints: {
+        1: 'Ara arriben els accents!',
+        2: 'Ara també hi ha majúscules: fes servir Maj!',
+        3: 'Ara arriben els signes de puntuació!',
+        4: 'Ara surten els dos punts i el punt i coma!',
+        5: 'Ara els signes surten de tot el conjunt!',
+        6: "A partir d'ara només augmenta la velocitat!"
+      }
+    },
+    expert: {
+      name: 'Expert', special: true, rampFrom: 6, speedMul: BASE_SPEED * EXPERT_BOOST, rows: fullRows,
+      common: COMMON, hard: HARD_EXPERT, all: [...HARD_EXPERT, '(', ')', "'", '-', '"', '·', '/', '€', '@', '&'],
+      info: 'Nivell 2: accents | 3: majúscules | 4: signes | 5-6: especials | 7+: velocitat',
+      hints: {
+        1: 'Ara arriben els accents!',
+        2: 'Ara també hi ha majúscules: fes servir Maj!',
+        3: 'Ara arriben els signes de puntuació!',
+        4: 'Ara surten caràcters especials més difícils!',
+        5: "Ara hi ha tots els símbols de l'escriptura catalana!",
+        6: "A partir d'ara només augmenta la velocitat!"
+      }
+    }
   };
-  const punctuation = ['.', ',', '?', '!', ':', ';'];
-  const letters = rows.flat();
+  let modeKey = 'principiant', mode = MODES.principiant, over = false, levelDone = false;
 
-  let level = 1, score = 0, hits = 0, total = 0;
-  let targets = [], currentTarget = null, running = false;
+  let level = 1, score = 0, hits = 0, total = 0, misses = 0;
+  let levelStart = 0, bonusMs = 0, timerId = null, finalMs = 0;
+  let ufoEl = null, ufoAnim = null, ufoSpawn = null, ufoSound = null, ufoCount = 0;
+
+  // ---------- Temps i precisió ----------
+  const elapsed = () => Math.max(0, performance.now() - levelStart - bonusMs);
+  function fmt(ms) {
+    const t = ms / 1000, m = Math.floor(t / 60);
+    return m + ':' + (t % 60).toFixed(1).padStart(4, '0');
+  }
+  function startTimer() {
+    clearInterval(timerId);
+    levelStart = performance.now(); bonusMs = 0;
+    timeEl.textContent = fmt(0);
+    timerId = setInterval(() => { if (running) timeEl.textContent = fmt(elapsed()); }, 100);
+  }
+  function stopTimer() {
+    clearInterval(timerId);
+    finalMs = elapsed();
+    timeEl.textContent = fmt(finalMs);
+  }
+  function accuracy() { return hits + misses ? hits / (hits + misses) : 1; }
+  function updateAcc() {
+    const p = Math.round(accuracy() * 100);
+    accEl.textContent = p + '%';
+    accEl.className = 'hud-value ' + (p >= 90 ? 'good' : p >= 70 ? 'mid' : 'low');
+  }
+  let currentTarget = null, running = false;
   let speedTimer = null;
   let invaderOffset = 0;
 
-  function movementDelay() {
-    // Nivells 1-2: molt lent. Des del 3 accelera progressivament.
-    if (level === 1) return 1150;
-    if (level === 2) return 1000;
-    return Math.max(230, 850 - (level - 3) * 70);
-  }
+  // Velocitat constant fins al nivell on cada mode comença a accelerar; després només puja.
+  const speedStep = () => Math.max(0, level - mode.rampFrom);
+  function movementDelay() { return Math.max(80, Math.max(230, 1150 - speedStep() * 85) / mode.speedMul); }
+  const moveStep = () => Math.min(14, 4 + speedStep());
+  const dropStep = () => Math.min(16, 5 + speedStep());
 
   function shuffled(arr) {
     const a = [...arr];
-    for (let i=a.length-1;i>0;i--) {
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
   }
 
-  function setMessage(icon, title, text, buttonText) {
+  function setMessage(icon, title, text, buttonText, withMenu = false, withMini = false) {
     messageEl.querySelector('.big').textContent = icon;
     messageEl.querySelector('h1').innerHTML = title;
     messageEl.querySelector('p').textContent = text;
+    modesEl.classList.add('hidden');
     startBtn.textContent = buttonText;
+    startBtn.classList.remove('hidden');
+    menuBtn.classList.toggle('hidden', !withMenu);
+    menuMini.classList.toggle('hidden', !withMini);
+    enterHint.classList.toggle('hidden', !withMini);
+    levelDone = withMini;
+    messageEl.classList.remove('hidden');
+  }
+  function showMenu() {
+    messageEl.querySelector('.big').textContent = '🚀';
+    messageEl.querySelector('h1').innerHTML = 'Invasors <span>de tecles</span>';
+    messageEl.querySelector('p').textContent = "Prem la tecla que s'il·lumina i la teva nau la farà volar pels aires. Tria un mode de joc.";
+    modesEl.classList.remove('hidden');
+    startBtn.classList.add('hidden');
+    menuBtn.classList.add('hidden');
+    menuMini.classList.add('hidden');
+    enterHint.classList.add('hidden');
+    levelDone = false;
     messageEl.classList.remove('hidden');
   }
 
+  // ---------- Àudio (un sol context) ----------
+  let actx = null;
+  function audio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!actx) actx = new AC();
+      if (actx.state === 'suspended') actx.resume();
+      return actx;
+    } catch (e) { return null; }
+  }
+  function beep(freq = 520, duration = .07, type = 'square', endFreq = null) {
+    const ctx = audio(); if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + duration);
+      gain.gain.setValueAtTime(.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + duration);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  // ---------- Construcció del nivell ----------
   function buildLevel() {
     clearTimeout(speedTimer);
+    stopUfo();
     running = true;
     currentTarget = null;
     invaderOffset = 0;
 
-    invadersEl.style.top = '72px';
-    invadersEl.style.left = '50%';
+    invadersEl.style.top = '56px';
     invadersEl.style.transform = 'translateX(-50%)';
     invadersEl.innerHTML = '';
+    ship.style.left = '50%';
 
-    // Teclat QWERTY real: 10 + 9 + 7 tecles.
-    const visualRows = rows.map(row => row.map(char => ({
-      char,
-      display: char,
-      extra: false,
-      uppercase: false
-    })));
+    const layout = mode.rows(level);
+    const visualRows = layout.map(rw => rw.keys.map(char => ({ char, display: char, uppercase: false })));
+    const sp = mode.special ? level : 1;   // el mode Principiant no té caràcters especials
 
-    // Exactament 2 accents a partir del nivell 2.
-    if (level >= 2) {
-      const vowels = ['a','e','i','o','u'];
+    // Nivell 2+: 2 accents catalans.
+    if (sp >= 2) {
+      const vowels = Object.keys(accented);
       const candidates = [];
       visualRows.forEach((row, r) => row.forEach((key, c) => {
         if (vowels.includes(key.char)) candidates.push([r, c]);
       }));
-
       shuffled(candidates).slice(0, 2).forEach(([r, c]) => {
-        const base = visualRows[r][c].char;
-        const options = accented[base];
-        visualRows[r][c].display =
-          options[Math.floor(Math.random() * options.length)];
+        const options = accented[visualRows[r][c].char];
+        visualRows[r][c].display = options[Math.floor(Math.random() * options.length)];
+        visualRows[r][c].accent = true;
       });
     }
 
-    // A partir del nivell 5, exactament 3 majúscules aleatòries.
-    if (level >= 5) {
+    // Nivell 3+: 3 majúscules (no sobre tecles amb accent).
+    if (sp >= 3) {
       const candidates = [];
-      visualRows.forEach((row, r) => row.forEach((key, c) => {
-        candidates.push([r, c]);
-      }));
-
+      visualRows.forEach((row, r) => row.forEach((key, c) => { if (!key.accent) candidates.push([r, c]); }));
       shuffled(candidates).slice(0, 3).forEach(([r, c]) => {
         visualRows[r][c].display = visualRows[r][c].display.toUpperCase();
         visualRows[r][c].uppercase = true;
       });
     }
 
-    const flatVisual = visualRows.flat();
-    targets = flatVisual.map(k => k.display);
-
-    // Exactament 2 signes de puntuació, canviants a cada nivell.
-    const punctuationKeys = level >= 2
-      ? shuffled(punctuation).slice(0, 2)
-      : [];
-
-    punctuationKeys.forEach(char => {
-      flatVisual.push({char, display: char, extra: true, uppercase: false});
-      targets.push(char);
-    });
-
-    total = targets.length;
-    hits = 0;
-    totalEl.textContent = total;
-    hitsEl.textContent = hits;
+    // Nivell 4+: 2 signes comuns. Nivell 5+: 2 caràcters especials més. Nivell 6+: de tot el conjunt.
+    const punctuationKeys = [];
+    if (sp >= 4) punctuationKeys.push(...shuffled(mode.common).slice(0, 2));
+    if (sp >= 5) punctuationKeys.push(...shuffled((sp >= 6 ? mode.all : mode.hard).filter(ch => !punctuationKeys.includes(ch))).slice(0, 2));
+    total = visualRows.flat().length + punctuationKeys.length;
+    hits = 0; misses = 0;
+    updateAcc();
     levelEl.textContent = level;
     progressEl.style.width = '0%';
+    ufoCount = 0;
+    startTimer();
+    scheduleUfo();
 
-    let index = 0;
-
-    // Tres files amb aspecte de teclat.
     visualRows.forEach((row, rowIndex) => {
       const rowEl = document.createElement('div');
-      rowEl.className = 'keyboard-row row-' + rowIndex;
-
+      rowEl.className = 'keyboard-row row-' + layout[rowIndex].r;
       row.forEach(key => {
         const el = document.createElement('div');
-        el.className = 'key' + (key.uppercase ? ' uppercase' : '');
+        el.className = 'key' + (key.uppercase ? ' uppercase' : '') + (key.accent ? ' accent' : '');
         el.dataset.char = key.display;
         el.textContent = key.display;
-        el.dataset.index = index++;
         rowEl.appendChild(el);
       });
-
       invadersEl.appendChild(rowEl);
     });
 
-    // La puntuació va en una fila pròpia.
     if (punctuationKeys.length) {
       const punctuationRow = document.createElement('div');
       punctuationRow.className = 'keyboard-row punctuation-row';
-
       punctuationKeys.forEach(char => {
         const el = document.createElement('div');
         el.className = 'key extra';
         el.dataset.char = char;
         el.textContent = char;
-        el.dataset.index = index++;
         punctuationRow.appendChild(el);
       });
-
       invadersEl.appendChild(punctuationRow);
     }
-
-    invadersEl.style.display = 'flex';
-    invadersEl.style.flexDirection = 'column';
-    invadersEl.style.alignItems = 'center';
-    invadersEl.style.gap = '10px';
-    invadersEl.style.width = 'min(900px, 90%)';
 
     nextTarget();
     startSpaceInvadersMovement();
     focusInput();
   }
 
+  // Posició del centre d'un element dins l'arena.
+  function centerOf(el) {
+    const a = arena.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2 - a.left, y: r.top + r.height / 2 - a.top };
+  }
+
+  function aimAt(el) {
+    const x = Math.max(40, Math.min(arena.clientWidth - 40, centerOf(el).x));
+    ship.style.left = x + 'px';
+  }
 
   function nextTarget() {
     const available = [...invadersEl.querySelectorAll('.key:not(.hit)')];
-    if (!available.length) {
-      finishLevel();
-      return;
-    }
-
+    if (!available.length) { finishLevel(); return; }
     if (currentTarget) currentTarget.classList.remove('target');
     currentTarget = available[Math.floor(Math.random() * available.length)];
     currentTarget.classList.add('target');
     targetHint.textContent = currentTarget.dataset.char;
+    aimAt(currentTarget);
   }
 
   function startSpaceInvadersMovement() {
     clearTimeout(speedTimer);
-
-    // Moviment horitzontal com Space Invaders:
-    // avança, toca el límit, baixa una mica i canvia de direcció.
-    let direction = 1;
-    let horizontal = 0;
-    let descending = false;
+    let direction = 1, horizontal = 0;
 
     const tick = () => {
       if (!running) return;
-
-      const arenaWidth = arena.clientWidth;
-      const formationWidth = invadersEl.offsetWidth;
-      const maxHorizontal = Math.max(15, (arenaWidth - formationWidth) / 2 - 10);
-
-      horizontal += direction * (level >= 3 ? 8 + (level - 3) * 1.5 : 4);
+      const maxHorizontal = Math.max(15, (arena.clientWidth - invadersEl.offsetWidth) / 2 - 10);
+      horizontal += direction * moveStep();
 
       if (horizontal >= maxHorizontal || horizontal <= -maxHorizontal) {
+        horizontal = Math.max(-maxHorizontal, Math.min(maxHorizontal, horizontal));
         direction *= -1;
-        invaderOffset += level >= 3 ? 10 + (level - 3) * 1.5 : 5;
+        invaderOffset += dropStep();
       }
 
-      const bottomLimit = arena.clientHeight - 175;
-      if (72 + invaderOffset >= bottomLimit) {
+      if (56 + invaderOffset + invadersEl.offsetHeight >= arena.clientHeight - 130) {
         gameOver();
         return;
       }
 
-      invadersEl.style.transform =
-        `translateX(calc(-50% + ${horizontal}px))`;
-      invadersEl.style.top = `${72 + invaderOffset}px`;
-
+      invadersEl.style.transform = `translateX(calc(-50% + ${horizontal}px))`;
+      invadersEl.style.top = `${56 + invaderOffset}px`;
+      if (currentTarget) aimAt(currentTarget);
       speedTimer = setTimeout(tick, movementDelay());
     };
-
     speedTimer = setTimeout(tick, movementDelay());
   }
 
-  function fireLaser() {
-    laser.classList.remove('fire');
-    void laser.offsetWidth;
-    laser.classList.add('fire');
+  // ---------- Làser i explosió de píxels ----------
+  function fireLaser(x, y) {
+    const shipTop = arena.clientHeight - ship.offsetHeight - 20;
+    const beam = document.createElement('div');
+    beam.className = 'laser';
+    beam.style.left = x + 'px';
+    beam.style.top = y + 'px';
+    beam.style.height = Math.max(10, shipTop - y) + 'px';
+    arena.appendChild(beam);
+    beam.animate([{ opacity: 1, transform: 'translateX(-50%) scaleX(1)' },
+                  { opacity: 0, transform: 'translateX(-50%) scaleX(.2)' }],
+                 { duration: 200, easing: 'steps(4)' }).onfinish = () => beam.remove();
+    ship.classList.remove('zap'); void ship.offsetWidth; ship.classList.add('zap');
+    beep(1100, .16, 'square', 180);
   }
 
-  function beep(freq=520, duration=.07, type='sine') {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type; osc.frequency.value = freq;
-      gain.gain.setValueAtTime(.045, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + duration);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + duration);
-    } catch(e) {}
+  // Cada tipus de tecla té la seva explosió: colors, forma, mida i so.
+  const BURSTS = {
+    normal:    { colors: ['#fffaea', '#ffb000', '#ff3df0', '#3df0ff', '#7dff6a', '#ff4a3d'], n: 22, sizes: [4, 6, 8], dist: [30, 85], flash: '#fff', fs: 44, shape: 'burst', snd: [160, 'sawtooth', 50] },
+    accent:    { colors: ['#3df0ff', '#b8fbff', '#ffffff', '#1aa7b5'], n: 16, sizes: [6, 8], dist: [75, 75], flash: '#3df0ff', fs: 30, shape: 'ring', snd: [520, 'triangle', 120] },
+    uppercase: { colors: ['#ffb000', '#ffe08a', '#fffaea', '#ff7a00'], n: 36, sizes: [6, 8, 10], dist: [45, 125], flash: '#ffb000', fs: 74, shape: 'burst', snd: [200, 'sawtooth', 40] },
+    extra:     { colors: ['#c08cff', '#e3ccff', '#ff7ad9', '#7a3dff'], n: 24, sizes: [4, 6, 8], dist: [35, 105], flash: '#c08cff', fs: 40, shape: 'diamond', snd: [420, 'square', 90] }
+  };
+
+  function explode(x, y, type = 'normal') {
+    const B = BURSTS[type] || BURSTS.normal;
+    for (let i = 0; i < B.n; i++) {
+      const p = document.createElement('div');
+      const size = B.sizes[Math.floor(Math.random() * B.sizes.length)];
+      p.className = 'px';
+      p.style.cssText = `left:${x - size / 2}px;top:${y - size / 2}px;width:${size}px;height:${size}px;background:${B.colors[i % B.colors.length]}`;
+      arena.appendChild(p);
+      const ring = B.shape === 'ring';
+      const ang = (Math.PI * 2 * i) / B.n + (ring ? 0 : Math.random() * .4);
+      const dist = ring ? B.dist[0] : B.dist[0] + Math.random() * (B.dist[1] - B.dist[0]);
+      const lift = B.shape === 'diamond' ? -28 : 14;   // les lila pugen, la resta cauen
+      p.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist + lift}px) scale(.3)`, opacity: 0 }
+      ], { duration: 420 + Math.random() * 200, easing: 'steps(6)' }).onfinish = () => p.remove();
+    }
+    // Flaix central (rombe a les lila; els accents no en tenen)
+    if (B.shape !== 'ring') {
+    const f = document.createElement('div');
+    const rot = B.shape === 'diamond' ? 'rotate(45deg) ' : '';
+    f.className = 'px';
+    f.style.cssText = `left:${x - B.fs / 2}px;top:${y - B.fs / 2}px;width:${B.fs}px;height:${B.fs}px;background:${B.flash}`;
+    arena.appendChild(f);
+    f.animate([{ opacity: 1, transform: rot + 'scale(.6)' }, { opacity: 0, transform: rot + 'scale(1.6)' }],
+              { duration: 160, easing: 'steps(3)' }).onfinish = () => f.remove();
+    }
+    // Anell d'ona expansiva (accents)
+    if (B.shape === 'ring') {
+      const r = document.createElement('div');
+      r.className = 'px';
+      r.style.cssText = `left:${x - 24}px;top:${y - 24}px;width:48px;height:48px;border:4px solid ${B.flash};border-radius:50%`;
+      arena.appendChild(r);
+      r.animate([{ opacity: 1, transform: 'scale(.4)' }, { opacity: 0, transform: 'scale(2.6)' }],
+                { duration: 380, easing: 'steps(6)' }).onfinish = () => r.remove();
+    }
+    beep(B.snd[0], .22, B.snd[1], B.snd[2]);
+  }
+
+  // ---------- Barra espai especial ----------
+  function scheduleUfo() {
+    clearTimeout(ufoSpawn);
+    ufoSpawn = setTimeout(spawnUfo, 6000 + Math.random() * 9000);
+  }
+  function spawnUfo() {
+    if (!running) return;
+    if (ufoEl) { scheduleUfo(); return; }
+    ufoEl = document.createElement('div');
+    ufoEl.className = 'ufo';
+    ufoEl.textContent = 'ESPAI';
+    arena.appendChild(ufoEl);
+    const w = ufoEl.offsetWidth, dur = Math.max(550, 2200 * Math.pow(.92, level - 1) * Math.pow(.96, ufoCount));
+    ufoCount++;
+    ufoAnim = ufoEl.animate(
+      [{ transform: `translateX(${-w}px)` }, { transform: `translateX(${arena.clientWidth}px)` }],
+      { duration: dur, easing: 'steps(45)' });
+    ufoAnim.onfinish = () => { removeUfo(); scheduleUfo(); };
+    let f = 0;
+    ufoSound = setInterval(() => beep(f++ % 2 ? 420 : 300, .06, 'square'), 110);
+  }
+  function removeUfo() {
+    clearInterval(ufoSound);
+    if (ufoAnim) { ufoAnim.onfinish = null; ufoAnim.cancel(); }
+    ufoAnim = null;
+    if (ufoEl) ufoEl.remove();
+    ufoEl = null;
+  }
+  function stopUfo() { clearTimeout(ufoSpawn); removeUfo(); }
+
+  function popup(x, y, text) {
+    const p = document.createElement('div');
+    p.className = 'pop';
+    p.textContent = text;
+    p.style.left = Math.max(70, Math.min(arena.clientWidth - 70, x)) + 'px';
+    p.style.top = y + 'px';
+    arena.appendChild(p);
+    p.animate([{ opacity: 1, transform: 'translate(-50%,0)' }, { opacity: 0, transform: 'translate(-50%,-40px)' }],
+              { duration: 900, easing: 'steps(8)' }).onfinish = () => p.remove();
+  }
+
+  function hitUfo() {
+    const { x, y } = centerOf(ufoEl);
+    removeUfo();
+    aimAt({ getBoundingClientRect: () => ({ left: x + arena.getBoundingClientRect().left, width: 0, top: 0, height: 0 }) });
+    fireLaser(x, y);
+    explode(x, y);
+    bonusMs += 1000;
+    timeEl.textContent = fmt(elapsed());
+    const pts = 200 * level;
+    score += pts;
+    scoreEl.textContent = score;
+    popup(x, y + 30, `-1s  +${pts}`);
+    scheduleUfo();
+    setTimeout(() => { if (running && currentTarget) aimAt(currentTarget); }, 200);
+  }
+
+  let errTimer = null;
+  function flashError() {
+    const els = [ship, currentTarget].filter(Boolean);
+    els.forEach(el => { el.classList.remove('err'); void el.offsetWidth; el.classList.add('err'); });
+    clearTimeout(errTimer);
+    errTimer = setTimeout(() => els.forEach(el => el.classList.remove('err')), 280);
   }
 
   function hit(char) {
-    if (!running || !currentTarget) return;
-    if (char.toLowerCase() !== currentTarget.dataset.char.toLowerCase()) {
-      arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
-      beep(130,.08,'square');
+    if (!running) return;
+    if (char === ' ' && ufoEl) { hitUfo(); return; }
+    if (!currentTarget) return;
+    if (char.normalize('NFC') !== currentTarget.dataset.char.normalize('NFC')) {
+      misses++;
+      updateAcc();
+      flashError();
+      beep(130, .1, 'square');
       return;
     }
 
     const hitEl = currentTarget;
+    const { x, y } = centerOf(hitEl);
+    ship.style.left = Math.max(40, Math.min(arena.clientWidth - 40, x)) + 'px';
     hitEl.classList.remove('target');
     hitEl.classList.add('hit');
-    score += level >= 3 ? level * 15 : level * 10;
+
+    fireLaser(x, y);
+    const kind = hitEl.classList.contains('accent') ? 'accent'
+               : hitEl.classList.contains('uppercase') ? 'uppercase'
+               : hitEl.classList.contains('extra') ? 'extra' : 'normal';
+    explode(x, y, kind);
+
     hits++;
+    updateAcc();
+    // Punts per encert: depenen del nivell i de la precisió actual.
+    score += Math.round((level >= 3 ? level * 15 : level * 10) * accuracy());
     scoreEl.textContent = score;
-    hitsEl.textContent = hits;
     progressEl.style.width = `${(hits / total) * 100}%`;
-    fireLaser();
-    beep(650 + level * 35,.08,'triangle');
 
     currentTarget = null;
-    setTimeout(() => {
-      if (running) nextTarget();
-    }, 110);
+    setTimeout(() => { if (running) nextTarget(); }, 140);
   }
 
   function finishLevel() {
     running = false;
     clearTimeout(speedTimer);
-    if (level >= 2) score += 100 * level;
-    scoreEl.textContent = score;
+    stopUfo();
+    stopTimer();
 
-    if (level === 1) {
-      level = 2;
-      setMessage('🚀','Nivell <span>1 superat!</span>','Ara arriben accents i signes de puntuació. Prepara els dits!','Nivell 2');
-    } else {
-      level++;
-      setMessage('🔥',`Nivell <span>${level - 1} superat!</span>`,`Molt bé! Ara les tecles apareixeran més ràpid.`, `Nivell ${level}`);
-    }
-    beep(880,.12,'triangle');
+    // Bonus de temps: com més per sota del temps de referència, més punts (escalat per la precisió).
+    const acc = accuracy(), secs = finalMs / 1000;
+    const par = total * Math.max(.8, 1.5 - (level - 1) * .1);
+    const bonus = Math.round(Math.max(0, par - secs) * 20 * level * acc);
+    score += bonus;
+    scoreEl.textContent = score;
+    const stats = `Temps ${secs.toFixed(1)}s | Precisió ${Math.round(acc * 100)}% | Bonus de temps +${bonus}.`;
+
+    const done = level;
+    level++;
+    const hints = mode.hints;
+    const hint = hints[done] || 'Ara les tecles es mouran més ràpid.';
+    setMessage(done === 1 ? '🚀' : '🔥', `Nivell <span>${done} superat!</span>`, `${stats} ${hint}`, `Nivell ${level}`, false, true);
+    beep(880, .12, 'triangle');
   }
 
   function gameOver() {
     running = false;
     clearTimeout(speedTimer);
-    setMessage('💥','Fi de la <span>partida</span>',`Has arribat al nivell ${level} amb ${score} punts. Torna-ho a provar i supera la teva puntuació!`,'Tornar a jugar');
-    beep(100,.18,'sawtooth');
+    stopUfo();
+    stopTimer();
+    over = true;
+    setMessage('💥', 'Fi de la <span>partida</span>', `Has arribat al nivell ${level} amb ${score} punts. Torna-ho a provar i supera la teva puntuació!`, 'Tornar a jugar', true);
+    beep(100, .3, 'sawtooth', 40);
   }
 
-  function startGame() {
-    level = 1; score = 0; hits = 0; total = 0;
+  function startGame(key) {
+    if (key) { modeKey = key; mode = MODES[key]; }
+    over = false;
+    modeTag.textContent = mode.name.toUpperCase();
+    levelInfo.textContent = mode.info;
+    level = 1; score = 0; hits = 0; total = 0; misses = 0;
     scoreEl.textContent = '0';
     messageEl.classList.add('hidden');
     buildLevel();
   }
 
   function continueGame() {
+    levelDone = false;
     messageEl.classList.add('hidden');
     buildLevel();
   }
 
-  function focusInput() {
-    setTimeout(() => input.focus(), 20);
-  }
+  function focusInput() { setTimeout(() => input.focus(), 20); }
 
   input.addEventListener('input', () => {
     const value = input.value;
     if (value) {
-      // L'input event és especialment útil per a accents creats amb tecles mortes.
       const chars = [...value];
       const char = chars[chars.length - 1];
       input.value = '';
@@ -492,21 +740,30 @@ background-size:91px 91px,137px 137px;background-position:15px 23px,64px 7px}
 
   document.addEventListener('keydown', e => {
     if (!messageEl.classList.contains('hidden')) return;
+    if (e.code === 'Space' && e.target !== input) e.preventDefault();
     focusInput();
   });
 
   arena.addEventListener('click', focusInput);
   startBtn.addEventListener('click', () => {
-    if (level === 1 && !running) {
-      // Si és la pantalla inicial o fi de partida, comencem de zero.
-      if (score === 0 && total === 0) startGame();
-      else continueGame();
-    } else if (!running) {
-      continueGame();
-    }
+    audio();
+    if (over) startGame();
+    else if (!running) continueGame();
     focusInput();
   });
+  menuBtn.addEventListener('click', () => { audio(); showMenu(); });
+  menuMini.addEventListener('click', () => { audio(); showMenu(); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !levelDone || messageEl.classList.contains('hidden')) return;
+    if (e.target.closest && e.target.closest('#menuMini')) return;
+    e.preventDefault();
+    audio(); continueGame(); focusInput();
+  });
+  document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => {
+    audio(); startGame(b.dataset.mode); focusInput();
+  }));
 
+  showMenu();
   focusInput();
 })();
 </script>
