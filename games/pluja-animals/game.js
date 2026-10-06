@@ -389,7 +389,7 @@ function spawnAnimal() {
     fallingAnimals.push({
         element: element,
         name: animal.name,
-        y: -130,
+        y: 0,
         speed: getFallSpeed()
     });
 }
