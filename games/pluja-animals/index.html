@@ -135,3 +135,24 @@
 
         </div>
 
+    </section>
+
+</main>
+
+
+<!-- Diagnòstic: mostra els errors a la pantalla (es pot esborrar quan tot funcioni) -->
+<script>
+function mostraError(text) {
+    var m = document.getElementById("message");
+    if (m) {
+        m.textContent = "ERROR: " + text;
+        m.style.color = "red";
+        m.style.fontWeight = "700";
+    }
+}
+window.addEventListener("error", function (e) {
+    var fitxer = (e.filename || "").split("/").pop();
+    mostraError(e.message + " (" + fitxer + ", línia " + e.lineno + ")");
+});
+window.addEventListener("load", function () {
+    if (typeof startGame !== "function") {
