@@ -46,106 +46,17 @@
 }
 
 
-/* ZONA DEL JOC */
+/* ZONA DEL JOC
+   (el fons de posta de sol el dibuixa fons-posta.js
+   dins d'aquest contenidor, darrere dels animals) */
 
 .game-area {
     position: relative;
     height: 620px;
     overflow: hidden;
-
-/* ================================
-   ESCENARI
-   ================================ */
-
-#game {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
+    background: #1a1033; /* color de reserva mentre carrega el fons */
 }
 
-/* ================================
-   FONS PARALLAX
-   ================================ */
-
-#parallax-background {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-
-    overflow: hidden;
-    pointer-events: none;
-}
-
-
-.parallax-layer {
-    position: absolute;
-    inset: 0;
-
-    overflow: hidden;
-
-    pointer-events: none;
-}
-
-
-/* Cada imatge ocupa exactament
-   una pantalla */
-
-.parallax-strip {
-    position: absolute;
-
-    top: 0;
-    bottom: 0;
-
-    width: 100%;
-
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: cover;
-
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-
-    will-change: transform;
-}
-
-
-/* Primera còpia */
-
-.parallax-strip:nth-child(1) {
-    left: 0;
-}
-
-
-/* Segona còpia, immediatament
-   després de la primera */
-
-.parallax-strip:nth-child(2) {
-    left: 100%;
-}
-
-
-/* IMATGES */
-
-.sky .parallax-strip {
-    background-image: url("sky.png");
-}
-
-.mountains .parallax-strip {
-    background-image: url("mountains.png");
-}
-
-.trees .parallax-strip {
-    background-image: url("trees.png");
-}
-
-.clouds .parallax-strip {
-    background-image: url("clouds.png");
-}
-
-.grass .parallax-strip {
-    background-image: url("grass.png");
-}
 
 /* SÒL */
 
@@ -179,7 +90,8 @@
 
     text-align: center;
 
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(20, 10, 40, 0.55);
+    color: #ffffff;
 }
 
 .start-screen h2 {
@@ -212,43 +124,87 @@
 
 .falling-animal {
     position: absolute;
-
+    width: 110px;
+    height: 125px;
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    min-width: 100px;
-
     pointer-events: none;
-
     user-select: none;
+    z-index: 5;
+}
+
+.animal-sprite {
+    width: 100px;
+    height: 92px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
 }
 
 .animal-word {
-    padding: 6px 10px;
-
-    background: #ffffff;
-    color: #09101d;
-
-    border: 2px solid #09101d;
+    margin-top: 2px;
+    padding: 4px 9px;
     border-radius: 8px;
-
+    background: #09101d;
+    color: white;
+    border: 2px solid #84cbc9;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-
-    box-shadow: 4px 4px 0 #09101d;
-
+    font-size: 15px;
+    white-space: nowrap;
     transition: background 0.1s;
-}
-
-.animal-word.match {
-    background: #84cbc9;
 }
 
 .pixel-animal {
     margin-top: 7px;
-
     image-rendering: pixelated;
+}
+
+.falling-animal.typing-match .animal-word {
+    background: #84cbc9;
+    color: #09101d;
+}
+
+.falling-animal.animal-correct {
+    transform: scale(1.2);
+    opacity: 0;
+    transition: 0.12s ease;
+}
+
+.life-lost {
+    animation: lifeLost 0.18s ease;
+}
+
+.level-up {
+    animation: levelUp 0.5s ease;
+}
+
+@keyframes lifeLost {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    75% {
+        transform: translateX(8px);
+    }
+}
+
+@keyframes levelUp {
+    0% {
+        box-shadow: inset 0 0 0 0 #84cbc9;
+    }
+
+    50% {
+        box-shadow: inset 0 0 40px 10px rgba(132, 203, 201, 0.35);
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 0 #84cbc9;
+    }
 }
 
 
@@ -300,89 +256,3 @@
     .game-info {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    .game-area {
-        height: 540px;
-    }
-
-    .start-screen h2 {
-        font-size: 1.6rem;
-    }
-
-}
-.falling-animal {
-    position: absolute;
-    width: 110px;
-    height: 125px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-    z-index: 5;
-}
-
-.animal-sprite {
-    width: 100px;
-    height: 92px;
-    background-repeat: no-repeat;
-    image-rendering: pixelated;
-}
-
-.animal-word {
-    margin-top: 2px;
-    padding: 4px 9px;
-    border-radius: 8px;
-    background: #09101d;
-    color: white;
-    border: 2px solid #84cbc9;
-    font-weight: 700;
-    font-size: 15px;
-    white-space: nowrap;
-}
-
-.falling-animal.typing-match .animal-word {
-    background: #84cbc9;
-    color: #09101d;
-}
-
-.falling-animal.animal-correct {
-    transform: scale(1.2);
-    opacity: 0;
-    transition: 0.12s ease;
-}
-
-.life-lost {
-    animation: lifeLost 0.18s ease;
-}
-
-.level-up {
-    animation: levelUp 0.5s ease;
-}
-
-@keyframes lifeLost {
-    0%, 100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-8px);
-    }
-
-    75% {
-        transform: translateX(8px);
-    }
-}
-
-@keyframes levelUp {
-    0% {
-        box-shadow: inset 0 0 0 0 #84cbc9;
-    }
-
-    50% {
-        box-shadow: inset 0 0 40px 10px rgba(132, 203, 201, 0.35);
-    }
-
-    100% {
-        box-shadow: inset 0 0 0 0 #84cbc9;
-    }
-}
