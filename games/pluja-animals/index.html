@@ -140,19 +140,43 @@
 </main>
 
 
-<!-- Diagnòstic: mostra els errors a la pantalla (es pot esborrar quan tot funcioni) -->
+<!-- DIAGNÒSTIC (esborra aquest bloc quan tot funcioni) -->
+<div id="diag" style="position:fixed;left:8px;bottom:8px;z-index:99999;max-width:92vw;background:#000;color:#0f0;font:12px/1.4 monospace;padding:8px 10px;border-radius:6px;white-space:pre-wrap"></div>
 <script>
-function mostraError(text) {
-    var m = document.getElementById("message");
-    if (m) {
-        m.textContent = "ERROR: " + text;
-        m.style.color = "red";
-        m.style.fontWeight = "700";
+(function () {
+    var box = document.getElementById("diag");
+    var errors = [];
+    function pinta(extra) {
+        var area = document.getElementById("game-area");
+        var ss = document.getElementById("start-screen");
+        var z = ss ? getComputedStyle(ss).zIndex : "?";
+        box.textContent =
+            "html: v4 carregat
+" +
+            "game.js: " + (typeof startGame === "function" ? "OK" : "NO CARREGAT") + "
+" +
+            "fons (canvas): " + (area && area.querySelector("canvas") ? "OK" : "NO") + "
+" +
+            "css nou (z-index pantalla=100): " + (z === "100" ? "OK" : "NO (" + z + ")") + "
+" +
+            "errors: " + (errors.length ? errors.join(" | ") : "cap") +
+            (extra ? "
+" + extra : "");
     }
-}
-window.addEventListener("error", function (e) {
-    var fitxer = (e.filename || "").split("/").pop();
-    mostraError(e.message + " (" + fitxer + ", línia " + e.lineno + ")");
-});
-window.addEventListener("load", function () {
-    if (typeof startGame !== "function") {
+    window.addEventListener("error", function (e) {
+        errors.push(e.message + " [" + (e.filename || "").split("/").pop() + ":" + e.lineno + "]");
+        pinta();
+    });
+    window.addEventListener("load", function () { pinta(); });
+    document.addEventListener("click", function (e) {
+        var t = e.target;
+        pinta("últim clic a: " + t.tagName + (t.id ? "#" + t.id : "") + (t.className && t.className.baseVal === undefined ? "." + t.className : ""));
+    }, true);
+    pinta();
+})();
+</script>
+
+<script src="game.js"></script>
+
+</body>
+</html>
