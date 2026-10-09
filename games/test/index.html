@@ -4,106 +4,147 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Test de nivell de mecanografia</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0a1a;--panel:#14122b;--line:#2b2760;--cy:#3df5ff;--mg:#ff4fd8;--ye:#ffe14d;--gr:#5cff9b;--re:#ff5a6a;--tx:#e8e6ff;--dim:#8d89c9}
+:root{--panel:rgba(9,20,34,.86);--edge:rgba(242,197,92,.35);--gold:#f2c55c;--ice:#eaf2f6;--dim:#a9bccb;--ember:#e9794a;--red:#ff6b6b;--ok:#7fe0b0}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font:20px/1.5 "Courier New",ui-monospace,monospace;
- background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
-main{max-width:860px;margin:0 auto;padding:28px 18px 60px}
-h1,h2{font-family:"Press Start 2P","Courier New",monospace;font-weight:400;line-height:1.5;margin:0 0 18px}
-h1{font-size:clamp(18px,4vw,28px);color:var(--cy);text-shadow:0 0 12px rgba(61,245,255,.55)}
-h2{font-size:15px;color:var(--ye)}
-.panel{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:22px;margin-bottom:20px}
+body{margin:0;min-height:100vh;color:var(--ice);font:19px/1.55 "Atkinson Hyperlegible",Verdana,sans-serif;
+ background:linear-gradient(180deg,#0a1626 0%,#14304b 52%,#3d5266 76%,#c9744a 100%) fixed}
+#peaks{position:fixed;left:0;right:0;bottom:0;width:100%;height:34vh;pointer-events:none;z-index:0}
+main{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:30px 18px 70px}
+h1,h2,.rank,.num{font-family:Cinzel,Georgia,serif}
+h1{font-size:clamp(26px,5vw,42px);font-weight:800;margin:0 0 4px;letter-spacing:.5px;color:var(--gold)}
+.sub{margin:0 0 22px;color:var(--dim)}
+h2{font-size:21px;font-weight:600;margin:0 0 14px;color:var(--gold)}
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:24px;margin-bottom:20px;backdrop-filter:blur(4px)}
 .hidden{display:none!important}
-label{display:block;color:var(--dim);margin-bottom:6px}
-input[type=text]{width:100%;font:inherit;font-size:24px;padding:10px 14px;background:#0b0a1a;color:var(--tx);border:2px solid var(--line);border-radius:4px}
-input[type=text]:focus{outline:none;border-color:var(--cy);box-shadow:0 0 0 3px rgba(61,245,255,.25)}
-button{font:inherit;font-weight:700;cursor:pointer;padding:10px 20px;border-radius:4px;border:2px solid var(--cy);background:var(--cy);color:#04121a;margin:14px 10px 0 0}
-button.sec{background:transparent;color:var(--cy)}
-button:focus-visible{outline:3px solid var(--ye);outline-offset:2px}
-.stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:14px;color:var(--dim)}
-.stats b{color:var(--ye);font-size:24px}
-.bar{height:6px;background:#0b0a1a;border-radius:3px;margin-bottom:16px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--cy);transition:width .1s}
-#text{position:relative;font-size:24px;line-height:1.7;white-space:pre-wrap;cursor:text;padding:6px 2px}
-#text span{border-radius:2px}
-#text .ok{color:var(--gr)}
-#text .cur{background:var(--cy);color:#04121a}
-#text .bad{background:var(--re)!important;color:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.row{grid-template-columns:1fr}}
+label.f{display:block;color:var(--dim);margin-bottom:6px}
+input[type=text]{width:100%;font:inherit;font-size:21px;padding:10px 12px;background:#07111d;color:var(--ice);border:1px solid #3a5670;border-radius:6px}
+input[type=text]:focus{outline:3px solid rgba(242,197,92,.45);border-color:var(--gold)}
+.difs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0 4px}
+.dif input{position:absolute;opacity:0}
+.dif span{display:block;height:100%;padding:12px 14px;border:1px solid #3a5670;border-radius:8px;cursor:pointer}
+.dif b{display:block;font-family:Cinzel,Georgia,serif;color:var(--ice)}
+.dif small{color:var(--dim);font-size:16px}
+.dif input:checked+span{border-color:var(--gold);background:rgba(242,197,92,.12);box-shadow:inset 0 0 0 1px var(--gold)}
+.dif input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
+button{font:inherit;font-weight:700;cursor:pointer;padding:11px 24px;border-radius:6px;border:1px solid var(--gold);background:var(--gold);color:#1a1405;margin:16px 10px 0 0}
+button.sec{background:transparent;color:var(--gold)}
+button:focus-visible,select:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
+#err{color:var(--red);min-height:1.5em;margin:10px 0 0}
+.stats{display:flex;gap:28px;flex-wrap:wrap;color:var(--dim)}
+.stats b{color:var(--gold);font-family:Cinzel,serif;font-size:26px;margin-left:4px}
+#climb{width:100%;height:auto;display:block;margin:6px 0 10px}
+#text{position:relative;font-size:26px;line-height:1.75;white-space:pre-wrap;cursor:text;color:var(--dim);padding:2px}
+#text span{border-radius:3px}
+#text .ok{color:var(--gold)}
+#text .cur{background:var(--ice);color:#0a1626}
+#text .bad{background:var(--red)!important;color:#fff}
 #ta{position:absolute;inset:0;width:100%;height:100%;opacity:0;resize:none;border:0}
-.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:6px 0 18px}
-.big div{border:2px solid var(--line);border-radius:6px;padding:12px;text-align:center;color:var(--dim)}
-.big b{display:block;font-family:"Press Start 2P",monospace;font-weight:400;font-size:22px;margin-top:6px}
-.nivell{font-family:"Press Start 2P",monospace;font-size:16px;color:var(--mg);margin:6px 0 16px}
+.rank{font-size:clamp(26px,5vw,38px);font-weight:800;color:var(--gold);margin:0 0 4px}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:16px 0 22px}
+.big div{border:1px solid var(--edge);border-radius:8px;padding:12px;text-align:center;color:var(--dim)}
+.num{display:block;font-size:34px;font-weight:800;color:var(--ice)}
 .keys{display:flex;gap:10px;flex-wrap:wrap}
-.k{min-width:56px;text-align:center;padding:6px 10px;border:2px solid var(--re);border-bottom-width:5px;border-radius:6px;color:var(--re);font-weight:700}
+.k{min-width:58px;text-align:center;padding:6px 12px;border:2px solid var(--red);border-radius:8px;color:var(--red);font-weight:700;font-size:22px}
 .k small{display:block;color:var(--dim);font-size:14px;font-weight:400}
 .wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:640px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
-th{color:var(--ye);font-weight:700}
-#msg{color:var(--dim);margin-top:10px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+table{border-collapse:collapse;width:100%;min-width:720px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.12)}
+th{color:var(--gold);font-family:Cinzel,serif}
+select{font:inherit;padding:6px 10px;background:#07111d;color:var(--ice);border:1px solid #3a5670;border-radius:6px}
+#msg{color:var(--dim)}
 </style>
 </head>
 <body>
+<svg id="peaks" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
+  <polygon points="0,300 0,190 140,110 230,170 380,60 520,180 640,100 780,200 900,130 1000,190 1000,300" fill="#0e2237" opacity=".55"/>
+  <polygon points="0,300 0,250 160,190 300,240 450,170 600,250 760,200 900,255 1000,220 1000,300" fill="#07111d" opacity=".8"/>
+</svg>
 <main>
 <h1>Test de nivell de mecanografia</h1>
+<p class="sub">Escala fins al cim: com més bé escriguis, més amunt arribaràs.</p>
 
 <section id="s-name" class="panel">
-  <h2>Abans de començar</h2>
-  <label for="nom">Escriu el teu nom i cognom</label>
+  <h2>Prepara l’ascens</h2>
+  <label class="f" for="nom">El teu nom</label>
   <input type="text" id="nom" maxlength="30" autocomplete="off">
-  <p id="err" style="color:var(--re);min-height:1.5em;margin:6px 0 0"></p>
+  <div class="difs" role="radiogroup" aria-label="Dificultat">
+    <label class="dif"><input type="radio" name="dif" value="Principiant" checked><span><b>Principiant</b><small>Un text curt, per començar bé.</small></span></label>
+    <label class="dif"><input type="radio" name="dif" value="Experimentat"><span><b>Experimentat</b><small>Un text més llarg, per als qui ja coneixen el teclat.</small></span></label>
+  </div>
+  <p id="err" role="alert"></p>
   <button id="go">Començar el test</button>
   <button id="seeT" class="sec">Veure la taula</button>
 </section>
 
 <section id="s-test" class="panel hidden">
-  <div class="stats"><span>Temps <b id="t">0</b> s</span><span>Velocitat <b id="v">0</b> ppm</span><span>Precisió <b id="p">100</b>%</span></div>
-  <div class="bar"><i id="bar"></i></div>
+  <div class="stats"><span>Temps<b id="t">0</b> s</span><span>Velocitat<b id="v">0</b> ppm</span><span>Precisió<b id="p">100</b>%</span></div>
+  <svg id="climb" viewBox="0 -18 800 130" aria-hidden="true">
+    <polygon points="0,112 150,78 230,88 400,14 520,66 620,50 800,112" fill="#0e2237" stroke="rgba(242,197,92,.35)"/>
+    <path id="trail" d="M20,106 C120,96 200,92 230,86 S300,60 330,50 S380,30 400,14" fill="none" stroke="#4d6b85" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+    <path id="walked" d="M20,106 C120,96 200,92 230,86 S300,60 330,50 S380,30 400,14" fill="none" stroke="#f2c55c" stroke-width="4" stroke-linecap="round"/>
+    <line x1="400" y1="-16" x2="400" y2="14" stroke="#eaf2f6" stroke-width="2"/>
+    <polygon points="400,-16 428,-9 400,-2" fill="#e9794a"/>
+    <circle id="hero" cx="20" cy="106" r="8" fill="#eaf2f6" stroke="#f2c55c" stroke-width="3"/>
+  </svg>
+  <button id="menuT" class="sec" style="margin:0 0 12px">Tornar al menú</button>
   <div id="text"><textarea id="ta" aria-label="Escriu aquí el text" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div>
 </section>
 
 <section id="s-res" class="panel hidden">
-  <h2 id="rn"></h2>
-  <div class="nivell" id="rl"></div>
+  <p class="sub" style="margin:0">Has arribat al rang de</p>
+  <div class="rank" id="rl"></div>
+  <p id="rn" style="margin:0;color:var(--dim)"></p>
   <div class="big">
-    <div>Velocitat<b id="rv" style="color:var(--cy)"></b>ppm</div>
-    <div>Precisió<b id="rp" style="color:var(--gr)"></b></div>
-    <div>Temps<b id="rt" style="color:var(--ye)"></b></div>
+    <div>Velocitat<span class="num" id="rv"></span>ppm</div>
+    <div>Precisió<span class="num" id="rp"></span></div>
+    <div>Temps<span class="num" id="rt"></span></div>
   </div>
-  <h2>Tecles més fallades</h2>
+  <h2>Tecles que et costen més</h2>
   <div class="keys" id="rk"></div>
   <p id="msg"></p>
   <button id="seeT2">Veure la taula</button>
-  <button id="again" class="sec">Tornar a començar</button>
+  <button id="again" class="sec">Tornar al menú</button>
 </section>
 
 <section id="s-tab" class="panel hidden">
-  <h2>Resultats de tots els alumnes</h2>
+  <h2>Resultats</h2>
   <p id="tmode" style="color:var(--dim);margin-top:0"></p>
+  <label class="f" for="fdif">Dificultat</label>
+  <select id="fdif"><option value="">Totes</option><option>Principiant</option><option>Experimentat</option></select>
   <div class="wrap"><table>
-    <thead><tr><th>#</th><th>Nom</th><th>ppm</th><th>Precisió</th><th>Nivell</th><th>Tecles fallades</th><th>Data</th></tr></thead>
+    <thead><tr><th>#</th><th>Nom</th><th>Dificultat</th><th>ppm</th><th>Precisió</th><th>Rang</th><th>Tecles fallades</th></tr></thead>
     <tbody id="tb"></tbody>
   </table></div>
   <button id="csv">Descarregar CSV</button>
-  <button id="back" class="sec">Tornar</button>
+  <button id="back" class="sec">Tornar al menú</button>
 </section>
 </main>
 
 <script>
 // Adreça de l'Apps Script (Google Sheets). Si és buida, els resultats es guarden només en aquest navegador.
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzbdkyne_aGnybfvaEz8wtIvQLaMnAh0h27AzhruhlPDfhPcpP1ioP3afRsZkjISjWC/exec";
+const SHEET_URL = "";
 
-const TEXT = "Escriure bé és més important que escriure ràpid. Abans de començar, seu amb l’esquena recta i col·loca bé els dits sobre el teclat. La mà esquerra ha de tenir els dits sobre les tecles A, S, D i F, i la mà dreta sobre J, K, L i Ñ. Cada dit té les seves tecles. Intenta no mirar el teclat mentre escrius i fixa’t en el text de la pantalla. Prem cada tecla amb cura i no corris massa. És millor escriure a poc a poc i no fer errors que anar molt de pressa i equivocar-se. Mantén un ritme tranquil, deixa els espais correctes i revisa el que has escrit. Amb paciència i pràctica, cada dia escriuràs millor!";
+const TEXTS = {
+  "Principiant": "La mecanografia ens ajuda a escriure més ràpidament i amb menys errors. Seu amb l’esquena recta i col·loca bé els dits sobre les tecles guia. Intenta no mirar el teclat i fixa’t en la pantalla. Escriu amb calma i precisió. Practicar cada dia millora la velocitat, la concentració i la confiança.",
+  "Experimentat": "Escriure bé és més important que escriure ràpid. Abans de començar, seu amb l’esquena recta i col·loca bé els dits sobre el teclat. La mà esquerra ha de tenir els dits sobre les tecles A, S, D i F, i la mà dreta sobre J, K, L i Ñ. Cada dit té les seves tecles. Intenta no mirar el teclat mentre escrius i fixa’t en el text de la pantalla. Prem cada tecla amb cura i no corris massa. És millor escriure a poc a poc i no fer errors que anar molt de pressa i equivocar-se. Mantén un ritme tranquil, deixa els espais correctes i revisa el que has escrit. Amb paciència i pràctica, cada dia escriuràs millor!"
+};
+const RANKS = ["Aprenent", "Explorador", "Guia", "Mestre", "Llegenda"];
 
 const $ = id => document.getElementById(id);
 const show = id => { for (const s of ["s-name","s-test","s-res","s-tab"]) $(s).classList.toggle("hidden", s !== id); };
-let nom, idx, errs, keys, t0, timer, failed, done, spans, rows = [];
+let TEXT, nom, diff, idx, errs, keys, t0, timer, failed, done, spans, rows = [];
+const textEl = $("text"), ta = $("ta"), walked = $("walked"), hero = $("hero");
+const L = walked.getTotalLength();
 
-const textEl = $("text"), ta = $("ta");
+function setClimb(p) {
+  walked.style.strokeDasharray = (p * L) + " " + L;
+  const pt = walked.getPointAtLength(p * L);
+  hero.setAttribute("cx", pt.x); hero.setAttribute("cy", pt.y);
+}
 function build() {
   textEl.querySelectorAll("span").forEach(s => s.remove());
   spans = [...TEXT].map(c => { const s = document.createElement("span"); s.textContent = c; textEl.appendChild(s); return s; });
@@ -112,9 +153,10 @@ function begin() {
   nom = $("nom").value.trim();
   if (nom.length < 2) { $("err").textContent = "Escriu el teu nom abans de començar."; $("nom").focus(); return; }
   $("err").textContent = "";
+  diff = document.querySelector("input[name=dif]:checked").value; TEXT = TEXTS[diff];
   idx = 0; errs = 0; keys = 0; t0 = 0; failed = {}; done = false;
-  clearInterval(timer); build(); spans[0].className = "cur";
-  ["t","v"].forEach(i => $(i).textContent = "0"); $("p").textContent = "100"; $("bar").style.width = "0";
+  clearInterval(timer); build(); spans[0].className = "cur"; setClimb(0);
+  $("t").textContent = "0"; $("v").textContent = "0"; $("p").textContent = "100";
   show("s-test"); ta.focus();
 }
 function secs() { return t0 ? (performance.now() - t0) / 1000 : 0; }
@@ -132,11 +174,10 @@ function press(ch) {
     if (idx < TEXT.length) spans[idx].className = "cur";
   } else {
     errs++; failed[exp] = (failed[exp] || 0) + 1;
-    spans[idx].classList.add("bad");
-    setTimeout(() => spans[idx] && spans[idx].classList.remove("bad"), 180);
+    const s = spans[idx]; s.classList.add("bad");
+    setTimeout(() => s.classList.remove("bad"), 180);
   }
-  $("bar").style.width = (idx / TEXT.length * 100) + "%";
-  tick();
+  setClimb(idx / TEXT.length); tick();
   if (idx >= TEXT.length) finish();
 }
 const flush = () => { const v = ta.value; ta.value = ""; for (const c of v) press(c); };
@@ -145,26 +186,26 @@ ta.addEventListener("compositionend", flush);
 textEl.addEventListener("click", () => ta.focus());
 
 const keyName = c => c === " " ? "espai" : c;
-function nivell(p, pr) {
+function rang(p, pr) {
   const e = p * Math.pow(pr / 100, 2);
-  return e < 8 ? "Inicial" : e < 15 ? "Bàsic" : e < 25 ? "Intermedi" : e < 35 ? "Avançat" : "Expert";
+  return RANKS[e < 8 ? 0 : e < 15 ? 1 : e < 25 ? 2 : e < 35 ? 3 : 4];
 }
 function finish() {
   done = true; clearInterval(timer); tick();
-  const rec = { nom, ppm: ppm(), precisio: prec(), temps: Math.round(secs()), data: new Date().toISOString() };
-  rec.nivell = nivell(rec.ppm, rec.precisio);
+  const rec = { nom, dificultat: diff, ppm: ppm(), precisio: prec(), temps: Math.round(secs()), data: new Date().toISOString() };
+  rec.nivell = rang(rec.ppm, rec.precisio);
   const top = Object.entries(failed).sort((a, b) => b[1] - a[1]).slice(0, 6);
   rec.fallades = top.map(([k, n]) => keyName(k) + "×" + n).join(" ");
-  $("rn").textContent = nom;
-  $("rl").textContent = "Nivell: " + rec.nivell;
+  $("rl").textContent = rec.nivell;
+  $("rn").textContent = nom + " · " + diff;
   $("rv").textContent = rec.ppm; $("rp").textContent = rec.precisio + "%";
   const m = Math.floor(rec.temps / 60), s = rec.temps % 60;
   $("rt").textContent = m + ":" + String(s).padStart(2, "0");
   const rk = $("rk"); rk.textContent = "";
-  if (!top.length) rk.textContent = "Cap error. Molt bé!";
+  if (!top.length) rk.textContent = "Cap error. Has arribat al cim sense caure!";
   top.forEach(([k, n]) => {
-    const d = document.createElement("div"); d.className = "k";
-    d.textContent = keyName(k); const sm = document.createElement("small"); sm.textContent = n + (n > 1 ? " errors" : " error");
+    const d = document.createElement("div"); d.className = "k"; d.textContent = keyName(k);
+    const sm = document.createElement("small"); sm.textContent = n + (n > 1 ? " errors" : " error");
     d.appendChild(sm); rk.appendChild(d);
   });
   show("s-res"); send(rec);
@@ -180,24 +221,28 @@ async function send(rec) {
   } catch (e) { $("msg").textContent = "No s'ha pogut enviar. Avisa el professor."; }
 }
 
-async function openTable() {
-  show("s-tab"); $("tb").textContent = "";
-  try {
-    if (SHEET_URL) { rows = await (await fetch(SHEET_URL)).json(); $("tmode").textContent = "Dades de la taula compartida."; }
-    else { rows = JSON.parse(localStorage.getItem("meca-test") || "[]"); $("tmode").textContent = "Mode local: només es veuen els resultats fets en aquest navegador."; }
-  } catch (e) { rows = []; $("tmode").textContent = "No s'ha pogut carregar la taula."; }
-  rows.sort((a, b) => b.ppm - a.ppm);
-  rows.forEach((r, i) => {
+function renderRows() {
+  const f = $("fdif").value; $("tb").textContent = "";
+  rows.filter(r => !f || r.dificultat === f).forEach((r, i) => {
     const tr = document.createElement("tr");
-    [i + 1, r.nom, r.ppm, r.precisio + "%", r.nivell, r.fallades, String(r.data).slice(0, 10)].forEach(v => {
+    [i + 1, r.nom, r.dificultat, r.ppm, r.precisio + "%", r.nivell, r.fallades].forEach(v => {
       const td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
     });
     $("tb").appendChild(tr);
   });
 }
+async function openTable() {
+  show("s-tab");
+  try {
+    if (SHEET_URL) { rows = await (await fetch(SHEET_URL)).json(); $("tmode").textContent = "Dades de la taula compartida."; }
+    else { rows = JSON.parse(localStorage.getItem("meca-test") || "[]"); $("tmode").textContent = "Mode local: només es veuen els resultats fets en aquest navegador."; }
+  } catch (e) { rows = []; $("tmode").textContent = "No s'ha pogut carregar la taula."; }
+  rows.sort((a, b) => b.ppm - a.ppm); renderRows();
+}
 function csv() {
   const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-  const out = ["nom,ppm,precisio,nivell,fallades,temps,data", ...rows.map(r => [r.nom, r.ppm, r.precisio, r.nivell, r.fallades, r.temps, r.data].map(q).join(","))].join("\n");
+  const out = ["nom,dificultat,ppm,precisio,rang,fallades,temps,data",
+    ...rows.map(r => [r.nom, r.dificultat, r.ppm, r.precisio, r.nivell, r.fallades, r.temps, r.data].map(q).join(","))].join("\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["\ufeff" + out], { type: "text/csv" })); a.download = "resultats-mecanografia.csv"; a.click();
 }
@@ -205,8 +250,9 @@ function csv() {
 $("go").onclick = begin;
 $("nom").addEventListener("keydown", e => { if (e.key === "Enter") begin(); });
 $("seeT").onclick = $("seeT2").onclick = openTable;
-$("back").onclick = () => show("s-name");
-$("again").onclick = () => { $("nom").value = ""; show("s-name"); $("nom").focus(); };
+$("fdif").onchange = renderRows;
+function toMenu() { clearInterval(timer); done = true; $("err").textContent = ""; show("s-name"); $("nom").focus(); }
+$("back").onclick = $("again").onclick = $("menuT").onclick = toMenu;
 $("csv").onclick = csv;
 </script>
 </body>
