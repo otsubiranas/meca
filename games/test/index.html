@@ -214,11 +214,14 @@ function finish() {
 async function send(rec) {
   $("msg").textContent = "Enviant la puntuació…";
   try { const l = JSON.parse(localStorage.getItem("meca-test") || "[]"); l.push(rec); localStorage.setItem("meca-test", JSON.stringify(l)); } catch (e) {}
-  if (!SHEET_URL) { $("msg").textContent = "Puntuació guardada en aquest ordinador."; return; }
+  if (!SHEET_URL) { $("msg").textContent = "Falta connectar la pàgina al full de càlcul (SHEET_URL buit). La puntuació només s'ha guardat en aquest ordinador."; return; }
   try {
-    await fetch(SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(rec) });
-    $("msg").textContent = "Puntuació enviada a la taula.";
-  } catch (e) { $("msg").textContent = "No s'ha pogut enviar. Avisa el professor."; }
+    const r = await fetch(SHEET_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(rec) });
+    const t = (await r.text()).trim();
+    $("msg").textContent = t === "ok" ? "Puntuació enviada a la taula."
+      : t.startsWith("<") ? "El script demana iniciar sessió: la implementació ha de tenir accés per a «Qualsevol persona»."
+      : "El full ha rebutjat la puntuació (" + t.slice(0, 60) + "). Avisa el professor.";
+  } catch (e) { $("msg").textContent = "No s'ha pogut confirmar l'enviament. Revisa l'URL i la implementació del script."; }
 }
 
 function renderRows() {
