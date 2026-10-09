@@ -6,78 +6,31 @@
 
     <title>Jocs de mecanografia</title>
 
+    <!-- FAVICON: desa la imatge com a favicon.png a la mateixa carpeta que aquest index.html -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+
     <link rel="stylesheet" href="styles.css">
 
     <style>
-        body {
-            background: #09101d;
-            color: white;
-        }
-
-        .catalog-page {
-            min-height: 100vh;
-        }
+        body { background: #09101d; color: white; }
+        .catalog-page { min-height: 100vh; }
 
         /* HEADER */
-        .catalog-header {
-            width: min(1200px, 90%);
-            margin: 0 auto;
-            padding: 28px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .catalog-header img {
-            width: 150px;
-            height: auto;
-        }
+        .catalog-header { width: min(1200px, 90%); margin: 0 auto; padding: 28px 0; display: flex; align-items: center; }
+        .catalog-header img { width: 150px; height: auto; }
 
         /* HERO */
-        .catalog-hero {
-            width: min(1200px, 90%);
-            margin: 60px auto 70px;
-        }
-
-        .catalog-hero h1 {
-            margin: 0 0 20px;
-            font-size: clamp(2.8rem, 6vw, 5.5rem);
-            line-height: 0.95;
-            letter-spacing: -0.04em;
-        }
-
-        .catalog-hero h1 span {
-            color: #84cbc9;
-        }
-
-        .catalog-hero p {
-            max-width: 650px;
-            margin: 0;
-            font-size: 1.2rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.7);
-        }
+        .catalog-hero { width: min(1200px, 90%); margin: 60px auto 70px; }
+        .catalog-hero h1 { margin: 0 0 20px; font-size: clamp(2.8rem, 6vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; }
+        .catalog-hero h1 span { color: #84cbc9; }
+        .catalog-hero p { max-width: 650px; margin: 0; font-size: 1.2rem; line-height: 1.6; color: rgba(255, 255, 255, 0.7); }
 
         /* CATALOG */
-        .catalog {
-            width: min(1200px, 90%);
-            margin: 0 auto 80px;
-        }
-
-        .catalog-title {
-            margin-bottom: 28px;
-        }
-
-        .catalog-title h2 {
-            margin: 0;
-            font-size: 1.8rem;
-        }
-
-        /* 3 x 3 */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
+        .catalog { width: min(1200px, 90%); margin: 0 auto 80px; }
+        .catalog-title { margin-bottom: 28px; }
+        .catalog-title h2 { margin: 0; font-size: 1.8rem; }
+        .games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
         /* GAME CARD */
         .game-card {
@@ -85,355 +38,292 @@
             background: #101927;
             border: 1px solid rgba(132, 203, 201, 0.18);
             border-radius: 20px;
-            padding: 28px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             text-decoration: none;
             color: white;
-            transition:
-                transform 0.2s ease,
-                border-color 0.2s ease,
-                background 0.2s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .game-card:hover { transform: translateY(-6px); background: #132131; border-color: #84cbc9; }
+        .game-card:focus-visible { outline: 3px solid #84cbc9; outline-offset: 3px; }
+
+        /* THUMBNAIL */
+        .thumb { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+        .thumb svg { width: 100%; height: 100%; display: block; transition: transform 0.5s ease; }
+        .game-card:hover .thumb svg { transform: scale(1.06); }
+        .thumb svg text { font-family: inherit; }
+        .thumb .mono { font-family: "Courier New", monospace; font-weight: 700; }
+
+        .thumb.ph {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem;
+            background: radial-gradient(circle at 50% 40%, #1c2a3d, #0d1522);
         }
 
-        .game-card:hover {
-            transform: translateY(-6px);
-            background: #132131;
-            border-color: #84cbc9;
+        /* Animacions suaus en passar el ratolí */
+        @keyframes fall { to { transform: translateY(9px); } }
+        @keyframes hop  { to { transform: translateY(-7px); } }
+        @media (prefers-reduced-motion: no-preference) {
+            .game-card:hover .fall { animation: fall 0.8s ease-in-out infinite alternate; }
+            .game-card:hover .hop  { animation: hop 0.5s ease-out infinite alternate; }
+            .game-card:hover .d2   { animation-delay: -0.3s; }
+            .game-card:hover .d3   { animation-delay: -0.55s; }
         }
 
-        .game-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: #84cbc9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-        }
-
-        .game-info h3 {
-            margin: 0 0 10px;
-            font-size: 1.35rem;
-        }
-
-        .game-info p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.5;
-            font-size: 0.95rem;
-        }
-
-        .game-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 25px;
-        }
-
-        .game-status {
-            font-size: 0.8rem;
-            color: #84cbc9;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .game-arrow {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
+        /* TEXT */
+        .card-body { padding: 18px 24px 22px; }
+        .game-info h3 { margin: 0 0 8px; font-size: 1.35rem; }
+        .game-info p { margin: 0; color: rgba(255, 255, 255, 0.6); line-height: 1.45; font-size: 0.95rem; }
+        .game-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+        .game-status { font-size: 0.8rem; color: #84cbc9; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+        .game-arrow { width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .game-card:hover .game-arrow { background: #84cbc9; color: #09101d; border-color: #84cbc9; }
 
         /* PRÒXIMAMENT */
-        .game-card.disabled {
-            opacity: 0.5;
-            cursor: default;
-        }
+        .game-card.disabled { opacity: 0.5; cursor: default; }
+        .game-card.disabled:hover { transform: none; background: #101927; border-color: rgba(132, 203, 201, 0.18); }
+        .game-card.disabled .game-status { color: rgba(255, 255, 255, 0.45); }
 
-        .game-card.disabled:hover {
-            transform: none;
-            background: #101927;
-            border-color: rgba(132, 203, 201, 0.18);
-        }
-
-        .game-card.disabled .game-icon {
-            background: #202a38;
-        }
-
-        .game-card.disabled .game-status {
-            color: rgba(255, 255, 255, 0.45);
-        }
-
-        /* TABLET */
-        @media (max-width: 850px) {
-            .games-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* MÒBIL */
+        @media (max-width: 850px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) {
-            .catalog-header {
-                padding: 20px 0;
-            }
-
-            .catalog-header img {
-                width: 120px;
-            }
-
-            .catalog-hero {
-                margin: 40px auto 50px;
-            }
-
-            .catalog-hero h1 {
-                font-size: 3rem;
-            }
-
-            .catalog-hero p {
-                font-size: 1rem;
-            }
-
-            .games-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .game-card {
-                aspect-ratio: auto;
-                min-height: 300px;
-            }
+            .catalog-header { padding: 20px 0; }
+            .catalog-header img { width: 120px; }
+            .catalog-hero { margin: 40px auto 50px; }
+            .catalog-hero h1 { font-size: 3rem; }
+            .catalog-hero p { font-size: 1rem; }
+            .games-grid { grid-template-columns: 1fr; }
+            .game-card { aspect-ratio: auto; }
+            .thumb { flex: none; height: 190px; }
         }
     </style>
 </head>
 
 <body>
-
 <div class="catalog-page">
 
-    <!-- HEADER -->
     <header class="catalog-header">
-        <a href="index.html">
-            <img src="logo.png" alt="Logo">
-        </a>
+        <a href="index.html"><img src="logo.png" alt="Logo"></a>
     </header>
 
-
-    <!-- HERO -->
     <section class="catalog-hero">
-
-        <h1>
-            Jocs de<br>
-            <span>mecanografia.</span>
-        </h1>
-
-        <p>
-            Una col·lecció de jocs de mecanografia pels alumnes de l'Escola Carme Guasch.
-        </p>
-
+        <h1>Jocs de<br><span>mecanografia.</span></h1>
+        <p>Una col·lecció de jocs de mecanografia pels alumnes de l'Escola Carme Guasch.</p>
     </section>
 
-
-    <!-- CATÀLEG -->
     <main class="catalog">
-
-        <div class="catalog-title">
-            <h2>Tria el teu joc:</h2>
-        </div>
-
+        <div class="catalog-title"><h2>Tria el teu joc:</h2></div>
 
         <div class="games-grid">
 
-            <!-- 1 -->
+            <!-- 1 · PLUJA D'ANIMALS -->
             <a class="game-card" href="games/pluja-animals/">
-
-                <div class="game-icon">🐾</div>
-
-                <div class="game-info">
-                    <h3>Pluja d'animals</h3>
-                    <p>
-                        Escriu els noms dels animals
-                        abans que arribin a terra.
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17305c"/><stop offset="1" stop-color="#5a9bd0"/></linearGradient></defs>
+                        <rect width="300" height="170" fill="url(#gA)"/>
+                        <path d="M25 8v14M95 34v14M155 4v14M205 30v14M270 10v14M120 70v12M285 80v12M12 85v12" stroke="#cfeaff" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+                        <g class="fall"><text x="58" y="62" font-size="38" text-anchor="middle">🐶</text><rect x="38" y="68" width="40" height="20" rx="6" fill="#fff"/><text class="mono" x="58" y="82" font-size="13" text-anchor="middle" fill="#17305c">gos</text></g>
+                        <g class="fall d2"><text x="150" y="98" font-size="38" text-anchor="middle">🐸</text><rect x="118" y="104" width="64" height="20" rx="6" fill="#fff"/><text class="mono" x="150" y="118" font-size="13" text-anchor="middle" fill="#17305c">granota</text></g>
+                        <g class="fall d3"><text x="242" y="52" font-size="38" text-anchor="middle">🐱</text><rect x="222" y="58" width="40" height="20" rx="6" fill="#fff"/><text class="mono" x="242" y="72" font-size="13" text-anchor="middle" fill="#17305c">gat</text></g>
+                        <rect y="150" width="300" height="20" fill="#3c9a5f"/>
+                        <path d="M0 150q15-10 30 0t30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0 30 0" fill="#4fb774"/>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Jugar</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Pluja d'animals</h3>
+                        <p>Escriu els noms dels animals abans que arribin a terra.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Jugar</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
 
-
-            <!-- 2 -->
+            <!-- 2 · MECAZOMBIS -->
             <a class="game-card" href="games/mecazombis/">
-                
-                <div class="game-icon">🧟</div>
-
-                <div class="game-info">
-                    <h3>Mecazombis</h3>
-                    <p>
-                        Defensa't dels zombis amb les lletres de la filera central.
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="gZ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#150d2e"/><stop offset="1" stop-color="#3a2263"/></linearGradient>
+                            <radialGradient id="gM"><stop offset="0" stop-color="#f6f2c9" stop-opacity=".5"/><stop offset="1" stop-color="#f6f2c9" stop-opacity="0"/></radialGradient>
+                        </defs>
+                        <rect width="300" height="170" fill="url(#gZ)"/>
+                        <circle cx="235" cy="42" r="55" fill="url(#gM)"/>
+                        <circle cx="235" cy="42" r="22" fill="#f6f2c9"/>
+                        <circle cx="228" cy="36" r="4" fill="#e0dba8"/><circle cx="242" cy="50" r="3" fill="#e0dba8"/>
+                        <path d="M14 145v-34a15 15 0 0 1 30 0v34zM258 145v-28a13 13 0 0 1 26 0v28z" fill="#3b3356"/>
+                        <rect y="142" width="300" height="28" fill="#10231a"/>
+                        <g class="hop"><text x="100" y="140" font-size="58" text-anchor="middle">🧟</text></g>
+                        <g class="hop d2"><text x="190" y="144" font-size="46" text-anchor="middle">🧟</text></g>
+                        <g class="mono" font-size="16" text-anchor="middle">
+                            <rect x="82" y="42" width="36" height="36" rx="8" fill="#0d1b12" stroke="#7cf08a" stroke-width="2.5"/><text x="100" y="66" fill="#7cf08a">A</text>
+                            <rect x="172" y="62" width="36" height="36" rx="8" fill="#0d1b12" stroke="#7cf08a" stroke-width="2.5"/><text x="190" y="86" fill="#7cf08a">L</text>
+                        </g>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Jugar</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Mecazombis</h3>
+                        <p>Defensa't dels zombis amb les lletres de la filera central.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Jugar</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
 
-
-            <!-- 3 -->
+            <!-- 3 · INVASORS DE TECLES -->
             <a class="game-card" href="games/invasors/">
-
-                <div class="game-icon">👾</div>
-
-                <div class="game-info">
-                    <h3>Invasors de tecles</h3>
-                    <p>
-                        Les tecles avancen per destruir la terra. Salva el món!
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <rect width="300" height="170" fill="#05060f"/>
+                        <g fill="#fff" opacity=".7"><circle cx="20" cy="30" r="1"/><circle cx="280" cy="20" r="1.2"/><circle cx="12" cy="120" r="1"/><circle cx="290" cy="110" r="1"/><circle cx="70" cy="8" r="1"/><circle cx="250" cy="150" r="1"/></g>
+                        <g class="fall mono" font-size="16" text-anchor="middle" stroke-width="2">
+                            <rect x="41" y="14" width="34" height="34" rx="7" fill="#1a2440" stroke="#84cbc9"/><text x="58" y="37" fill="#84cbc9" stroke="none">a</text>
+                            <rect x="87" y="14" width="34" height="34" rx="7" fill="#1a2440" stroke="#ffd93d"/><text x="104" y="37" fill="#ffd93d" stroke="none">Ç</text>
+                            <rect x="133" y="14" width="34" height="34" rx="7" fill="#1a2440" stroke="#84cbc9"/><text x="150" y="37" fill="#84cbc9" stroke="none">s</text>
+                            <rect x="179" y="14" width="34" height="34" rx="7" fill="#1a2440" stroke="#c39bff"/><text x="196" y="37" fill="#c39bff" stroke="none">?</text>
+                            <rect x="225" y="14" width="34" height="34" rx="7" fill="#1a2440" stroke="#84cbc9"/><text x="242" y="37" fill="#84cbc9" stroke="none">d</text>
+                        </g>
+                        <g class="fall d2 mono" font-size="16" text-anchor="middle" stroke-width="2">
+                            <rect x="87" y="62" width="34" height="34" rx="7" fill="#1a2440" stroke="#84cbc9"/><text x="104" y="85" fill="#84cbc9" stroke="none">j</text>
+                            <rect x="133" y="62" width="34" height="34" rx="7" fill="#2a1830" stroke="#ff4d6d"/><text x="150" y="85" fill="#ff4d6d" stroke="none">k</text>
+                            <rect x="179" y="62" width="34" height="34" rx="7" fill="#1a2440" stroke="#84cbc9"/><text x="196" y="85" fill="#84cbc9" stroke="none">l</text>
+                        </g>
+                        <path d="M150 140V100" stroke="#ff4d6d" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="150" cy="98" r="10" fill="#ff4d6d" opacity=".35"/>
+                        <text x="150" y="166" font-size="30" text-anchor="middle">🦀</text>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Jugar</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Invasors de tecles</h3>
+                        <p>Les tecles avancen per destruir la terra. Salva el món!</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Jugar</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
 
-            
-            <!-- 4 -->
+            <!-- 4 · MECAGAT -->
             <a class="game-card" href="games/mecagat/">
-
-                <div class="game-icon">🐱</div>
-
-                <div class="game-info">
-                    <h3>Mecagat</h3>
-                    <p>
-                        Ajuda el gatet a tornar a casa!
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs><linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2a6e"/><stop offset=".6" stop-color="#d9647a"/><stop offset="1" stop-color="#ffb46b"/></linearGradient></defs>
+                        <rect width="300" height="170" fill="url(#gG)"/>
+                        <circle cx="205" cy="105" r="34" fill="#ffd27d"/>
+                        <g fill="#fff" opacity=".8"><circle cx="30" cy="22" r="1.2"/><circle cx="90" cy="40" r="1"/><circle cx="140" cy="14" r="1.2"/><circle cx="270" cy="30" r="1"/></g>
+                        <path d="M0 128q80-24 150-6t150-8V170H0z" fill="#2a6b55"/>
+                        <g class="mono" font-size="15" text-anchor="middle" fill="#3a2a1e">
+                            <rect x="62" y="140" width="30" height="22" rx="8" fill="#f3e3c3"/><text x="77" y="156">a</text>
+                            <rect x="112" y="144" width="30" height="22" rx="8" fill="#f3e3c3"/><text x="127" y="160">s</text>
+                            <rect x="162" y="140" width="30" height="22" rx="8" fill="#f3e3c3"/><text x="177" y="156">d</text>
+                            <rect x="212" y="144" width="30" height="22" rx="8" fill="#f3e3c3"/><text x="227" y="160">f</text>
+                        </g>
+                        <g class="hop"><text x="30" y="136" font-size="38" text-anchor="middle">🐱</text></g>
+                        <text x="268" y="138" font-size="42" text-anchor="middle">🏠</text>
+                        <text x="268" y="84" font-size="16" text-anchor="middle" opacity=".9">♥</text>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Jugar</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Mecagat</h3>
+                        <p>Ajuda el gatet a tornar a casa!</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Jugar</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
 
-            <!-- 5 -->
+            <!-- 5 · MECASAURUS -->
             <a class="game-card" href="games/mecasaurus/">
-
-                <div class="game-icon">🦕</div>
-
-                <div class="game-info">
-                    <h3>Mecasaurus</h3>
-                    <p>
-                        Els dinosaures han oblidat el seu nom. Ajuda'ls abans que caigui el meteorit!
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs><linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e1550"/><stop offset=".55" stop-color="#d4503a"/><stop offset="1" stop-color="#ffa24a"/></linearGradient></defs>
+                        <rect width="300" height="170" fill="url(#gD)"/>
+                        <path d="M0 140l70-34 30 22 55-46 40 40 40-24 65 42v30H0z" fill="#3a1d2e" opacity=".8"/>
+                        <g class="fall"><path d="M228 34L310-6 262 66z" fill="#ff7a2e" opacity=".7"/><path d="M236 40L296 6 258 62z" fill="#ffd36b" opacity=".8"/><circle cx="244" cy="50" r="17" fill="#ff9a3c"/><circle cx="238" cy="45" r="5" fill="#c2511d"/><circle cx="250" cy="56" r="3" fill="#c2511d"/></g>
+                        <rect y="140" width="300" height="30" fill="#2c1a14"/>
+                        <rect x="14" y="48" width="86" height="28" rx="10" fill="#fff"/><path d="M52 76l8 12 6-12z" fill="#fff"/>
+                        <text class="mono" x="57" y="68" font-size="15" text-anchor="middle" fill="#2e1550" letter-spacing="2">_ _ _ _ _</text>
+                        <rect x="112" y="76" width="86" height="28" rx="10" fill="#fff"/><path d="M146 104l8 12 6-12z" fill="#fff"/>
+                        <text class="mono" x="155" y="96" font-size="15" text-anchor="middle" fill="#2e1550" letter-spacing="2">T _ R E X</text>
+                        <g class="hop"><text x="56" y="148" font-size="58" text-anchor="middle">🦕</text></g>
+                        <g class="hop d2"><text x="156" y="148" font-size="52" text-anchor="middle">🦖</text></g>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Jugar</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Mecasaurus</h3>
+                        <p>Els dinosaures han oblidat el seu nom. Ajuda'ls abans que caigui el meteorit!</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Jugar</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
 
-
-            <!-- 6 -->
+            <!-- 6 · PROVA DE NIVELL -->
             <a class="game-card" href="games/test/">
-
-                <div class="game-icon">⌨️</div>
-
-                <div class="game-info">
-                    <h3>Prova de nivell</h3>
-                    <p>
-                        Prova el teu nivell o comprova si has millorat.
-                    </p>
+                <div class="thumb">
+                    <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="gT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2233"/><stop offset="1" stop-color="#14465a"/></linearGradient>
+                            <pattern id="pK" width="26" height="26" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="21" height="21" rx="5" fill="#16384d" stroke="#2c6482"/></pattern>
+                        </defs>
+                        <rect width="300" height="170" fill="url(#gT)"/>
+                        <text x="26" y="58" font-size="36" font-weight="800" fill="#84cbc9">62</text>
+                        <text x="78" y="58" font-size="13" fill="#9fc9d6">ppm</text>
+                        <text x="188" y="58" font-size="36" font-weight="800" fill="#ffd93d">98%</text>
+                        <rect x="26" y="78" width="260" height="78" fill="url(#pK)"/>
+                        <rect x="55" y="107" width="21" height="21" rx="5" fill="#84cbc9"/>
+                        <rect x="107" y="107" width="21" height="21" rx="5" fill="#84cbc9"/>
+                        <rect x="159" y="81" width="21" height="21" rx="5" fill="#84cbc9"/>
+                        <rect x="211" y="107" width="21" height="21" rx="5" fill="#ff6b81"/>
+                        <rect x="81" y="133" width="130" height="21" rx="5" fill="#84cbc9" opacity=".85"/>
+                    </svg>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Prova</span>
-                    <span class="game-arrow">→</span>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Prova de nivell</h3>
+                        <p>Prova el teu nivell o comprova si has millorat.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Prova</span><span class="game-arrow">→</span></div>
                 </div>
-
             </a>
-
 
             <!-- 7 -->
             <div class="game-card disabled">
-
-                <div class="game-icon">⚡</div>
-
-                <div class="game-info">
-                    <h3>Mode velocitat</h3>
-                    <p>
-                        Posa a prova la teva
-                        velocitat d'escriptura.
-                    </p>
+                <div class="thumb ph">⚡</div>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Mode velocitat</h3>
+                        <p>Posa a prova la teva velocitat d'escriptura.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Pròximament</span></div>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Pròximament</span>
-                </div>
-
             </div>
-
 
             <!-- 8 -->
             <div class="game-card disabled">
-
-                <div class="game-icon">🧠</div>
-
-                <div class="game-info">
-                    <h3>Repte mental</h3>
-                    <p>
-                        Concentra't i escriu
-                        sense cometre errors.
-                    </p>
+                <div class="thumb ph">🧠</div>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Repte mental</h3>
+                        <p>Concentra't i escriu sense cometre errors.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Pròximament</span></div>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Pròximament</span>
-                </div>
-
             </div>
-
 
             <!-- 9 -->
             <div class="game-card disabled">
-
-                <div class="game-icon">🏆</div>
-
-                <div class="game-info">
-                    <h3>Gran repte</h3>
-                    <p>
-                        El repte definitiu de
-                        mecanografia.
-                    </p>
+                <div class="thumb ph">🏆</div>
+                <div class="card-body">
+                    <div class="game-info">
+                        <h3>Gran repte</h3>
+                        <p>El repte definitiu de mecanografia.</p>
+                    </div>
+                    <div class="game-bottom"><span class="game-status">Pròximament</span></div>
                 </div>
-
-                <div class="game-bottom">
-                    <span class="game-status">Pròximament</span>
-                </div>
-
             </div>
 
         </div>
-
     </main>
-
 </div>
-
 </body>
 </html>
