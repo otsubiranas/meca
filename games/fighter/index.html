@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meca Fighter</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--u:min(1vw,1.7778vh);}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#07070d;overflow:hidden;color:#fff;
+  font-family:'Press Start 2P',ui-monospace,Menlo,Consolas,monospace}
+#game{position:absolute;left:50%;top:50%;width:calc(var(--u)*100);height:calc(var(--u)*56.25);
+  transform:translate(-50%,-50%);overflow:hidden;background:#1a1030;user-select:none}
+
+/* ---------- escenari ---------- */
+.sky{position:absolute;inset:0 0 38% 0;background:linear-gradient(#2b1055 0%,#7a2f7a 45%,#ff7a59 85%,#ffc36b 100%)}
+.sun{position:absolute;left:calc(var(--u)*44);top:calc(var(--u)*10);width:calc(var(--u)*12);height:calc(var(--u)*12);
+  border-radius:50%;background:#ffe9a8;box-shadow:0 0 calc(var(--u)*6) #ffd36b}
+.city{position:absolute;left:0;right:0;bottom:38%;height:calc(var(--u)*14);
+  background:
+   linear-gradient(#150a28,#150a28) 2% 100%/6% 60% no-repeat,
+   linear-gradient(#150a28,#150a28) 10% 100%/5% 90% no-repeat,
+   linear-gradient(#150a28,#150a28) 17% 100%/7% 50% no-repeat,
+   linear-gradient(#150a28,#150a28) 27% 100%/5% 75% no-repeat,
+   linear-gradient(#150a28,#150a28) 36% 100%/8% 55% no-repeat,
+   linear-gradient(#150a28,#150a28) 49% 100%/6% 95% no-repeat,
+   linear-gradient(#150a28,#150a28) 58% 100%/7% 65% no-repeat,
+   linear-gradient(#150a28,#150a28) 68% 100%/5% 85% no-repeat,
+   linear-gradient(#150a28,#150a28) 76% 100%/8% 55% no-repeat,
+   linear-gradient(#150a28,#150a28) 87% 100%/6% 80% no-repeat,
+   linear-gradient(#150a28,#150a28) 95% 100%/5% 60% no-repeat}
+.ground{position:absolute;left:0;right:0;bottom:0;height:38%;
+  background:repeating-linear-gradient(90deg,#3a2a4d 0 calc(var(--u)*6),#33243f calc(var(--u)*6) calc(var(--u)*12)),#33243f;
+  border-top:calc(var(--u)*.5) solid #5b4570}
+.ground::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.55))}
+
+/* ---------- HUD ---------- */
+#hud{position:absolute;left:calc(var(--u)*3);right:calc(var(--u)*3);top:calc(var(--u)*2);height:calc(var(--u)*10);display:flex;justify-content:space-between;align-items:flex-start}
+.hside{width:calc(var(--u)*39)}
+.hname{font-size:calc(var(--u)*1.5);margin-bottom:calc(var(--u)*.8);display:flex;justify-content:space-between;text-shadow:calc(var(--u)*.2) calc(var(--u)*.2) 0 #000}
+.hside.right .hname{flex-direction:row-reverse}
+.bar{position:relative;height:calc(var(--u)*3.2);background:#220;border:calc(var(--u)*.4) solid #fff;box-shadow:0 0 0 calc(var(--u)*.3) #000;overflow:hidden}
+.bar .lag,.bar .fill{position:absolute;top:0;bottom:0}
+.hside.left .bar div{left:0}
+.hside.right .bar div{right:0}
+.bar .lag{background:#e33;transition:width .8s ease .35s;width:100%}
+.bar .fill{transition:width .15s linear,background .2s;width:100%;background:hsl(120,80%,48%)}
+.pips{margin-top:calc(var(--u)*.9);font-size:calc(var(--u)*1.6);color:#ffd23f;letter-spacing:calc(var(--u)*.4)}
+.hside.right .pips{text-align:right}
+#center{width:calc(var(--u)*14);text-align:center;font-size:calc(var(--u)*1.4);padding-top:calc(var(--u)*.4);line-height:1.6;color:#ffd23f;text-shadow:calc(var(--u)*.2) calc(var(--u)*.2) 0 #000}
+
+/* ---------- lluitadors ---------- */
+.fighter{position:absolute;top:calc(var(--u)*13.5);width:calc(var(--u)*18);height:calc(var(--u)*28.8);
+  transition:left 1.2s cubic-bezier(.5,0,.3,1);--dir:1}
+.fighter .flip{width:100%;height:100%;transform-origin:50% 100%}
+.fighter.right .flip{transform:scaleX(-1)}
+.fighter svg{width:100%;height:100%;overflow:visible;animation:bob 1s ease-in-out infinite}
+.fighter.p1{--gi:#d93a2b;--pants:#b32a1e;--band:#ffd23f;--belt:#222}
+.fighter.p2{--gi:#2b6fd9;--pants:#1f55a8;--band:#fff;--belt:#111}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(var(--u)*-.7))}}
+.fighter.lunge{animation:lunge .32s ease-out}
+@keyframes lunge{0%{transform:translateX(0)}40%{transform:translateX(calc(var(--u)*7*var(--dir)))}100%{transform:translateX(0)}}
+.fighter.hurt .flip{animation:hurt .38s linear}
+@keyframes hurt{0%,100%{filter:none;translate:0}20%{filter:brightness(2.6) saturate(.2);translate:calc(var(--u)*-1.5)}
+  40%{translate:calc(var(--u)*1.2)}60%{filter:brightness(1.8);translate:calc(var(--u)*-.8)}80%{translate:calc(var(--u)*.5)}}
+.fighter.ko .flip{transition:transform 1s ease-in;transform:rotate(-88deg) translateX(calc(var(--u)*-3));}
+.fighter.right.ko .flip{transform:scaleX(-1) rotate(-88deg) translateX(calc(var(--u)*-3));}
+.fighter.win svg{animation:win .5s ease-in-out infinite}
+@keyframes win{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(var(--u)*-2.4))}}
+.pop{position:absolute;font-size:calc(var(--u)*2.6);color:#fff;text-shadow:calc(var(--u)*.25) calc(var(--u)*.25) 0 #c00,0 0 calc(var(--u)*1) #ff0;
+  animation:pop .9s ease-out forwards;pointer-events:none;z-index:6}
+@keyframes pop{0%{transform:translateY(0) scale(.6);opacity:1}30%{transform:translateY(calc(var(--u)*-2)) scale(1.3)}100%{transform:translateY(calc(var(--u)*-6)) scale(1);opacity:0}}
+
+/* ---------- panells de combinacions ---------- */
+.panel{position:absolute;top:calc(var(--u)*43.5);width:calc(var(--u)*46);height:calc(var(--u)*11.5);
+  background:rgba(8,6,20,.82);border:calc(var(--u)*.4) solid #fff;padding:calc(var(--u)*1) calc(var(--u)*1.4);
+  display:flex;flex-direction:column;justify-content:space-between}
+.panel.left{left:calc(var(--u)*2)}
+.panel.right{right:calc(var(--u)*2)}
+.panel.wrong{animation:wrong .4s}
+@keyframes wrong{0%,100%{translate:0;border-color:#fff}15%,55%{translate:calc(var(--u)*-1);border-color:#f33;background:rgba(90,0,0,.85)}35%,75%{translate:calc(var(--u)*1);border-color:#f33}}
+.ptitle{font-size:calc(var(--u)*1);display:flex;justify-content:space-between;color:#bbb}
+.combo{display:flex;gap:calc(var(--u)*.5);justify-content:center}
+.key{width:calc(var(--u)*4.8);height:calc(var(--u)*4.8);line-height:calc(var(--u)*4.8);text-align:center;
+  font-size:calc(var(--u)*2.2);background:#eee;color:#111;border-radius:calc(var(--u)*.7);
+  border-bottom:calc(var(--u)*.6) solid #888;text-transform:uppercase}
+.key.done{background:#3ddc6b;border-bottom-color:#1c8a3d;color:#032;transform:translateY(calc(var(--u)*.4))}
+.key.cur{background:#ffd23f;border-bottom-color:#b08a00;animation:cur .5s ease-in-out infinite alternate}
+@keyframes cur{to{transform:translateY(calc(var(--u)*-.4))}}
+.pkeys{font-size:calc(var(--u)*.85);color:#888;text-align:center;letter-spacing:calc(var(--u)*.1)}
+
+/* ---------- banner i pantalles ---------- */
+#banner{position:absolute;left:0;right:0;top:calc(var(--u)*17);text-align:center;font-size:calc(var(--u)*7);color:#ffd23f;
+  text-shadow:calc(var(--u)*.6) calc(var(--u)*.6) 0 #c0392b,calc(var(--u)*-.2) calc(var(--u)*-.2) 0 #fff;opacity:0;pointer-events:none;z-index:5}
+#banner.show{animation:banner .55s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes banner{0%{transform:scale(3);opacity:0}100%{transform:scale(1);opacity:1}}
+#overlay{position:absolute;inset:0;background:rgba(5,3,15,.88);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;z-index:10;padding:calc(var(--u)*4)}
+#overlay.hidden{display:none}
+#overlay h1{font-size:calc(var(--u)*6.2);color:#ffd23f;text-shadow:calc(var(--u)*.6) calc(var(--u)*.6) 0 #c0392b;margin-bottom:calc(var(--u)*3)}
+#overlay h2{font-size:calc(var(--u)*3.4);margin-bottom:calc(var(--u)*2.5);color:#ffd23f;line-height:1.4}
+#overlay p{font-size:calc(var(--u)*1.35);line-height:2.1;max-width:calc(var(--u)*80);color:#ddd}
+#overlay .kb{display:flex;gap:calc(var(--u)*6);margin:calc(var(--u)*2.5) 0}
+#overlay .kb div{border:calc(var(--u)*.3) solid #fff;padding:calc(var(--u)*1.5) calc(var(--u)*2);font-size:calc(var(--u)*1.2);line-height:2.2}
+#overlay .kb b{display:block;font-size:calc(var(--u)*1.5)}
+.red{color:#ff5a47}.blue{color:#5aa2ff}
+.blink{animation:blink 1s steps(2) infinite;color:#ffd23f;margin-top:calc(var(--u)*3);font-size:calc(var(--u)*1.8)}
+@keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="game">
+  <div class="sky"><div class="sun"></div></div>
+  <div class="city"></div>
+  <div class="ground"></div>
+
+  <div id="hud">
+    <div class="hside left"><div class="hname"><span id="nameL"></span></div>
+      <div class="bar"><div class="lag" id="lagL"></div><div class="fill" id="fillL"></div></div>
+      <div class="pips" id="pipsL"></div></div>
+    <div id="center"><div id="roundLabel">RONDA 1</div></div>
+    <div class="hside right"><div class="hname"><span id="nameR"></span></div>
+      <div class="bar"><div class="lag" id="lagR"></div><div class="fill" id="fillR"></div></div>
+      <div class="pips" id="pipsR"></div></div>
+  </div>
+
+  <div class="fighter p1" id="f1"><div class="flip"><!--SVG1--></div></div>
+  <div class="fighter p2" id="f2"><div class="flip"><!--SVG2--></div></div>
+
+  <div class="panel left" id="panelL"></div>
+  <div class="panel right" id="panelR"></div>
+
+  <div id="banner"></div>
+
+  <div id="overlay"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================== CONFIGURACIÓ ================== */
+var LEFT  = 'qwertasdfgzxcvb';   // mà esquerra
+var RIGHT = 'yuiophjklnm';       // mà dreta
+var MAXHP = 100, START_LEN = 2, MAXLEN = 8, STUN_MS = 400;
+var NAMES = { p1:'JUGADOR 1', p2:'JUGADOR 2' };
+
+/* ================== UTILITATS ================== */
+function $(s){ return document.querySelector(s); }
+var game = $('#game');
+var banner = $('#banner'), overlay = $('#overlay');
+var els = { p1:$('#f1'), p2:$('#f2') };
+var panels = { left:$('#panelL'), right:$('#panelR') };
+var hud = {
+  left :{ name:$('#nameL'), fill:$('#fillL'), lag:$('#lagL'), pips:$('#pipsL') },
+  right:{ name:$('#nameR'), fill:$('#fillR'), lag:$('#lagR'), pips:$('#pipsR') }
+};
+function other(side){ return side==='left' ? 'right' : 'left'; }
+function anim(elm, cls, ms){
+  elm.classList.remove(cls); void elm.offsetWidth; elm.classList.add(cls);
+  setTimeout(function(){ elm.classList.remove(cls); }, ms);
+}
+
+/* ================== PERSONATGES (SVG original) ================== */
+function fighterSVG(){
+  return '<svg viewBox="0 0 110 160" xmlns="http://www.w3.org/2000/svg">'+
+  '<ellipse cx="52" cy="155" rx="34" ry="5" fill="rgba(0,0,0,.4)"/>'+
+  '<path d="M38 88 L24 148 L44 148 L56 94Z" style="fill:var(--pants)"/>'+
+  '<rect x="18" y="146" width="30" height="9" rx="3" fill="#1c1c1c"/>'+
+  '<path d="M52 88 L68 148 L88 148 L70 86Z" style="fill:var(--pants)"/>'+
+  '<rect x="62" y="146" width="30" height="9" rx="3" fill="#1c1c1c"/>'+
+  '<path d="M30 54 Q50 44 72 54 L70 98 L34 98Z" style="fill:var(--gi)"/>'+
+  '<path d="M44 48 L52 72 L62 48Z" fill="#f1c27d"/>'+
+  '<rect x="33" y="88" width="38" height="9" style="fill:var(--belt)"/>'+
+  '<path d="M34 58 L16 80 L24 92 L44 72Z" style="fill:var(--gi)"/>'+
+  '<circle cx="20" cy="90" r="8" fill="#f1c27d"/>'+
+  '<circle cx="52" cy="32" r="15" fill="#f1c27d"/>'+
+  '<path d="M37 30 Q40 14 54 15 Q68 15 67 30 L60 24 Q50 20 42 26Z" fill="#2b1b12"/>'+
+  '<rect x="37" y="26" width="30" height="6" style="fill:var(--band)"/>'+
+  '<path d="M38 28 L20 22 L24 31 L16 36 L38 32Z" style="fill:var(--band)"/>'+
+  '<rect x="58" y="35" width="5" height="3" fill="#111"/>'+
+  '<rect x="56" y="31" width="9" height="2" fill="#111"/>'+
+  '<path d="M62 58 L92 64 L90 76 L60 72Z" style="fill:var(--gi)"/>'+
+  '<circle cx="96" cy="70" r="9" fill="#f1c27d"/>'+
+  '</svg>';
+}
+els.p1.querySelector('.flip').innerHTML = fighterSVG();
+els.p2.querySelector('.flip').innerHTML = fighterSVG();
+
+/* ================== SO ================== */
+var actx = null;
+function initAudio(){
+  if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(actx && actx.state==='suspended') actx.resume();
+}
+function beep(f, dur, type, vol, slideTo){
+  if(!actx) return;
+  var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = type||'square'; o.frequency.setValueAtTime(f, t);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t+dur);
+  g.gain.setValueAtTime(vol||.08, t); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur);
+}
+var sfx = {
+  tick:function(){ beep(660,.05,'square',.05); },
+  bad :function(){ beep(140,.25,'sawtooth',.09,70); },
+  hit :function(len){ beep(220+len*30,.22,'square',.12,60); beep(90,.3,'sawtooth',.1,40); },
+  ko  :function(){ beep(300,.9,'sawtooth',.14,40); },
+  go  :function(){ beep(520,.25,'square',.1,880); },
+  win :function(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ beep(f,.2,'square',.09); }, i*140); }); }
+};
+
+/* ================== ESTAT ================== */
+var state = 'menu';       // menu | intro | fight | ko | swap | end
+var round = 0, nextRound = 1, runId = 0;
+var wins = { p1:0, p2:0 };
+var sideOf = { p1:'left', p2:'right' };
+var F = { left:null, right:null };   // lluitador per costat
+
+function sideKeys(side){ return side==='left' ? LEFT : RIGHT; }
+function rndCombo(side, len){
+  var k = sideKeys(side), out = [], last = '';
+  for(var i=0;i<len;i++){
+    var c; do { c = k.charAt(Math.floor(Math.random()*k.length)); } while(c===last);
+    out.push(c); last = c;
+  }
+  return out;
+}
+function groupKeys(side){
+  var s = sideKeys(side).toUpperCase();
+  return side==='left' ? 'Q W E R T · A S D F G · Z X C V B' : 'Y U I O P · H J K L · N M';
+}
+function newFighter(owner, side){
+  return { owner:owner, side:side, hp:MAXHP, len:START_LEN, pos:0,
+           combo:rndCombo(side, START_LEN), stun:0 };
+}
+
+/* ================== RENDER ================== */
+function renderPanel(side){
+  var f = F[side], p = panels[side];
+  if(!f){ p.innerHTML = ''; return; }
+  var keys = '';
+  for(var i=0;i<f.combo.length;i++){
+    keys += '<span class="key'+(i<f.pos?' done':(i===f.pos?' cur':''))+'">'+f.combo[i]+'</span>';
+  }
+  p.innerHTML =
+    '<div class="ptitle"><span class="'+(f.owner==='p1'?'red':'blue')+'">'+NAMES[f.owner]+'</span><span>COMBO x'+f.len+'</span></div>'+
+    '<div class="combo">'+keys+'</div>'+
+    '<div class="pkeys">'+groupKeys(side)+'</div>';
+}
+function renderHud(){
+  ['left','right'].forEach(function(side){
+    var f = F[side], h = hud[side];
+    if(!f) return;
+    h.name.textContent = NAMES[f.owner];
+    h.name.className = f.owner==='p1' ? 'red' : 'blue';
+    var pct = Math.max(0, f.hp)/MAXHP*100;
+    h.fill.style.width = pct+'%';
+    h.lag.style.width = pct+'%';
+    h.fill.style.background = 'hsl('+(pct*1.2)+',80%,48%)';
+    var w = wins[f.owner], s = '';
+    for(var i=0;i<2;i++) s += (i<w ? '●' : '○');
+    h.pips.textContent = s;
+  });
+}
+function placeFighters(){
+  ['p1','p2'].forEach(function(o){
+    var side = sideOf[o], e = els[o];
+    e.style.left = 'calc(var(--u)*' + (side==='left' ? 15 : 67) + ')';
+    e.style.setProperty('--dir', side==='left' ? 1 : -1);
+    e.classList.toggle('right', side==='right');
+    e.classList.remove('ko','win','hurt','lunge');
+  });
+}
+function showBanner(text, ms){
+  banner.textContent = text;
+  banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show');
+  if(ms) setTimeout(function(){ banner.style.opacity = 0; banner.classList.remove('show'); }, ms);
+  banner.style.opacity = '';
+}
+function hideBanner(){ banner.classList.remove('show'); banner.style.opacity = 0; }
+function setOverlay(html){ overlay.innerHTML = html; overlay.classList.remove('hidden'); }
+function hideOverlay(){ overlay.classList.add('hidden'); }
+
+/* ================== FLUX DE LA PARTIDA ================== */
+function menuScreen(){
+  state = 'menu';
+  F.left = F.right = null; renderPanel('left'); renderPanel('right');
+  setOverlay(
+    '<h1>MECA<br>FIGHTER</h1>'+
+    '<p>Duel de mecanografia per a <b>dos jugadors</b> en un mateix teclat.<br>'+
+    'Escriu bé la combinació per colpejar el rival. Cada cop és més llarga!</p>'+
+    '<div class="kb"><div><b class="red">MÀ ESQUERRA</b>Q W E R T<br>A S D F G<br>Z X C V B</div>'+
+    '<div><b class="blue">MÀ DRETA</b>Y U I O P<br>H J K L<br>N M</div></div>'+
+    '<p>2 rondes · entre rondes els jugadors canvien de lloc<br>Si hi ha empat, ronda de desempat</p>'+
+    '<div class="blink">PREM ESPAI PER COMENÇAR</div>');
+}
+function startMatch(){
+  initAudio();
+  wins = { p1:0, p2:0 };
+  startRound(1);
+}
+function startRound(n){
+  runId++; var id = runId;
+  round = n;
+  if(n===1) sideOf = { p1:'left', p2:'right' };
+  else      sideOf = { p1:'right', p2:'left' };   // ronda 2 i desempat: costats canviats
+  F.left  = newFighter(sideOf.p1==='left' ? 'p1' : 'p2', 'left');
+  F.right = newFighter(sideOf.p1==='right' ? 'p1' : 'p2', 'right');
+  placeFighters(); renderHud(); renderPanel('left'); renderPanel('right');
+  $('#roundLabel').innerHTML = n===3 ? 'DESEMPAT' : 'RONDA<br>'+n;
+  hideOverlay();
+  state = 'intro';
+  showBanner(n===3 ? 'DESEMPAT' : 'RONDA '+n);
+  setTimeout(function(){
+    if(id!==runId) return;
+    showBanner('FIGHT!'); sfx.go(); state = 'fight';
+    setTimeout(function(){ if(id===runId) hideBanner(); }, 800);
+  }, 1700);
+}
+
+function press(side, k){
+  var f = F[side], now = performance.now();
+  if(!f || now < f.stun) return;
+  if(k === f.combo[f.pos]){
+    f.pos++; sfx.tick();
+    if(f.pos >= f.len) hit(side); else renderPanel(side);
+  } else {
+    f.pos = 0; f.combo = rndCombo(side, f.len); f.stun = now + STUN_MS;
+    renderPanel(side); anim(panels[side], 'wrong', 400); sfx.bad();
+  }
+}
+
+function hit(side){
+  var a = F[side], d = F[other(side)];
+  var dmg = 5 + a.len*2;
+  d.hp = Math.max(0, d.hp - dmg);
+  sfx.hit(a.len);
+  anim(els[a.owner], 'lunge', 320);
+  anim(els[d.owner], 'hurt', 380);
+  var pop = document.createElement('div');
+  pop.className = 'pop'; pop.textContent = '-'+dmg;
+  pop.style.left = 'calc(var(--u)*' + (d.side==='left' ? 20 : 72) + ')';
+  pop.style.top = 'calc(var(--u)*14)';
+  game.appendChild(pop); setTimeout(function(){ pop.remove(); }, 900);
+  renderHud();
+  if(d.hp <= 0){ ko(a, d); return; }
+  a.len = Math.min(MAXLEN, a.len + 1);
+  a.pos = 0; a.combo = rndCombo(side, a.len);
+  renderPanel(side);
+}
+
+function ko(winner, loser){
+  state = 'ko'; var id = runId;
+  wins[winner.owner]++;
+  renderHud(); sfx.ko();
+  showBanner('K.O.');
+  setTimeout(function(){ els[loser.owner].classList.add('ko'); els[winner.owner].classList.add('win'); }, 350);
+  setTimeout(function(){
+    if(id!==runId) return;
+    hideBanner();
+    afterRound();
+  }, 2800);
+}
+
+function afterRound(){
+  if(round === 1){
+    nextRound = 2; state = 'swap';
+    setOverlay(
+      '<h2>CANVI DE POSICIONS!</h2>'+
+      '<p><b class="red">JUGADOR 1</b> passa a la <b>DRETA</b> (tecles Y U I O P H J K L N M)<br>'+
+      '<b class="blue">JUGADOR 2</b> passa a l\'<b>ESQUERRA</b> (tecles Q W E R T A S D F G Z X C V B)</p>'+
+      '<div class="blink">PREM ESPAI PER A LA RONDA 2</div>');
+  } else if(round === 2 && wins.p1 === wins.p2){
+    nextRound = 3; state = 'swap';
+    setOverlay(
+      '<h2>EMPAT!</h2>'+
+      '<p>Cada jugador ha guanyat una ronda.<br>Ronda de desempat <b>sense canviar de costat</b>.</p>'+
+      '<div class="blink">PREM ESPAI PER AL DESEMPAT</div>');
+  } else {
+    endMatch();
+  }
+}
+
+function endMatch(){
+  state = 'end';
+  var w = wins.p1 > wins.p2 ? 'p1' : 'p2';
+  sfx.win();
+  setOverlay(
+    '<h2>VICTÒRIA PER A<br><span class="'+(w==='p1'?'red':'blue')+'">'+NAMES[w]+'</span></h2>'+
+    '<p>Rondes guanyades<br><b class="red">'+NAMES.p1+': '+wins.p1+'</b> &nbsp;·&nbsp; <b class="blue">'+NAMES.p2+': '+wins.p2+'</b></p>'+
+    '<div class="blink">PREM ESPAI PER REVENJA</div>');
+}
+
+/* ================== TECLAT ================== */
+addEventListener('keydown', function(e){
+  if(e.repeat) return;
+  initAudio();
+  if(e.code === 'Space' || e.key === 'Enter'){
+    e.preventDefault();
+    if(state === 'menu') startMatch();
+    else if(state === 'swap') startRound(nextRound);
+    else if(state === 'end') startMatch();
+    return;
+  }
+  if(state !== 'fight') return;
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  var k = (e.key || '').toLowerCase();
+  if(k.length !== 1) return;
+  var side = LEFT.indexOf(k) >= 0 ? 'left' : (RIGHT.indexOf(k) >= 0 ? 'right' : null);
+  if(!side) return;
+  e.preventDefault();
+  press(side, k);
+});
+
+placeFighters();
+menuScreen();
+})();
+</script>
+</body>
+</html>
