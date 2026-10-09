@@ -1,0 +1,15 @@
+.stepup-footer{
+  position:relative;z-index:5;width:100%;margin-top:50px;padding:28px 18px;
+  background:#09101d;border-top:1px solid rgba(132,203,201,.25);
+  color:#fff;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+.stepup-footer .sf-inner{
+  max-width:1200px;margin:0 auto;display:flex;align-items:center;
+  justify-content:center;gap:22px;flex-wrap:wrap;text-align:left;
+}
+.stepup-footer img{height:64px;width:auto;display:block}
+.stepup-footer strong{display:block;font-size:1.15rem;color:#fff}
+.stepup-footer span{display:block;color:rgba(255,255,255,.7)}
+.stepup-footer a{color:#84cbc9;font-weight:700;text-decoration:none}
+.stepup-footer a:hover,.stepup-footer a:focus-visible{text-decoration:underline}
+@media(max-width:560px){.stepup-footer .sf-inner{flex-direction:column;text-align:center}}
