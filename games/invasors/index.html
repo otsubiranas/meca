@@ -238,8 +238,8 @@ background:repeating-linear-gradient(#fff 0 6px,var(--cyan) 6px 12px);box-shadow
   const accented = { a:['à'], e:['è','é'], i:['í'], o:['ò','ó'], u:['ú'] };
   // ---------- Modes de joc ----------
   const TOP = [...'qwertyuiop'], HOME = [...'asdfghjklñ'], HOME9 = [...'asdfghjkl'], BOTTOM = [...'zxcvbnm'];
-  const BASE_SPEED = 1.55;     // velocitat base de tots els modes (1 = original)
-  const EXPERT_BOOST = 2.3;   // Expert: encara més ràpid que Avançat
+  const BASE_SPEED = 2;     // velocitat base de tots els modes (1 = original)
+  const EXPERT_BOOST = 3;   // Expert: encara més ràpid que Avançat
   const fullRows = () => [{ r: 0, keys: TOP }, { r: 1, keys: HOME9 }, { r: 2, keys: BOTTOM }];
   const COMMON = [',', '.', '?', '!'];
   const HARD_EXPERT = ['ï', 'ü', 'ç', ';', ':', '%'];
@@ -248,7 +248,7 @@ background:repeating-linear-gradient(#fff 0 6px,var(--cyan) 6px 12px);box-shadow
       name: 'Principiant', special: false, rampFrom: 3, speedMul: BASE_SPEED,
       rows: lv => [lv >= 2 && { r: 0, keys: TOP }, { r: 1, keys: HOME }, lv >= 3 && { r: 2, keys: BOTTOM }].filter(Boolean),
       info: 'Nivell 1: fila del mig | 2: fila de dalt | 3: totes les lletres | 4+: velocitat',
-      hints: { 1: 'Ara arriba la fila de dalt!', 2: 'Ara tens totes les lletres!', 3: "A partir d'ara només augmenta la velocitat!" }
+      hints: { 1: 'Ara arriba la fila de dalt!', 2: 'Ara tens totes les lletres!', 3: "Augmenta la velocitat!" }
     },
     avancat: {
       name: 'Avançat', special: true, rampFrom: 6, speedMul: BASE_SPEED, rows: fullRows,
