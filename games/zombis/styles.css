@@ -1,0 +1,271 @@
+:root {
+  --ink: #1c1c1c;
+  --paper: #fbfaf4;
+  --aura: #ffd92e;
+  --stink: #2fbf6b;
+  --blood: #e0242b;
+  --skin: #3f9a4a;
+  --cloth: #6b3fa0;
+  --font: "Gochi Hand", "Segoe Print", "Comic Sans MS", "Bradley Hand", cursive;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, #fff 0, transparent 40%),
+    #e9e6d8;
+  display: flex;
+  justify-content: center;
+}
+
+.game-shell {
+  width: min(960px, 100%);
+  padding: 14px;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  flex: 1;
+  letter-spacing: 1px;
+  transform: rotate(-1.5deg);
+}
+
+.back-link {
+  color: var(--ink);
+  text-decoration: underline wavy var(--stink);
+  font-size: 1.1rem;
+}
+
+.score-box {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 12px 6px 14px 6px;
+  padding: 4px 14px;
+  text-align: center;
+  line-height: 1.1;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.score-box span { display: block; font-size: 0.9rem; }
+.score-box strong { font-size: 1.8rem; }
+.best-box { background: #fff3a8; }
+
+.instructions { text-align: center; font-size: 1.15rem; margin: 6px 0; }
+
+/* ---------- Zona de joc: full de paper ---------- */
+.game {
+  position: relative;
+  height: 560px;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  border-radius: 8px 14px 8px 16px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 31px, rgba(80,130,200,.18) 31px 32px),
+    var(--paper);
+  box-shadow: 5px 5px 0 var(--ink);
+  outline: none;
+  user-select: none;
+}
+
+.columns {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 46px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  border-top: 3px solid var(--ink);
+  background: rgba(255, 217, 46, .35);
+  z-index: 3;
+}
+.columns div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  border-right: 2px dashed rgba(0,0,0,.35);
+}
+.columns div:last-child { border-right: 0; }
+
+.danger-line {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 70px;
+  border-top: 3px dashed var(--blood);
+  z-index: 2;
+}
+.danger-line span {
+  position: absolute;
+  right: 10px;
+  top: -24px;
+  color: var(--blood);
+  font-size: 1rem;
+}
+
+.zombies, .arrows { position: absolute; inset: 0; z-index: 1; }
+.arrows { z-index: 2; pointer-events: none; }
+
+/* ---------- Zombi ---------- */
+.zombie {
+  position: absolute;
+  width: 10%;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  will-change: transform;
+}
+.zombie svg { height: 100px; width: auto; overflow: visible; }
+.zombie-img { height: 100px; width: auto; max-width: 100%; object-fit: contain; }
+
+.zombie .key-tag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+  min-width: 34px;
+  padding: 0 8px;
+  text-align: center;
+  font-size: 1.6rem;
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--ink);
+  z-index: 3;
+}
+
+.fly {
+  position: absolute;
+  width: 8px; height: 8px;
+  background: var(--ink);
+  border-radius: 50%;
+  animation: buzz 1.1s linear infinite;
+}
+.fly::before, .fly::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  width: 8px; height: 6px;
+  background: #bfe0ff;
+  border: 1px solid #7aaee0;
+  border-radius: 50%;
+}
+.fly::before { left: -6px; }
+.fly::after { right: -6px; }
+.fly.f1 { left: 4px;  top: 20px; animation-delay: 0s; }
+.fly.f2 { right: 2px; top: 46px; animation-delay: -.4s; }
+.fly.f3 { left: 14px; top: 78px; animation-delay: -.8s; }
+@keyframes buzz {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(10px, -8px); }
+  50%  { transform: translate(-6px, -14px); }
+  75%  { transform: translate(-10px, 4px); }
+  100% { transform: translate(0, 0); }
+}
+
+.aura { animation: pulse .7s ease-in-out infinite alternate; transform-origin: 40px 60px; }
+@keyframes pulse { to { transform: scale(1.06); opacity: .75; } }
+
+.stink path { animation: wave 1.2s ease-in-out infinite alternate; }
+.stink path:nth-child(2) { animation-delay: -.3s; }
+.stink path:nth-child(3) { animation-delay: -.6s; }
+@keyframes wave { to { transform: translateY(-5px); opacity: .5; } }
+
+.zombie.dying { animation: poof .35s ease-out forwards; }
+@keyframes poof {
+  to { transform: scale(1.5) rotate(20deg); opacity: 0; }
+}
+
+/* ---------- Raig d'energia ---------- */
+.blast {
+  position: absolute;
+  width: 10%;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+}
+.blast i {
+  display: block;
+  width: 34px;
+  height: 56px;
+  background: radial-gradient(circle at 50% 35%, #fff 0 22%, var(--aura) 23% 70%, transparent 71%);
+  border: 3px solid var(--ink);
+  border-radius: 50% 50% 40% 40%;
+  box-shadow: 0 0 14px 5px rgba(255, 217, 46, .85);
+}
+
+/* ---------- Pantalles ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(251, 250, 244, .88);
+}
+.overlay.hidden { display: none; }
+.overlay-card {
+  text-align: center;
+  background: #fff;
+  border: 4px solid var(--ink);
+  border-radius: 14px 8px 16px 8px;
+  padding: 22px 34px;
+  box-shadow: 5px 5px 0 var(--ink);
+  max-width: 420px;
+}
+.overlay-card h2 { margin: 4px 0; font-size: 2.2rem; }
+.overlay-card p { margin: 6px 0; font-size: 1.2rem; }
+.big-emoji { font-size: 3.4rem; }
+.final-score { font-size: 3.6rem; color: var(--blood); }
+
+.primary-button {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  margin-top: 10px;
+  padding: 6px 26px;
+  background: var(--aura);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+}
+.primary-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+
+/* ---------- Teclat ---------- */
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  margin-top: 12px;
+}
+.keyboard button {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  padding: 8px 0;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+.keyboard button.pressed { background: var(--aura); transform: translate(2px, 2px); box-shadow: none; }
+.keyboard button.nope { background: #ffc9c9; }
+
+.footer-note { text-align: center; font-size: 1.05rem; }
+
+@media (max-width: 600px) {
+  .game { height: 480px; }
+  .zombie svg, .zombie-img { height: 80px; }
+  .zombie { height: 80px; }
+}
