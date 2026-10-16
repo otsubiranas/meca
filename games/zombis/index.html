@@ -444,13 +444,15 @@
     return a;
   }
 
-  // Dificultat: comença molt tranquil i va pujant sense parar.
-  // ~100 punts = bona partida, 300+ = concentració màxima.
-  const progress = () => Math.min(score / 320, 1.25);
-  const zombieSpeed = () => (38 + 108 * progress()) * (0.88 + Math.random() * 0.27);          // px/s
+  // Dificultat: puja contínuament des del primer zombi, de forma molt sutil al principi.
+  // ~100 punts = ja és complicat, ~300 = s'ha de suar de valent.
+  const progress = () => Math.min(score / 300, 1.5);
+  const zombieSpeed = () => {
+    const p = progress();
+    return (38 + 100 * p + 25 * p * p) * (0.88 + Math.random() * 0.27);                       // px/s
+  };
   const spawnDelay = () => {
-    const p = Math.min(progress(), 1);
-    let d = Math.max(0.45, 1.9 - 1.35 * p) * (0.8 + Math.random() * 0.5);                      // s
+    let d = Math.max(0.4, 1.9 * Math.exp(-0.00413 * score)) * (0.8 + Math.random() * 0.5);    // s
     if (boss) d *= 1.5;                                                                          // amb gegant, menys zombis normals
     return d;
   };
