@@ -1,80 +1,848 @@
 <!DOCTYPE html>
 <html lang="ca">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mecazombis - Joc de mecanografia</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mecazombis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0b100c;
+    --bone: #ddd6b8;
+    --toxic: #86c23a;
+    --blood: #a31d1d;
+    --wood: #5a3d22;
+    --stone: #4b5046;
+    --title: "Creepster", "Chiller", Georgia, serif;
+    --body: "Special Elite", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; justify-content: center;
+    background: radial-gradient(ellipse at 50% 0%, #1d2a1e 0%, var(--night) 65%);
+    color: var(--bone); font-family: var(--body);
+  }
+  .shell { width: min(960px, 100%); padding: 14px; }
+
+  header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  h1 {
+    margin: 0; flex: 1; font-family: var(--title); font-weight: 400; font-size: 2.8rem; letter-spacing: 2px;
+    color: var(--toxic);
+    text-shadow: 2px 2px 0 #14200a, 4px 4px 0 rgba(0,0,0,.6), 0 6px 0 var(--blood);
+  }
+  .box {
+    min-width: 104px; padding: 5px 14px; text-align: center; line-height: 1.15;
+    background: linear-gradient(#2a2d26, #1a1d18); border: 3px solid var(--stone); border-radius: 4px 4px 10px 10px;
+    box-shadow: 0 3px 0 #000, inset 0 0 14px rgba(0,0,0,.7);
+  }
+  .box span { display: block; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: #9c9b86; }
+  .box strong { font-family: var(--title); font-weight: 400; font-size: 1.9rem; color: var(--bone); letter-spacing: 1px; }
+  .box.best strong { color: #d9a441; }
+  .menu-btn {
+    font-family: var(--body); font-size: .85rem; cursor: pointer; color: var(--bone);
+    background: linear-gradient(#2a2d26, #1a1d18); border: 3px solid var(--stone); border-radius: 6px;
+    padding: 8px 14px; box-shadow: 0 3px 0 #000; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .menu-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
+
+  /* ---------- Cementiri ---------- */
+  #game {
+    position: relative; height: 600px; overflow: hidden; outline: none; user-select: none;
+    background:
+      repeating-linear-gradient(to right, rgba(255,255,255,.035) 0 10%, transparent 10% 20%),
+      linear-gradient(to bottom, #0a0f14 0%, #16251c 55%, #223224 100%);
+    border: 4px solid #000; border-radius: 6px;
+    box-shadow: 0 0 0 3px var(--stone), 0 10px 30px rgba(0,0,0,.7), inset 0 0 90px rgba(0,0,0,.75);
+  }
+  .moon {
+    position: absolute; top: 24px; right: 7%; width: 80px; height: 80px; border-radius: 50%; z-index: 0;
+    background: radial-gradient(circle at 35% 35%, #f3efc9 0 40%, #d6d09c 70%, #b5ae7b 100%);
+    box-shadow: 0 0 40px 12px rgba(233,228,170,.25);
+  }
+  .fog {
+    position: absolute; left: -50%; width: 200%; height: 160px; z-index: 3; pointer-events: none; opacity: .5;
+    background:
+      radial-gradient(ellipse at 10% 50%, rgba(190,210,185,.28), transparent 45%),
+      radial-gradient(ellipse at 40% 60%, rgba(190,210,185,.22), transparent 45%),
+      radial-gradient(ellipse at 70% 40%, rgba(190,210,185,.28), transparent 45%),
+      radial-gradient(ellipse at 95% 60%, rgba(190,210,185,.2), transparent 45%);
+    animation: drift 40s linear infinite;
+  }
+  .fog.f1 { bottom: 90px; }
+  .fog.f2 { bottom: 280px; animation-duration: 65s; animation-direction: reverse; opacity: .35; }
+  @keyframes drift { to { transform: translateX(50%); } }
+
+  #scenery { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .tomb {
+    position: absolute; bottom: 0; background: linear-gradient(#585e55, #3a3f38);
+    border-radius: 40% 40% 0 0 / 28% 28% 0 0; border: 2px solid #20231f;
+    box-shadow: inset 0 6px 0 rgba(255,255,255,.07);
+  }
+  .tomb::after { content: "✝"; position: absolute; top: 10%; left: 0; right: 0; text-align: center; color: rgba(0,0,0,.35); font-size: 1.1rem; }
+
+  #layer, #fx { position: absolute; inset: 0; }
+  #layer { z-index: 2; }
+  #fx { z-index: 4; pointer-events: none; }
+
+  /* ---------- Terra i tecles ---------- */
+  #pad {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 64px; z-index: 5;
+    display: grid; grid-template-columns: repeat(10, 1fr);
+    background: repeating-linear-gradient(95deg, #3a2816 0 7px, #33230f 7px 13px);
+    border-top: 12px solid #3d5a22;
+    box-shadow: 0 -3px 0 #0a1405, inset 0 6px 14px rgba(0,0,0,.6);
+  }
+  #pad button {
+    font-family: var(--title); font-size: 1.9rem; color: var(--bone); cursor: pointer; letter-spacing: 1px;
+    background: linear-gradient(#6b4a2a, #4a311a); border: 2px solid #20150a; border-radius: 4px; margin: 4px 2px;
+    text-shadow: 0 2px 0 #000; box-shadow: 0 3px 0 #20150a;
+    transition: transform .06s, background .06s;
+  }
+  #pad button.on { transform: translateY(3px); box-shadow: 0 0 0 #20150a; background: linear-gradient(#8a6a40, #6b4a2a); }
+  #pad button.miss { background: linear-gradient(#7d2a2a, #4d1414); }
+
+  /* ---------- Zombi ---------- */
+  .zombie {
+    position: absolute; width: 10%; display: flex; flex-direction: column; align-items: center;
+    will-change: transform;
+  }
+  .zombie .tag {
+    font-family: var(--title); font-size: 1.4rem; line-height: 1.1; min-width: 34px; text-align: center; padding: 1px 9px; margin-bottom: 3px;
+    color: var(--bone); background: linear-gradient(#6b4a2a, #4a311a); border: 2px solid #20150a; border-radius: 3px;
+    text-shadow: 0 1px 0 #000; box-shadow: 0 2px 0 #20150a;
+  }
+  .zombie img, .zombie .fallback {
+    height: 90px; max-width: 100%; width: auto; object-fit: contain; pointer-events: none;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,.7)) saturate(1.05);
+    transform-origin: 50% 100%;
+    animation: shamble .9s ease-in-out infinite alternate;
+  }
+  .zombie .fallback { font-size: 62px; line-height: 90px; }
+  @keyframes shamble { from { rotate: -4deg; } to { rotate: 4deg; } }
+  .zombie.dead img, .zombie.dead .fallback { animation: none; }
+  .zombie.dead { animation: die .45s ease-in forwards; }
+  @keyframes die {
+    30% { filter: brightness(2.2) sepia(1) hue-rotate(-30deg) saturate(4); }
+    to { transform: var(--t) translateY(30px) rotate(25deg) scale(.8); opacity: 0; filter: brightness(.3); }
+  }
+
+  /* ---------- Zombi gegant ---------- */
+  .zombie.boss { width: 30%; }
+  .zombie.boss img, .zombie.boss .fallback {
+    height: 230px;
+    filter: drop-shadow(0 6px 4px rgba(0,0,0,.75)) drop-shadow(0 0 16px rgba(134,194,58,.55));
+    animation-duration: 1.6s;
+  }
+  .zombie.boss .fallback { font-size: 170px; line-height: 230px; }
+  .zombie.boss.hit img, .zombie.boss.hit .fallback {
+    filter: brightness(2.2) drop-shadow(0 6px 4px rgba(0,0,0,.75));
+  }
+  /* mentre llança la bola: pose nyoku2 i resplendor groc al darrere */
+  .zombie.boss.firing::before {
+    content: ""; position: absolute; left: 50%; top: 0; width: 140%; height: 88%; z-index: -1;
+    transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255,230,90,.9) 0%, rgba(255,205,40,.45) 42%, rgba(255,200,40,0) 70%);
+    animation: aura .25s ease-in-out infinite alternate;
+  }
+  @keyframes aura { from { opacity: .75; transform: translateX(-50%) scale(.95); } to { opacity: 1; transform: translateX(-50%) scale(1.06); } }
+  .zombie.boss.firing img, .zombie.boss.firing .fallback {
+    filter: drop-shadow(0 6px 4px rgba(0,0,0,.75)) drop-shadow(0 0 12px #ffe14d) drop-shadow(0 0 28px rgba(255,210,40,.75));
+  }
+  .hpbar {
+    width: 92%; height: 14px; margin-top: 6px; background: #1a0a0a; border: 2px solid #000;
+    border-radius: 3px; overflow: hidden; box-shadow: 0 2px 0 rgba(0,0,0,.6);
+  }
+  .hpbar i { display: block; height: 100%; width: 100%; background: linear-gradient(#c93232, #7d1515); transition: width .12s; }
+
+  /* ---------- Fletxa ---------- */
+  .arrow { position: absolute; width: 10%; display: flex; justify-content: center; z-index: 4; }
+  .a { position: relative; width: 20px; height: 64px; }
+  .a .head {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 17px solid #c4c4b8;
+    filter: drop-shadow(0 0 1px #000);
+  }
+  .a .shaft {
+    position: absolute; top: 14px; bottom: 0; left: 50%; width: 4px; transform: translateX(-50%);
+    background: linear-gradient(90deg, #8a6236, #5c3f1f); border-radius: 2px; box-shadow: 0 0 2px #000;
+  }
+  .a .fletch { position: absolute; bottom: 0; left: 50%; width: 16px; height: 16px; transform: translateX(-50%); }
+  .a .fletch::before, .a .fletch::after {
+    content: ""; position: absolute; bottom: 0; width: 7px; height: 16px; background: var(--blood); border: 1px solid #3a0a0a;
+  }
+  .a .fletch::before { left: 0; border-radius: 80% 0 0 0; transform: skewY(-18deg); }
+  .a .fletch::after  { right: 0; border-radius: 0 80% 0 0; transform: skewY(18deg); }
+
+  /* ---------- Bola de llum ---------- */
+  .warn {
+    position: absolute; top: 0; width: 10%; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(110,195,255,0), rgba(110,195,255,.22));
+    border-left: 2px dashed rgba(150,215,255,.55); border-right: 2px dashed rgba(150,215,255,.55);
+    animation: warn .35s ease-in-out infinite alternate;
+  }
+  @keyframes warn { to { opacity: .45; } }
+  .orb { position: absolute; top: 0; width: 10%; display: flex; justify-content: center; z-index: 6; }
+  .orb i {
+    display: block; width: 54px; height: 54px; border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 30%, #e2f6ff 45%, #86d4ff 70%, rgba(134,212,255,0) 74%);
+    box-shadow: 0 0 22px 10px rgba(150,220,255,.8), 0 0 50px 20px rgba(90,175,255,.4);
+  }
+  .orb { height: 54px; }
+  .orb i { position: relative; z-index: 1; }
+  .orb .trail {
+    position: absolute; left: 50%; bottom: 30px; width: 46px; height: 190px; transform: translateX(-50%);
+    background: linear-gradient(to top, rgba(215,242,255,.9), rgba(120,205,255,.45) 35%, rgba(90,180,255,0));
+    clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  }
+  .orb.charge .trail { display: none; }
+  .orb.charge i { animation: grow .9s ease-in forwards; }
+  @keyframes grow { from { transform: scale(.15); opacity: .6; } to { transform: scale(1); opacity: 1; } }
+  .spark {
+    position: absolute; width: 12px; height: 12px; margin: -6px 0 0 0; border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 35%, #a6defe 60%, rgba(100,190,255,0) 72%);
+    animation: spark .55s ease-out forwards; pointer-events: none;
+  }
+  @keyframes spark { to { transform: translateY(-46px) scale(.2); opacity: 0; } }
+  .puff {
+    position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 25%, rgba(170,226,255,.8) 50%, rgba(100,190,255,0) 72%);
+    animation: puff .45s ease-out forwards;
+  }
+  @keyframes puff { to { transform: scale(3.2); opacity: 0; } }
+  .arrow.holy .a { filter: drop-shadow(0 0 6px #ffe680) drop-shadow(0 0 12px rgba(255,220,120,.8)); }
+  .arrow.holy .head { border-bottom-color: #fff6c4; }
+  .arrow.holy .shaft { background: linear-gradient(90deg, #fff0a0, #e6c050); }
+
+  /* ---------- Efectes ---------- */
+  .splat {
+    position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(120,20,20,.95) 0 30%, rgba(80,12,12,.7) 45%, transparent 70%);
+    animation: splat .5s ease-out forwards;
+  }
+  .splat.small { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+  @keyframes splat { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+  .chunk {
+    position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #5d8a24;
+    animation: chunk .55s ease-out forwards;
+  }
+  @keyframes chunk { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+  .plus {
+    position: absolute; font-family: var(--title); font-size: 1.5rem; color: #d9a441; text-shadow: 0 2px 0 #000;
+    animation: plus .7s ease-out forwards; transform: translateX(-50%); white-space: nowrap;
+  }
+  .plus.good { color: #f3efc9; font-size: 1.9rem; }
+  @keyframes plus { to { transform: translate(-50%, -44px); opacity: 0; } }
+  #game.hurt::after {
+    content: ""; position: absolute; inset: 0; z-index: 25; pointer-events: none;
+    box-shadow: inset 0 0 120px 40px rgba(163,29,29,.9); animation: hurt .5s ease-out forwards;
+  }
+  @keyframes hurt { to { opacity: 0; } }
+  #banner {
+    position: absolute; left: 0; right: 0; top: 38%; z-index: 24; text-align: center; pointer-events: none;
+    font-family: var(--title); font-size: 3.2rem; color: var(--blood); opacity: 0;
+    text-shadow: 0 3px 0 #000, 0 0 20px rgba(163,29,29,.8);
+  }
+  #banner.show { animation: banner 2.2s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(1.5); } 12% { opacity: 1; transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* ---------- Pantalles ---------- */
+  .overlay {
+    position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+    background: rgba(6,9,7,.85);
+  }
+  .overlay.hidden { display: none; }
+  .card {
+    text-align: center; padding: 24px 34px; max-width: 460px;
+    background: linear-gradient(#2a2d26, #181b16); border: 4px solid var(--stone); border-radius: 6px 6px 16px 16px;
+    box-shadow: 0 8px 0 #000, inset 0 0 30px rgba(0,0,0,.7);
+  }
+  .card.wide { max-width: 680px; }
+  .card h2 {
+    margin: 4px 0 10px; font-family: var(--title); font-weight: 400; font-size: 3rem; color: var(--toxic);
+    text-shadow: 2px 2px 0 #14200a, 0 5px 0 var(--blood); line-height: 1.1;
+  }
+  .card p { margin: 8px 0; line-height: 1.5; font-size: .95rem; }
+  .card b { color: #d9a441; letter-spacing: 2px; }
+  .final { font-family: var(--title); font-size: 4.4rem; line-height: 1.1; color: var(--blood); text-shadow: 0 3px 0 #000; }
+  .emoji { font-size: 3rem; filter: drop-shadow(0 4px 0 #000); }
+  button.go {
+    font-family: var(--title); font-size: 1.6rem; letter-spacing: 2px; margin: 12px 5px 0; padding: 6px 28px; cursor: pointer;
+    color: var(--bone); background: linear-gradient(#a82a2a, #6e1414); border: 3px solid #2a0707; border-radius: 6px;
+    text-shadow: 0 2px 0 #000; box-shadow: 0 5px 0 #2a0707;
+  }
+  button.go.alt { background: linear-gradient(#4b5046, #2c302a); border-color: #121410; box-shadow: 0 5px 0 #121410; }
+  button.go:active { transform: translateY(4px); box-shadow: 0 1px 0 #2a0707; }
+
+  .modes { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .mode {
+    flex: 1 1 240px; max-width: 300px; cursor: pointer; text-align: center; padding: 14px 16px 12px;
+    font-family: var(--body); color: var(--bone);
+    background: linear-gradient(#34382f, #20231d); border: 3px solid var(--stone); border-radius: 6px 6px 14px 14px;
+    box-shadow: 0 6px 0 #000, inset 0 0 20px rgba(0,0,0,.6);
+    transition: transform .1s, border-color .1s;
+  }
+  .mode:hover { transform: translateY(-3px); border-color: var(--toxic); }
+  .mode:active { transform: translateY(2px); box-shadow: 0 2px 0 #000; }
+  .mode .mname { display: block; font-family: var(--title); font-size: 2.2rem; color: var(--toxic); text-shadow: 0 3px 0 #000; }
+  .mode.nyoku .mname { color: #d9a441; }
+  .mode .mdesc { display: block; font-size: .82rem; line-height: 1.45; margin: 4px 0 8px; color: #c9c3a6; }
+  .mode .rec { display: block; font-size: .75rem; letter-spacing: 1px; text-transform: uppercase; color: #9c9b86; }
+  .mode .key { display: inline-block; margin-top: 6px; padding: 0 8px; border: 2px solid #20150a; border-radius: 3px; background: #4a311a; font-size: .8rem; }
+
+  /* ---------- Botó d'esquivar ---------- */
+  #dodge {
+    position: relative; display: block; width: 100%; margin-top: 10px; overflow: hidden; cursor: pointer;
+    font-family: var(--title); font-size: 1.5rem; letter-spacing: 3px; color: var(--bone);
+    background: linear-gradient(#6b4a2a, #4a311a); border: 3px solid #20150a; border-radius: 8px; padding: 6px 0;
+    box-shadow: 0 4px 0 #20150a; text-shadow: 0 2px 0 #000;
+  }
+  #dodge::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--cd, 0) * 100%);
+    background: rgba(0,0,0,.55);
+  }
+  #dodge span { position: relative; }
+  #dodge.hidden { display: none; }
+  #dodge:active { transform: translateY(3px); box-shadow: 0 1px 0 #20150a; }
+
+  .note { text-align: center; margin: 10px 0 0; font-size: .8rem; color: #8c8b78; }
+
+  @media (max-width: 600px) {
+    #game { height: 520px; }
+    .zombie img, .zombie .fallback { height: 64px; }
+    .zombie .tag { font-size: 1.05rem; min-width: 26px; padding: 0 6px; }
+    .zombie.boss img, .zombie.boss .fallback { height: 150px; }
+    .zombie.boss .fallback { font-size: 110px; line-height: 150px; }
+    #pad button { font-size: 1.4rem; }
+    h1 { font-size: 2rem; }
+    .card { padding: 18px 16px; }
+    .card h2 { font-size: 2.2rem; }
+    #banner { font-size: 2rem; }
+  }
+</style>
 </head>
 <body>
-  <main class="game-shell">
-    <header class="game-header">
-      <a class="back-link" href="../index.html">← Tornar als jocs</a>
-      <h1>🧟 Mecazombis</h1>
-      <div class="score-box" aria-live="polite">
-        <span>Eliminats</span>
-        <strong id="score">0</strong>
-      </div>
-      <div class="score-box best-box">
-        <span>Rècord</span>
-        <strong id="best-score">0</strong>
-      </div>
-    </header>
+<main class="shell">
+  <header>
+    <h1>🧟 Mecazombis</h1>
+    <div class="box"><span>Eliminats</span><strong id="score">0</strong></div>
+    <div class="box best"><span id="bestLabel">Rècord</span><strong id="best">0</strong></div>
+    <button class="menu-btn" id="menuBtn">Menú</button>
+  </header>
 
-    <section class="instructions">
-      <p>Prem la tecla que correspon al zombi per llançar-li un raig d'energia!</p>
-    </section>
+  <section id="game" tabindex="0" aria-label="Zona de joc">
+    <div class="moon"></div>
+    <div id="scenery"></div>
+    <div class="fog f1"></div><div class="fog f2"></div>
+    <div id="layer"></div>
+    <div id="fx"></div>
+    <div id="pad"></div>
+    <div id="banner"></div>
 
-    <section id="game" class="game" tabindex="0" aria-label="Zona de joc de Mecazombis">
-      <div id="zombies" class="zombies"></div>
-      <div id="arrows" class="arrows"></div>
-
-      <div class="danger-line" aria-hidden="true"><span>⚠ no els deixis passar ⚠</span></div>
-
-      <div class="columns" aria-hidden="true">
-        <div>A</div><div>S</div><div>D</div><div>F</div><div>G</div>
-        <div>H</div><div>J</div><div>K</div><div>L</div><div>Ñ</div>
-      </div>
-
-      <div id="start-screen" class="overlay">
-        <div class="overlay-card">
-          <div class="big-emoji">🧟</div>
-          <h2>Mecazombis</h2>
-          <p>Elimina tants zombis com puguis abans que arribin a terra.</p>
-          <button id="start-button" class="primary-button">Començar</button>
+    <div id="start" class="overlay">
+      <div class="card wide">
+        <div class="emoji">🧟</div>
+        <h2>Mecazombis</h2>
+        <div class="modes">
+          <button class="mode" data-mode="classic">
+            <span class="mname">Clàssic</span>
+            <span class="rec" data-rec="classic">Rècord: 0</span>
+            <span class="key">1</span>
+          </button>
+          <button class="mode nyoku" data-mode="nyoku">
+            <span class="mname">Nyoku</span>
+            <span class="rec" data-rec="nyoku">Rècord: 0</span>
+            <span class="key">2</span>
+          </button>
         </div>
       </div>
-
-      <div id="game-over" class="overlay hidden">
-        <div class="overlay-card">
-          <div class="big-emoji">💀</div>
-          <h2>Game Over</h2>
-          <p>Has eliminat</p>
-          <div id="final-score" class="final-score">0</div>
-          <p>zombis</p>
-          <button id="restart-button" class="primary-button">Torna a jugar</button>
-        </div>
-      </div>
-    </section>
-
-    <div class="keyboard" aria-label="Teclat del joc">
-      <button data-key="a">A</button>
-      <button data-key="s">S</button>
-      <button data-key="d">D</button>
-      <button data-key="f">F</button>
-      <button data-key="g">G</button>
-      <button data-key="h">H</button>
-      <button data-key="j">J</button>
-      <button data-key="k">K</button>
-      <button data-key="l">L</button>
-      <button data-key="ñ">Ñ</button>
     </div>
 
-    <p class="footer-note">Només poden volar dos raigs alhora.</p>
-  </main>
+    <div id="over" class="overlay hidden">
+      <div class="card">
+        <div class="emoji">💀</div>
+        <h2 id="overTitle">T'han menjat el cervell</h2>
+        <p>Zombis eliminats</p>
+        <div class="final" id="final">0</div>
+        <button class="go" id="againBtn">Torna a jugar</button>
+        <button class="go alt" id="toMenuBtn">Menú</button>
+      </div>
+    </div>
+  </section>
 
-  <script src="game.js"></script>
+  <button id="dodge" class="hidden"><span>ESPAI · fletxa extra</span></button>
+  <p class="note" id="note"></p>
+</main>
+
+<script>
+(() => {
+  const KEYS = ["a","s","d","f","g","h","j","k","l","ñ"];
+  const IMG = "zombi.png";           // zombis normals, a la mateixa carpeta que aquest HTML
+  const BOSS_IMG = "nyoku.png";      // zombi gegant
+  const BOSS_IMG2 = "nyoku2.png";    // el gegant mentre llança la bola de llum
+  const FIRE_POSE = 1000;            // ms que dura la pose de llançament
+
+  let boss2Ok = false;               // només canvia d'imatge si nyoku2.png existeix
+  { const probe = new Image(); probe.onload = () => { boss2Ok = true; }; probe.src = BOSS_IMG2; }
+  const MAX_ARROWS = 2;
+  const ARROW_SPEED = 900;           // px/s
+  const ARROW_H = 64;
+
+  const ORB_SPEED = 170;             // px/s
+  const ORB_SIZE = 54;
+  const CHARGE_TIME = 0.9;           // s que triga el gegant a carregar la bola
+  const HOLY_COOLDOWN = 900;         // ms fins poder tornar a disparar la fletxa extra (ESPAI)
+  const BOSS_EVERY = 30;             // zombis entre gegants
+
+  const MODES = {
+    classic: { name: "Clàssic", boss: false, note: "Una fletxa que falla segueix volant fins que surt per dalt. Apunta bé." },
+    nyoku:   { name: "Nyoku",   boss: true,  note: "El gegant ocupa 3 carrils i la bola de llum sempre baixa pel carril del mig. ESPAI dispara una fletxa extra que la destrueix; una fletxa normal també." }
+  };
+
+  const $ = id => document.getElementById(id);
+  const game = $("game"), layer = $("layer"), fx = $("fx"), pad = $("pad"), scenery = $("scenery");
+  const scoreEl = $("score"), bestEl = $("best"), bestLabel = $("bestLabel"), finalEl = $("final");
+  const startScr = $("start"), overScr = $("over"), overTitle = $("overTitle");
+  const dodgeBtn = $("dodge"), noteEl = $("note"), banner = $("banner");
+
+  let mode = "classic";
+  let screen = "menu";               // menu | playing | over
+  let zombies = [], arrows = [], orbs = [];
+  let boss = null, bossCount = 0, nextBossAt = BOSS_EVERY;
+  let score = 0, running = false, last = 0, spawnIn = 0;
+  let holyReady = 0;
+
+  // ---------- Rècords per mode ----------
+  const bests = {};
+  const bestKey = m => "mecazombis-best-" + m;
+  for (const m of Object.keys(MODES)) {
+    let v = 0;
+    try {
+      v = +localStorage.getItem(bestKey(m)) || 0;
+      if (m === "classic" && !v) v = +localStorage.getItem("mecazombis-best") || 0;   // rècord de la versió anterior
+    } catch (e) {}
+    bests[m] = v;
+  }
+  function renderBests() {
+    document.querySelectorAll("[data-rec]").forEach(el => { el.textContent = "Rècord: " + bests[el.dataset.rec]; });
+  }
+  renderBests();
+
+  const small = () => window.innerWidth <= 600;
+  const imgH = () => (small() ? 64 : 90);
+  const tagH = () => (small() ? 28 : 36);
+  const zH = () => imgH() + tagH();
+  const bossH = () => (small() ? 150 : 230) + 22;
+  const limit = () => game.clientHeight - (pad.offsetHeight || 64);
+  const inLane = (z, lane) => z.lanes ? z.lanes.includes(lane) : z.lane === lane;
+
+  function arrowEl() {
+    const a = document.createElement("div");
+    a.className = "a";
+    a.innerHTML = '<span class="head"></span><span class="shaft"></span><span class="fletch"></span>';
+    return a;
+  }
+
+  // Dificultat: comença molt tranquil i va pujant sense parar.
+  // ~100 punts = bona partida, 300+ = concentració màxima.
+  const progress = () => Math.min(score / 320, 1.25);
+  const zombieSpeed = () => (28 + 115 * progress()) * (0.88 + Math.random() * 0.27);          // px/s
+  const spawnDelay = () => {
+    const p = Math.min(progress(), 1);
+    let d = Math.max(0.45, 1.9 - 1.35 * p) * (0.8 + Math.random() * 0.5);                      // s
+    if (boss) d *= 1.5;                                                                          // amb gegant, menys zombis normals
+    return d;
+  };
+  const bossHp = () => Math.min(14 + 4 * bossCount, 38);
+  const bossSpeed = () => Math.min(9 + 3 * bossCount, 28);
+  const fireGap = () => Math.max(2.4, 4.2 - 0.35 * bossCount) * (0.85 + Math.random() * 0.4);
+
+  // Tombes decoratives
+  [[6, 54, 70], [27, 46, 56], [48, 60, 76], [66, 44, 52], [88, 56, 66]].forEach(([l, w, h]) => {
+    const t = document.createElement("div");
+    t.className = "tomb"; t.style.left = l + "%"; t.style.width = w + "px"; t.style.height = h + "px";
+    t.style.bottom = "62px";
+    scenery.appendChild(t);
+  });
+
+  // Tecles de terra (clicables)
+  KEYS.forEach(k => {
+    const b = document.createElement("button");
+    b.textContent = k.toUpperCase(); b.dataset.k = k;
+    b.addEventListener("click", () => press(k));
+    pad.appendChild(b);
+  });
+  const flash = (k, c) => {
+    const b = pad.querySelector(`[data-k="${k}"]`);
+    if (!b) return;
+    b.classList.add(c); setTimeout(() => b.classList.remove(c), 120);
+  };
+
+  function makeImg(src = IMG) {
+    const img = new Image();
+    img.src = src; img.alt = ""; img.draggable = false;
+    img.style.animationDelay = (-Math.random() * 0.9) + "s";
+    img.onerror = () => {                          // si falta zombi.png, mostra un emoji
+      const f = document.createElement("div");
+      f.className = "fallback"; f.textContent = "🧟";
+      img.replaceWith(f);
+    };
+    return img;
+  }
+
+  // ---------- Zombis ----------
+  function spawn() {
+    const H = zH();
+    const free = [];
+    for (let c = 0; c < KEYS.length; c++) {
+      if (boss && boss.lanes.includes(c)) continue;
+      if (!zombies.some(z => z.lane === c && z.y < H * 1.25)) free.push(c);
+    }
+    if (!free.length) return;
+    const lane = free[Math.floor(Math.random() * free.length)];
+
+    const el = document.createElement("div");
+    el.className = "zombie";
+    el.style.left = (lane * 10) + "%";
+    const tag = document.createElement("div");
+    tag.className = "tag"; tag.textContent = KEYS[lane].toUpperCase();
+    el.append(tag, makeImg());
+    layer.appendChild(el);
+
+    const z = { lane, el, y: -H, h: H, speed: zombieSpeed() };
+    zombies.push(z);
+    place(z);
+  }
+
+  function place(z) {
+    const t = `translateY(${z.y}px)`;
+    z.el.style.setProperty("--t", t);
+    z.el.style.transform = t;
+  }
+
+  // ---------- Gegant ----------
+  function trySpawnBoss() {
+    const centers = [1, 2, 3, 4, 5, 6, 7, 8].sort(() => Math.random() - 0.5);
+    const c = centers.find(c => ![c - 1, c, c + 1].some(l => zombies.some(z => z.lane === l)));
+    if (c === undefined) return;                    // espera que hi hagi 3 carrils lliures
+
+    const h = bossH();
+    const el = document.createElement("div");
+    el.className = "zombie boss";
+    el.style.left = ((c - 1) * 10) + "%";
+    const bar = document.createElement("div");
+    bar.className = "hpbar"; bar.innerHTML = "<i></i>";
+    el.append(makeImg(BOSS_IMG), bar);
+    layer.appendChild(el);
+
+    const hp = bossHp();
+    boss = { lane: -1, lanes: [c - 1, c, c + 1], el, bar: bar.firstChild, y: -h * 0.55, h,
+             speed: bossSpeed(), hp, maxHp: hp, fireIn: 1.6, charge: null };
+    zombies.push(boss);
+    place(boss);
+
+    banner.textContent = "⚠ ZOMBI GEGANT ⚠";
+    banner.classList.remove("show"); void banner.offsetWidth; banner.classList.add("show");
+  }
+
+  function hitBoss(a) {
+    boss.hp--;
+    boss.bar.style.width = Math.max(0, boss.hp / boss.maxHp * 100) + "%";
+    boss.el.classList.add("hit");
+    setTimeout(() => boss && boss.el.classList.remove("hit"), 90);
+    burst(a.lane, Math.max(a.y, boss.y + boss.h * 0.3), { small: true });
+    if (boss.hp <= 0) killBoss();
+  }
+
+  function killBoss() {
+    const b = boss;
+    zombies = zombies.filter(z => z !== b);
+    b.el.classList.add("dead");
+    setTimeout(() => b.el.remove(), 450);
+    for (const l of b.lanes) {
+      burst(l, b.y + b.h * (0.35 + Math.random() * 0.45), { small: true });
+      burst(l, b.y + b.h * (0.35 + Math.random() * 0.45), { small: true });
+    }
+    popText(b.lanes[1] * 10 + 5, b.y + b.h * 0.4, "+5", "");
+    score += 5; scoreEl.textContent = score;
+    // fora les boles de llum que quedin
+    for (const o of orbs) { o.el.remove(); o.warn.remove(); }
+    orbs = [];
+    if (b.charge) { b.charge.el.remove(); b.charge.warn.remove(); }
+    boss = null; bossCount++;
+    nextBossAt = score + BOSS_EVERY;
+  }
+
+  // Un segon amb la imatge nyoku2.png i resplendor groc quan llança la bola
+  function firePose(b) {
+    const el = b.el, img = el.querySelector("img");
+    const orig = img ? img.getAttribute("src") : null;
+    el.classList.add("firing");
+    if (img && boss2Ok) img.src = BOSS_IMG2;
+    setTimeout(() => {
+      el.classList.remove("firing");
+      if (img && orig) img.src = orig;
+    }, FIRE_POSE);
+  }
+
+  function startCharge() {
+    const lane = boss.lanes[1];                    // sempre pel carril central del gegant
+    const warn = document.createElement("div");
+    warn.className = "warn";
+    warn.style.left = (lane * 10) + "%";
+    warn.style.height = limit() + "px";
+    const el = document.createElement("div");
+    el.className = "orb charge";
+    el.style.left = (lane * 10) + "%";
+    el.innerHTML = '<b class="trail"></b><i></i>';
+    fx.append(warn, el);
+    boss.charge = { lane, t: 0, el, warn };
+  }
+
+  // ---------- Fletxes ----------
+  function launch(lane, special) {
+    const el = document.createElement("div");
+    el.className = "arrow" + (special ? " holy" : "");
+    el.style.left = (lane * 10) + "%";
+    el.appendChild(arrowEl());
+    fx.appendChild(el);
+    const a = { lane, el, special, y: limit() - ARROW_H };
+    arrows.push(a);
+    el.style.transform = `translateY(${a.y}px)`;
+  }
+
+  function press(k) {
+    if (!running) return;
+    const lane = KEYS.indexOf(k);
+    if (lane < 0) return;
+    flash(k, "on");
+
+    // les fletxes extra d'ESPAI no compten per al límit de 2
+    if (arrows.filter(a => !a.special).length >= MAX_ARROWS) {
+      flash(k, "miss");
+      return;
+    }
+    launch(lane, false);
+  }
+
+  // ESPAI: fletxa extra que només destrueix boles de llum, pel carril central del gegant
+  function holyShot() {
+    if (!running || !MODES[mode].boss || !boss) return;
+    const now = performance.now();
+    if (now < holyReady) return;
+    holyReady = now + HOLY_COOLDOWN;
+    launch(boss.lanes[1], true);
+  }
+
+  function destroyOrb(o) {
+    o.done = true;
+    const p = document.createElement("div");
+    p.className = "puff";
+    p.style.left = (o.lane * 10 + 5) + "%"; p.style.top = (o.y + ORB_SIZE / 2) + "px";
+    fx.appendChild(p); setTimeout(() => p.remove(), 460);
+  }
+
+  function spark(o) {
+    const s = document.createElement("div");
+    s.className = "spark";
+    s.style.left = (o.lane * 10 + 5) + "%";
+    s.style.marginLeft = (Math.random() * 30 - 21) + "px";
+    s.style.top = (o.y + ORB_SIZE / 2 - 10 + Math.random() * 14) + "px";
+    fx.appendChild(s); setTimeout(() => s.remove(), 560);
+  }
+
+  // ---------- Efectes ----------
+  function popText(xPct, y, text, cls) {
+    const p = document.createElement("div");
+    p.className = "plus " + (cls || ""); p.textContent = text;
+    p.style.left = xPct + "%"; p.style.top = y + "px";
+    fx.appendChild(p); setTimeout(() => p.remove(), 720);
+  }
+
+  function burst(lane, y, opt = {}) {
+    const x = lane * 10 + 5;
+    const s = document.createElement("div");
+    s.className = "splat" + (opt.small ? " small" : "");
+    s.style.left = x + "%"; s.style.top = y + "px";
+    fx.appendChild(s); setTimeout(() => s.remove(), 520);
+    const n = opt.small ? 4 : 7;
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement("div");
+      c.className = "chunk"; c.style.left = x + "%"; c.style.top = y + "px";
+      c.style.setProperty("--dx", (Math.random() * 90 - 45) + "px");
+      c.style.setProperty("--dy", (Math.random() * 70 - 50) + "px");
+      if (i % 3 === 0) c.style.background = "#8a1c1c";
+      fx.appendChild(c); setTimeout(() => c.remove(), 560);
+    }
+    if (!opt.small) popText(x, y - 20, "+1", "");
+  }
+
+  function killZombie(z) {
+    zombies = zombies.filter(o => o !== z);
+    z.el.classList.add("dead");
+    setTimeout(() => z.el.remove(), 450);
+    burst(z.lane, z.y + z.h * 0.55);
+    score++; scoreEl.textContent = score;
+  }
+
+  // ---------- Bucle ----------
+  function frame(ts) {
+    if (!running) return;
+    const dt = Math.min((ts - last) / 1000, 0.05); last = ts;
+    const lim = limit();
+
+    // fletxes: volen cap amunt i toquen el primer zombi (o el gegant) que trobin
+    for (const a of arrows) {
+      const prev = a.y;
+      a.y -= ARROW_SPEED * dt;
+      // la fletxa toca el primer que troba pujant: zombi/gegant (només les normals) o bola de llum
+      let hit = null, hitOrb = null, hitBottom = -Infinity;
+      if (!a.special) {
+        for (const z of zombies) {
+          if (!inLane(z, a.lane)) continue;
+          const zTop = z.y + z.h * 0.25, zBot = z.y + z.h * 0.95;
+          if (zBot < 0) continue;
+          if (a.y <= zBot && prev + ARROW_H * 0.3 >= zTop && zBot > hitBottom) { hit = z; hitBottom = zBot; }
+        }
+      }
+      for (const o of orbs) {
+        if (o.done || o.lane !== a.lane) continue;
+        const oBot = o.y + ORB_SIZE;
+        if (a.y <= oBot && prev + ARROW_H * 0.3 >= o.y && oBot > hitBottom) { hitOrb = o; hit = null; hitBottom = oBot; }
+      }
+      if (hitOrb) { destroyOrb(hitOrb); a.done = true; }
+      else if (hit) {
+        if (hit === boss) hitBoss(a); else killZombie(hit);
+        a.done = true;
+      }
+      else if (a.y + ARROW_H < 0) a.done = true;      // surt per dalt
+      else a.el.style.transform = `translateY(${a.y}px)`;
+    }
+    if (arrows.some(a => a.done)) {
+      arrows = arrows.filter(a => { if (a.done) a.el.remove(); return !a.done; });
+    }
+
+    // zombis
+    for (const z of zombies) {
+      z.y += z.speed * dt; place(z);
+      if (z.y + z.h >= lim) return end("zombi");
+    }
+
+    // el gegant carrega i dispara boles de llum
+    if (boss) {
+      const oy = boss.y + boss.h * 0.8 - ORB_SIZE / 2;
+      if (!boss.charge && boss.y > -boss.h * 0.4) {
+        boss.fireIn -= dt;
+        if (boss.fireIn <= 0) startCharge();
+      }
+      if (boss.charge) {
+        const c = boss.charge;
+        c.t += dt;
+        c.el.style.transform = `translateY(${oy}px)`;
+        if (c.t >= CHARGE_TIME) {
+          c.el.classList.remove("charge");
+          orbs.push({ lane: c.lane, y: oy, el: c.el, warn: c.warn });
+          firePose(boss);
+          boss.charge = null;
+          boss.fireIn = fireGap();
+        }
+      }
+    }
+
+    // boles de llum
+    for (const o of orbs) {
+      if (o.done) continue;
+      o.y += ORB_SPEED * dt;
+      o.el.style.transform = `translateY(${o.y}px)`;
+      o.sparkT = (o.sparkT || 0) + dt;
+      if (o.sparkT > 0.035) { o.sparkT = 0; spark(o); }     // estela de guspires
+      if (o.y + ORB_SIZE >= lim) return end("orb");
+    }
+    if (orbs.some(o => o.done)) {
+      orbs = orbs.filter(o => { if (o.done) { o.el.remove(); o.warn.remove(); } return !o.done; });
+    }
+
+    // indicador de recàrrega de la fletxa extra
+    if (MODES[mode].boss) {
+      dodgeBtn.style.setProperty("--cd", Math.max(0, Math.min(1, (holyReady - ts) / HOLY_COOLDOWN)));
+    }
+
+    // aparició de zombis
+    spawnIn -= dt;
+    if (spawnIn <= 0) {
+      spawn();
+      spawnIn = spawnDelay();
+    }
+    if (MODES[mode].boss && !boss && score >= nextBossAt) trySpawnBoss();
+
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Estats ----------
+  function start(m) {
+    mode = m;
+    layer.innerHTML = ""; fx.innerHTML = "";
+    zombies = []; arrows = []; orbs = [];
+    boss = null; bossCount = 0; nextBossAt = BOSS_EVERY;
+    holyReady = 0; dodgeBtn.style.setProperty("--cd", 0);
+    score = 0; scoreEl.textContent = 0;
+    bestLabel.textContent = "Rècord · " + MODES[m].name;
+    bestEl.textContent = bests[m];
+    dodgeBtn.classList.toggle("hidden", !MODES[m].boss);
+    noteEl.textContent = MODES[m].note;
+    startScr.classList.add("hidden"); overScr.classList.add("hidden");
+    screen = "playing"; spawnIn = 0.3; running = true; last = performance.now();
+    game.focus(); requestAnimationFrame(frame);
+  }
+
+  function end(cause) {
+    running = false; screen = "over";
+    game.classList.remove("hurt"); void game.offsetWidth; game.classList.add("hurt");
+    if (score > bests[mode]) {
+      bests[mode] = score; bestEl.textContent = score;
+      try { localStorage.setItem(bestKey(mode), score); } catch (e) {}
+      renderBests();
+    }
+    overTitle.textContent = cause === "orb" ? "T'ha fulminat el Kame Hame Ha" : "T'han menjat el cervell";
+    finalEl.textContent = score;
+    overScr.classList.remove("hidden");
+  }
+
+  function showMenu() {
+    running = false; screen = "menu";
+    layer.innerHTML = ""; fx.innerHTML = "";
+    zombies = []; arrows = []; orbs = []; boss = null;
+    renderBests();
+    overScr.classList.add("hidden"); startScr.classList.remove("hidden");
+  }
+
+  document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => start(b.dataset.mode)));
+  $("againBtn").onclick = () => start(mode);
+  $("toMenuBtn").onclick = showMenu;
+  $("menuBtn").onclick = showMenu;
+  dodgeBtn.addEventListener("click", () => { holyShot(); game.focus(); });
+
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    const k = e.key.toLowerCase();
+    if (k === " ") {
+      e.preventDefault();
+      if (running) holyShot(); else if (screen === "over") start(mode);
+      return;
+    }
+    if (k === "escape") { if (screen !== "menu") showMenu(); return; }
+    if (screen === "menu") {
+      if (k === "1") start("classic");
+      else if (k === "2") start("nyoku");
+      else if (k === "enter") start(mode);
+      return;
+    }
+    if (screen === "over" && k === "enter") { start(mode); return; }
+    if (KEYS.includes(k)) { e.preventDefault(); press(k); }
+  });
+
+  noteEl.textContent = "";
+})();
+</script>
 </body>
 </html>
