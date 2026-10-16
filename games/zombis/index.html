@@ -380,12 +380,13 @@
   const IMG = "zombi.png";           // zombis normals, a la mateixa carpeta que aquest HTML
   const BOSS_IMG = "nyoku.png";      // zombi gegant
   const BOSS_IMG2 = "nyoku2.png";    // el gegant mentre llança la bola de llum
-  const FIRE_POSE = 1000;            // ms que dura la pose de llançament
+  const FIRE_POSE = 1000;            // ms que dura la pose després de llançar la bola
+  const POSE_LEAD = 0.4;             // s abans del llançament en què ja canvia a nyoku2
 
   let boss2Ok = false;               // només canvia d'imatge si nyoku2.png existeix
   { const probe = new Image(); probe.onload = () => { boss2Ok = true; }; probe.src = BOSS_IMG2; }
   const MAX_ARROWS = 2;
-  const ARROW_SPEED = 900;           // px/s
+  const ARROW_SPEED = 820;           // px/s
   const ARROW_H = 64;
 
   const ORB_SPEED = 170;             // px/s
@@ -446,7 +447,7 @@
   // Dificultat: comença molt tranquil i va pujant sense parar.
   // ~100 punts = bona partida, 300+ = concentració màxima.
   const progress = () => Math.min(score / 320, 1.25);
-  const zombieSpeed = () => (28 + 115 * progress()) * (0.88 + Math.random() * 0.27);          // px/s
+  const zombieSpeed = () => (38 + 108 * progress()) * (0.88 + Math.random() * 0.27);          // px/s
   const spawnDelay = () => {
     const p = Math.min(progress(), 1);
     let d = Math.max(0.45, 1.9 - 1.35 * p) * (0.8 + Math.random() * 0.5);                      // s
@@ -573,16 +574,22 @@
     nextBossAt = score + BOSS_EVERY;
   }
 
-  // Un segon amb la imatge nyoku2.png i resplendor groc quan llança la bola
-  function firePose(b) {
-    const el = b.el, img = el.querySelector("img");
-    const orig = img ? img.getAttribute("src") : null;
-    el.classList.add("firing");
+  // Pose de llançament: imatge nyoku2.png i resplendor groc.
+  // Comença una mica abans de llançar la bola i dura 1 s després del llançament.
+  function poseOn(b) {
+    if (b.posed) return;
+    b.posed = true;
+    const img = b.el.querySelector("img");
+    b.poseOrig = img ? img.getAttribute("src") : null;
+    b.el.classList.add("firing");
     if (img && boss2Ok) img.src = BOSS_IMG2;
-    setTimeout(() => {
-      el.classList.remove("firing");
-      if (img && orig) img.src = orig;
-    }, FIRE_POSE);
+  }
+  function poseOff(b) {
+    if (!b.posed) return;
+    b.posed = false;
+    b.el.classList.remove("firing");
+    const img = b.el.querySelector("img");
+    if (img && b.poseOrig) img.src = b.poseOrig;
   }
 
   function startCharge() {
@@ -739,10 +746,12 @@
         const c = boss.charge;
         c.t += dt;
         c.el.style.transform = `translateY(${oy}px)`;
+        if (c.t >= CHARGE_TIME - POSE_LEAD) poseOn(boss);
         if (c.t >= CHARGE_TIME) {
           c.el.classList.remove("charge");
           orbs.push({ lane: c.lane, y: oy, el: c.el, warn: c.warn });
-          firePose(boss);
+          const b = boss;
+          setTimeout(() => poseOff(b), FIRE_POSE);
           boss.charge = null;
           boss.fireIn = fireGap();
         }
