@@ -452,7 +452,7 @@
     return (38 + 100 * p + 25 * p * p) * (0.88 + Math.random() * 0.27);                       // px/s
   };
   const spawnDelay = () => {
-    let d = Math.max(0.4, 1.9 * Math.exp(-0.00413 * score)) * (0.8 + Math.random() * 0.5);    // s
+    let d = Math.max(0.4, 1.9 * Math.exp(-0.0085 * score)) * (0.8 + Math.random() * 0.5);    // s
     if (boss) d *= 1.5;                                                                          // amb gegant, menys zombis normals
     return d;
   };
