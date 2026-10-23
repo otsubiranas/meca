@@ -119,6 +119,9 @@
     animation: shamble .9s ease-in-out infinite alternate;
   }
   .zombie .fallback { font-size: 62px; line-height: 90px; }
+  /* zombis grans (x2): tots menys la gata i el gegant */
+  .zombie.big img, .zombie.big .fallback { height: 180px; max-width: none; }
+  .zombie.big .fallback { font-size: 124px; line-height: 180px; }
   @keyframes shamble { from { rotate: -4deg; } to { rotate: 4deg; } }
   .zombie.dead img, .zombie.dead .fallback { animation: none; }
   .zombie.dead { animation: die .45s ease-in forwards; }
@@ -323,6 +326,8 @@
   @media (max-width: 600px) {
     #game { height: 520px; }
     .zombie img, .zombie .fallback { height: 64px; }
+    .zombie.big img, .zombie.big .fallback { height: 128px; }
+    .zombie.big .fallback { font-size: 88px; line-height: 128px; }
     .zombie .tag { font-size: 1.05rem; min-width: 26px; padding: 0 6px; }
     .zombie.boss img, .zombie.boss .fallback { height: 150px; }
     .zombie.boss .fallback { font-size: 110px; line-height: 150px; }
@@ -476,7 +481,9 @@
   const small = () => window.innerWidth <= 600;
   const imgH = () => (small() ? 64 : 90);
   const tagH = () => (small() ? 28 : 36);
-  const zH = () => imgH() + tagH();
+  const ZOMBIE_SCALE = 2;            // mida dels zombis normals i la princesa respecte a la gata
+  const zH = () => imgH() + tagH();                       // gata
+  const bigH = () => imgH() * ZOMBIE_SCALE + tagH();      // zombis normals i princesa
   const bossH = () => (small() ? 150 : 230) + 22;
   const limit = () => game.clientHeight - (pad.offsetHeight || 64);
   const inLane = (z, lane) => z.lanes ? z.lanes.includes(lane) : z.lane === lane;
@@ -539,7 +546,7 @@
 
   // ---------- Zombis ----------
   function spawn() {
-    const H = zH();
+    const H = bigH();
     const free = [];
     for (let c = 0; c < KEYS.length; c++) {
       if (boss && boss.lanes.includes(c)) continue;
@@ -550,19 +557,19 @@
 
     const cat = MODES[mode].boss && Math.random() < CAT_CHANCE && !zombies.some(z => z.kind);
     const speed = zombieSpeed();
-    makeZombie(lane, cat ? CAT_IMG : pickZombieImg(), -H, cat ? speed * 1.25 : speed, cat ? "cat" : null);
+    makeZombie(lane, cat ? CAT_IMG : pickZombieImg(), cat ? -zH() : -H, cat ? speed * 1.25 : speed, cat ? "cat" : null);
   }
 
   function makeZombie(lane, src, y, speed, kind) {
     const el = document.createElement("div");
-    el.className = "zombie";
+    el.className = "zombie" + (kind === "cat" ? "" : " big");
     el.style.left = (lane * 10) + "%";
     const tag = document.createElement("div");
     tag.className = "tag"; tag.textContent = KEYS[lane].toUpperCase();
     el.append(tag, makeImg(src));
     layer.appendChild(el);
 
-    const z = { lane, el, y, h: zH(), speed, kind };
+    const z = { lane, el, y, h: kind === "cat" ? zH() : bigH(), speed, kind };
     if (kind === "princess") { z.throwIn = PRINCESS_THROW_DELAY; z.thrown = false; }
     zombies.push(z);
     place(z);
@@ -759,7 +766,7 @@
     setTimeout(() => z.el.remove(), 450);
     burst(z.lane, z.y + z.h * 0.55);
     score++; scoreEl.textContent = score;
-    if (z.kind === "cat") makeZombie(z.lane, PRINCESS_IMG, z.y, z.speed * 0.85, "princess");
+    if (z.kind === "cat") makeZombie(z.lane, PRINCESS_IMG, z.y + z.h - bigH(), z.speed * 0.85, "princess");
   }
 
   // ---------- Bucle ----------
