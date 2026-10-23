@@ -120,8 +120,8 @@
   }
   .zombie .fallback { font-size: 62px; line-height: 90px; }
   /* zombis grans (x2): tots menys la gata i el gegant */
-  .zombie.big img, .zombie.big .fallback { height: 180px; max-width: none; }
-  .zombie.big .fallback { font-size: 124px; line-height: 180px; }
+  .zombie.big img, .zombie.big .fallback { height: 144px; max-width: none; }
+  .zombie.big .fallback { font-size: 99px; line-height: 144px; }
   @keyframes shamble { from { rotate: -4deg; } to { rotate: 4deg; } }
   .zombie.dead img, .zombie.dead .fallback { animation: none; }
   .zombie.dead { animation: die .45s ease-in forwards; }
@@ -326,8 +326,8 @@
   @media (max-width: 600px) {
     #game { height: 520px; }
     .zombie img, .zombie .fallback { height: 64px; }
-    .zombie.big img, .zombie.big .fallback { height: 128px; }
-    .zombie.big .fallback { font-size: 88px; line-height: 128px; }
+    .zombie.big img, .zombie.big .fallback { height: 102px; }
+    .zombie.big .fallback { font-size: 70px; line-height: 102px; }
     .zombie .tag { font-size: 1.05rem; min-width: 26px; padding: 0 6px; }
     .zombie.boss img, .zombie.boss .fallback { height: 150px; }
     .zombie.boss .fallback { font-size: 110px; line-height: 150px; }
@@ -481,7 +481,7 @@
   const small = () => window.innerWidth <= 600;
   const imgH = () => (small() ? 64 : 90);
   const tagH = () => (small() ? 28 : 36);
-  const ZOMBIE_SCALE = 2;            // mida dels zombis normals i la princesa respecte a la gata
+  const ZOMBIE_SCALE = 1.6;           // mida dels zombis normals i la princesa respecte a la gata
   const zH = () => imgH() + tagH();                       // gata
   const bigH = () => imgH() * ZOMBIE_SCALE + tagH();      // zombis normals i princesa
   const bossH = () => (small() ? 150 : 230) + 22;
