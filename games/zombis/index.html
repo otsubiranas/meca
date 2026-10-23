@@ -214,6 +214,19 @@
   .arrow.holy .head { border-bottom-color: #fff6c4; }
   .arrow.holy .shaft { background: linear-gradient(90deg, #fff0a0, #e6c050); }
 
+  /* ---------- Ganivet ---------- */
+  .warn.red {
+    background: linear-gradient(to bottom, rgba(255,90,90,0), rgba(255,90,90,.2));
+    border-left-color: rgba(255,130,130,.55); border-right-color: rgba(255,130,130,.55);
+  }
+  .knife { position: absolute; top: 0; width: 10%; height: 56px; display: flex; justify-content: center; z-index: 6; }
+  .knife .k { position: relative; width: 16px; height: 56px; filter: drop-shadow(0 0 4px rgba(255,80,80,.8)); }
+  .knife .handle { position: absolute; top: 0; left: 50%; width: 8px; height: 20px; transform: translateX(-50%);
+    background: linear-gradient(90deg, #6b4a2a, #3a2816); border-radius: 2px; }
+  .knife .guard { position: absolute; top: 18px; left: 0; right: 0; height: 4px; background: #c9a441; border-radius: 2px; }
+  .knife .blade { position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 34px solid #dfe3e6; }
+
   /* ---------- Efectes ---------- */
   .splat {
     position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%;
@@ -377,9 +390,28 @@
 <script>
 (() => {
   const KEYS = ["a","s","d","f","g","h","j","k","l","ñ"];
-  const IMG = "zombi.png";           // zombis normals, a la mateixa carpeta que aquest HTML
+  const IMG = "zombi.png";           // zombis normals (mode Clàssic), a la mateixa carpeta que aquest HTML
   const BOSS_IMG = "nyoku.png";      // zombi gegant
   const BOSS_IMG2 = "nyoku2.png";    // el gegant mentre llança la bola de llum
+
+  // Skins dels zombis normals en mode Nyoku (w = pes = probabilitat relativa)
+  const NYOKU_SKINS = [
+    { src: "zombi-1.png", w: 1 },
+    { src: "zombi-2.png", w: 1 },
+    { src: "zombi-3.png", w: 1 },
+    { src: "zombi-4.png", w: 1 },
+    { src: "zombi-5.png", w: 0.25 },   // rar
+    { src: "zombi-6.png", w: 0.25 }    // rar
+  ];
+
+  // Gata + princesa (només mode Nyoku)
+  const CAT_IMG = "cat.png";                 // la gata; en morir es converteix en la princesa
+  const PRINCESS_IMG = "zombi-princess.png"; // la princesa: 1 vida, llança 1 ganivet
+  const CAT_CHANCE = 0.07;                   // probabilitat que un zombi nou sigui la gata
+  const PRINCESS_THROW_DELAY = 0.8;          // s després de transformar-se fins que llança el ganivet
+  const KNIFE_SPEED = 260;                   // px/s
+  const KNIFE_SIZE = 56;
+
   const FIRE_POSE = 1000;            // ms que dura la pose després de llançar la bola
   const POSE_LEAD = 0.4;             // s abans del llançament en què ja canvia a nyoku2
 
@@ -397,7 +429,7 @@
 
   const MODES = {
     classic: { name: "Clàssic", boss: false, note: "Una fletxa que falla segueix volant fins que surt per dalt. Apunta bé." },
-    nyoku:   { name: "Nyoku",   boss: true,  note: "El gegant ocupa 3 carrils i la bola de llum sempre baixa pel carril del mig. ESPAI dispara una fletxa extra que la destrueix; una fletxa normal també." }
+    nyoku:   { name: "Nyoku",   boss: true,  note: "El gegant ocupa 3 carrils i la bola de llum sempre baixa pel carril del mig. ESPAI dispara una fletxa extra que la destrueix; una fletxa normal també. Si mates la gata, es converteix en una princesa que et llança un ganivet." }
   };
 
   const $ = id => document.getElementById(id);
@@ -412,6 +444,18 @@
   let boss = null, bossCount = 0, nextBossAt = BOSS_EVERY;
   let score = 0, running = false, last = 0, spawnIn = 0;
   let holyReady = 0;
+
+  // Tria una skin per a un zombi normal: Clàssic sempre usa zombi.png,
+  // Nyoku en tria una a l'atzar segons els pesos de NYOKU_SKINS.
+  function pickZombieImg() {
+    if (!MODES[mode].boss) return IMG;
+    const total = NYOKU_SKINS.reduce((s, k) => s + k.w, 0);
+    let r = Math.random() * total;
+    for (const k of NYOKU_SKINS) {
+      if ((r -= k.w) < 0) return k.src;
+    }
+    return NYOKU_SKINS[0].src;
+  }
 
   // ---------- Rècords per mode ----------
   const bests = {};
@@ -485,7 +529,7 @@
     const img = new Image();
     img.src = src; img.alt = ""; img.draggable = false;
     img.style.animationDelay = (-Math.random() * 0.9) + "s";
-    img.onerror = () => {                          // si falta zombi.png, mostra un emoji
+    img.onerror = () => {                          // si falta la imatge, mostra un emoji
       const f = document.createElement("div");
       f.className = "fallback"; f.textContent = "🧟";
       img.replaceWith(f);
@@ -504,17 +548,40 @@
     if (!free.length) return;
     const lane = free[Math.floor(Math.random() * free.length)];
 
+    const cat = MODES[mode].boss && Math.random() < CAT_CHANCE && !zombies.some(z => z.kind);
+    const speed = zombieSpeed();
+    makeZombie(lane, cat ? CAT_IMG : pickZombieImg(), -H, cat ? speed * 1.25 : speed, cat ? "cat" : null);
+  }
+
+  function makeZombie(lane, src, y, speed, kind) {
     const el = document.createElement("div");
     el.className = "zombie";
     el.style.left = (lane * 10) + "%";
     const tag = document.createElement("div");
     tag.className = "tag"; tag.textContent = KEYS[lane].toUpperCase();
-    el.append(tag, makeImg());
+    el.append(tag, makeImg(src));
     layer.appendChild(el);
 
-    const z = { lane, el, y: -H, h: H, speed: zombieSpeed() };
+    const z = { lane, el, y, h: zH(), speed, kind };
+    if (kind === "princess") { z.throwIn = PRINCESS_THROW_DELAY; z.thrown = false; }
     zombies.push(z);
     place(z);
+    return z;
+  }
+
+  function throwKnife(z) {
+    const warn = document.createElement("div");
+    warn.className = "warn red";
+    warn.style.left = (z.lane * 10) + "%";
+    warn.style.height = limit() + "px";
+    const el = document.createElement("div");
+    el.className = "knife";
+    el.style.left = (z.lane * 10) + "%";
+    el.innerHTML = '<div class="k"><span class="handle"></span><span class="guard"></span><span class="blade"></span></div>';
+    fx.append(warn, el);
+    const y = z.y + z.h * 0.6;
+    el.style.transform = `translateY(${y}px)`;
+    orbs.push({ lane: z.lane, y, el, warn, knife: true, size: KNIFE_SIZE });
   }
 
   function place(z) {
@@ -569,8 +636,8 @@
     popText(b.lanes[1] * 10 + 5, b.y + b.h * 0.4, "+5", "");
     score += 5; scoreEl.textContent = score;
     // fora les boles de llum que quedin
-    for (const o of orbs) { o.el.remove(); o.warn.remove(); }
-    orbs = [];
+    for (const o of orbs) { if (!o.knife) { o.el.remove(); o.warn.remove(); } }
+    orbs = orbs.filter(o => o.knife);
     if (b.charge) { b.charge.el.remove(); b.charge.warn.remove(); }
     boss = null; bossCount++;
     nextBossAt = score + BOSS_EVERY;
@@ -647,7 +714,7 @@
     o.done = true;
     const p = document.createElement("div");
     p.className = "puff";
-    p.style.left = (o.lane * 10 + 5) + "%"; p.style.top = (o.y + ORB_SIZE / 2) + "px";
+    p.style.left = (o.lane * 10 + 5) + "%"; p.style.top = (o.y + (o.size || ORB_SIZE) / 2) + "px";
     fx.appendChild(p); setTimeout(() => p.remove(), 460);
   }
 
@@ -692,6 +759,7 @@
     setTimeout(() => z.el.remove(), 450);
     burst(z.lane, z.y + z.h * 0.55);
     score++; scoreEl.textContent = score;
+    if (z.kind === "cat") makeZombie(z.lane, PRINCESS_IMG, z.y, z.speed * 0.85, "princess");
   }
 
   // ---------- Bucle ----------
@@ -716,7 +784,7 @@
       }
       for (const o of orbs) {
         if (o.done || o.lane !== a.lane) continue;
-        const oBot = o.y + ORB_SIZE;
+        const oBot = o.y + (o.size || ORB_SIZE);
         if (a.y <= oBot && prev + ARROW_H * 0.3 >= o.y && oBot > hitBottom) { hitOrb = o; hit = null; hitBottom = oBot; }
       }
       if (hitOrb) { destroyOrb(hitOrb); a.done = true; }
@@ -760,14 +828,23 @@
       }
     }
 
-    // boles de llum
+    // la princesa llança un únic ganivet
+    for (const z of zombies) {
+      if (z.kind !== "princess" || z.thrown) continue;
+      z.throwIn -= dt;
+      if (z.throwIn <= 0 && z.y > -z.h * 0.3) { z.thrown = true; throwKnife(z); }
+    }
+
+    // boles de llum i ganivets
     for (const o of orbs) {
       if (o.done) continue;
-      o.y += ORB_SPEED * dt;
+      o.y += (o.knife ? KNIFE_SPEED : ORB_SPEED) * dt;
       o.el.style.transform = `translateY(${o.y}px)`;
-      o.sparkT = (o.sparkT || 0) + dt;
-      if (o.sparkT > 0.035) { o.sparkT = 0; spark(o); }     // estela de guspires
-      if (o.y + ORB_SIZE >= lim) return end("orb");
+      if (!o.knife) {
+        o.sparkT = (o.sparkT || 0) + dt;
+        if (o.sparkT > 0.035) { o.sparkT = 0; spark(o); }     // estela de guspires
+      }
+      if (o.y + (o.size || ORB_SIZE) >= lim) return end(o.knife ? "knife" : "orb");
     }
     if (orbs.some(o => o.done)) {
       orbs = orbs.filter(o => { if (o.done) { o.el.remove(); o.warn.remove(); } return !o.done; });
@@ -814,7 +891,9 @@
       try { localStorage.setItem(bestKey(mode), score); } catch (e) {}
       renderBests();
     }
-    overTitle.textContent = cause === "orb" ? "T'ha fulminat el Kame Hame Ha" : "T'han menjat el cervell";
+    overTitle.textContent = cause === "orb" ? "T'ha fulminat el Kame Hame Ha"
+      : cause === "knife" ? "T'ha apunyalat la princesa"
+      : "T'han menjat el cervell";
     finalEl.textContent = score;
     overScr.classList.remove("hidden");
   }
