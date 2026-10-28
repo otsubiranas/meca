@@ -4,7 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Jocs de mecanografia</title>
+    <title>Jocs de mecanografia en català | Ot Subiranas</title>
+    <meta name="description" content="Jocs de mecanografia en català gratuïts per aprendre a escriure amb el teclat jugant: zombis, invasors, dinosaures, futbol i més. Prova de nivell inclosa.">
+    <meta name="keywords" content="jocs mecanografia, jocs mecanografia català, mecanografia en català, jocs mecanografia ot, aprendre mecanografia, practicar mecanografia">
+    <meta name="author" content="Ot Subiranas">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://meca.stepupfigueres.com/">
+
+    <!-- Open Graph (WhatsApp, xarxes) -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ca_ES">
+    <meta property="og:title" content="Jocs de mecanografia en català">
+    <meta property="og:description" content="Aprèn a escriure amb el teclat jugant. Jocs gratuïts de mecanografia en català.">
+    <meta property="og:url" content="https://meca.stepupfigueres.com/">
+    <meta property="og:image" content="https://meca.stepupfigueres.com/favicon.png">
+
+    <!-- Dades estructurades -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Jocs de mecanografia en català",
+      "alternateName": ["Jocs mecanografia Ot", "Jocs mecanografia català"],
+      "url": "https://meca.stepupfigueres.com/",
+      "inLanguage": "ca",
+      "author": { "@type": "Person", "name": "Ot Subiranas" }
+    }
+    </script>
 
     <!-- FAVICON: desa la imatge com a favicon.png a la mateixa carpeta que aquest index.html -->
     <link rel="icon" type="image/png" href="favicon.png">
@@ -121,6 +147,11 @@
         .game-card.disabled:hover { transform: none; background: #101927; border-color: rgba(132, 203, 201, 0.18); }
         .game-card.disabled .game-status { color: rgba(255, 255, 255, 0.45); }
 
+        /* TEXT SEO */
+        .seo-text { margin-top: 60px; max-width: 800px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        .seo-text h2 { color: white; font-size: 1.3rem; margin: 0 0 12px; }
+        .seo-text p { margin: 0; }
+
         @media (max-width: 900px) {
             .test-card { flex: 1 1 100%; }
         }
@@ -147,13 +178,13 @@
 <div class="catalog-page">
 
     <header class="catalog-header">
-        <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        <a href="index.html"><img src="logo.png" alt="Jocs de mecanografia en català"></a>
     </header>
 
     <section class="catalog-hero">
         <div class="hero-text">
             <h1>Jocs de<br><span>mecanografia.</span></h1>
-            <p>Una col·lecció de jocs de mecanografia pels alumnes de l'Escola Carme Guasch.</p>
+            <p>Una col·lecció de jocs de mecanografia en català i gratuïts creada per als alumnes de l'Escola Carme Guasch.</p>
         </div>
 
         <!-- PROVA DE NIVELL (targeta allargada) -->
@@ -421,6 +452,12 @@
             -->
 
         </div>
+
+        <!-- TEXT SEO -->
+        <section class="seo-text">
+            <h2>Aprèn mecanografia en català jugant</h2>
+            <p>Aquests jocs de mecanografia en català t'ajuden a millorar la velocitat i la precisió amb el teclat de manera divertida. Comença amb la prova de nivell i després practica amb els diferents jocs!</p>
+        </section>
     </main>
 </div>
 
@@ -447,7 +484,7 @@ document.querySelectorAll('.thumb').forEach(box => {
   if (!slug) return;
   const img = new Image();
   img.className = 'thumb-img';
-  img.alt = '';
+  img.alt = 'Jocs mecanografia ot';
   img.onload = () => box.appendChild(img);
   img.src = THUMB_DIR + 'thumbnail-' + slug + '.png';
 });
