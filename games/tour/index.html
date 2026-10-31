@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tour de France · Joc de mecanografia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@700&family=Nunito:wght@600;800&family=Oswald:wght@500;700&display=swap">
+<style>
+/* Cartell vintage del Tour: paper crema amb gra d’impremta, tinta blau marí, vermell del Tour i groc de mallot.
+   Una sola aparença (com un pòster imprès), igual en mode clar i fosc. */
+:root{
+  --paper:#f4e7c9; --paper-2:#ead7ae; --card:#fbf3df; --ink:#1f2a44; --red:#c8382f; --red-dk:#8f241e;
+  --blue:#1f4f8b; --yellow:#f2bf2f; --green:#2f8a55;
+  --display:"Alfa Slab One",Rockwell,"Roboto Slab",Georgia,serif;
+  --label:"Oswald","Arial Narrow","Franklin Gothic Medium",Impact,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --grain:radial-gradient(rgba(110,70,20,.07) 1px, transparent 1.3px);
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-weight:600;overflow:hidden}
+#app{position:relative;height:100%;display:flex;flex-direction:column}
+
+/* ---- capçalera i marcador ---- */
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px));
+  background:var(--paper) var(--grain) 0 0/7px 7px;border-bottom:3px solid var(--ink)}
+.title{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:1.35rem;color:var(--red);
+  letter-spacing:.02em;text-transform:uppercase;text-shadow:2px 2px 0 var(--ink);white-space:nowrap}
+.title .bike{display:inline-block;transform:scaleX(-1);text-shadow:none}
+.title i{display:inline-block;width:36px;height:12px;border:2px solid var(--ink);
+  background:linear-gradient(90deg,var(--blue) 33%,#fffaf0 33% 66%,var(--red) 66%)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{display:grid;justify-items:center;min-width:70px;padding:2px 10px 3px;background:#fffaf0;border:2px solid var(--ink);
+  border-radius:6px;box-shadow:3px 3px 0 var(--ink)}
+.stat .k{font-family:var(--label);font-weight:500;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red);line-height:1.3}
+.stat b{font-family:var(--label);font-weight:700;font-size:1.3rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{font-size:.7rem;font-weight:500}
+
+/* ---- barra de ruta: una carretera amb el recorregut ---- */
+.routebar{padding:6px max(30px,calc(env(safe-area-inset-right,0px) + 22px)) 8px max(30px,calc(env(safe-area-inset-left,0px) + 22px));
+  background:var(--paper-2) var(--grain) 0 0/7px 7px;border-bottom:3px solid var(--ink)}
+.route{position:relative;height:40px}
+.route .line{position:absolute;left:0;right:0;top:15px;height:10px;border:2px solid var(--ink);border-radius:6px;
+  background:#5f6383 repeating-linear-gradient(90deg,transparent 0 10px,#fffaf0 10px 18px) 0 50%/100% 2px no-repeat}
+.route .done{position:absolute;left:0;top:15px;height:10px;width:0;border:2px solid var(--ink);border-radius:6px;background:var(--red)}
+.route span{position:absolute;top:0;transform:translateX(-50%)}
+.route .mk{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fffaf0;border:2px solid var(--ink);
+  box-shadow:2px 2px 0 var(--ink);font-size:20px;overflow:hidden}
+.mk img{width:30px;height:30px;object-fit:contain;display:block;image-rendering:pixelated}
+#me{z-index:2;top:-4px;filter:drop-shadow(1px 2px 0 rgba(31,42,68,.6))}
+#me img{height:38px;display:block;image-rendering:pixelated}
+canvas{flex:1;width:100%;min-height:0;display:block}
+
+/* ---- pantalles (cartells) ---- */
+.overlay{position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-start;overflow:auto;z-index:5;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));
+  background:rgba(31,42,68,.55)}
+.overlay.hide{display:none}
+.card{margin:auto;width:100%;max-width:600px;text-align:center;color:var(--ink);padding:26px 28px 28px;
+  background:var(--card) var(--grain) 0 0/7px 7px;border:4px solid var(--ink);border-radius:10px;
+  box-shadow:inset 0 0 0 6px var(--card),inset 0 0 0 8px var(--red),9px 9px 0 rgba(31,42,68,.9)}
+.kicker{display:flex;align-items:center;gap:10px;justify-content:center;margin:0 0 4px;font-family:var(--label);font-weight:500;
+  font-size:.85rem;letter-spacing:.24em;text-transform:uppercase;color:var(--blue)}
+.kicker::before,.kicker::after{content:"";height:2px;width:34px;background:currentColor}
+.card h1{margin:0 0 10px;font-family:var(--display);font-weight:400;font-size:2.5rem;line-height:1.05;color:var(--red);
+  text-transform:uppercase;letter-spacing:.02em;text-shadow:3px 3px 0 var(--ink);text-wrap:balance}
+.card p{margin:8px auto;line-height:1.5;font-size:1.08rem;max-width:34em}
+.card .note{font-size:.92rem;color:#4d5670}
+.section{display:flex;align-items:center;gap:10px;margin:16px 0 4px;font-family:var(--label);font-weight:700;font-size:1.05rem;
+  letter-spacing:.14em;text-transform:uppercase}
+.section::before,.section::after{content:"";flex:1;height:0;border-top:2px dashed var(--ink);opacity:.5}
+kbd{display:inline-block;min-width:1.9em;margin:0 2px;padding:0 6px;font-family:var(--label);font-weight:700;font-size:.9rem;line-height:1.5;
+  background:#fffaf0;border:2px solid var(--ink);border-bottom-width:4px;border-radius:5px}
+.hint{font-size:.95rem;color:#4d5670}
+
+/* ---- botons ---- */
+button{font:inherit;cursor:pointer;color:inherit}
+.btn{margin:14px 6px 0;padding:12px 28px;font-family:var(--label);font-weight:700;font-size:1.25rem;letter-spacing:.08em;text-transform:uppercase;
+  color:#fff8e8;background:var(--red);border:3px solid var(--ink);border-radius:8px;box-shadow:4px 4px 0 var(--ink);
+  transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn.alt{color:var(--ink);background:#fffaf0}
+button:focus-visible{outline:3px dashed var(--blue);outline-offset:4px}
+
+/* ---- selector de ciclista ---- */
+#chars{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 2px}
+#chars .nav{flex:none;width:56px;height:56px;padding:0;border-radius:50%;font-size:1.4rem;line-height:1;background:#fffaf0;
+  border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+#chars .nav:hover{background:var(--yellow)}
+#chars .nav:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+#rider{position:relative;display:grid;place-items:center;width:220px;height:200px;max-width:100%;cursor:pointer;user-select:none}
+#rider::before{content:"";position:absolute;inset:6px 16px;border-radius:50%;border:3px solid var(--ink);
+  background:repeating-conic-gradient(from 0deg,var(--yellow) 0 10deg,#fbe7a6 10deg 20deg)}
+#rider-bike{position:relative;display:block;transform-origin:50% 100%;animation:pedal .8s ease-in-out infinite}
+#rider img{width:170px;height:150px;object-fit:contain;image-rendering:pixelated;display:block;filter:drop-shadow(2px 3px 0 rgba(31,42,68,.35))}
+#rider img.pop{animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.8);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes pedal{0%,50%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1deg)}75%{transform:translateY(-3px) rotate(1deg)}}
+#rider-count{display:block;width:max-content;margin:6px auto 2px;padding:2px 12px;font-family:var(--label);font-weight:700;font-size:1rem;
+  letter-spacing:.1em;font-variant-numeric:tabular-nums;color:#fff8e8;background:var(--ink);border-radius:4px}
+
+/* ---- mapa ---- */
+#map-wrap{position:relative;display:inline-block;margin:4px 0 0;max-width:100%}
+#map-img{display:block;max-width:100%;max-height:54vh;height:auto}
+#map-wrap .spot{position:absolute;margin:0;padding:0;background:transparent;border:4px solid transparent;border-radius:16px}
+#map-wrap .spot:hover{border-color:rgba(200,56,47,.55)}
+#map-wrap .spot[aria-checked="true"]{border-color:var(--red);background:rgba(242,191,47,.18);animation:glow 1.2s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 7px rgba(242,191,47,.45)}}
+#stage-info{display:inline-block;margin:10px 0 2px;padding:6px 18px;font-family:var(--label);font-weight:700;font-size:1.15rem;
+  letter-spacing:.1em;text-transform:uppercase;color:#fff8e8;background:var(--ink);border-radius:4px;
+  box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 4px #fff8e8}
+
+/* ---- resultats ---- */
+#stars{display:flex;justify-content:center;gap:10px;margin:0 0 6px;font-size:3.2rem;line-height:1}
+#stars span{animation:star .45s cubic-bezier(.3,1.6,.5,1) both}
+#stars span:nth-child(2){animation-delay:.15s}#stars span:nth-child(3){animation-delay:.3s}
+#stars span.off{filter:grayscale(1);opacity:.3}
+@keyframes star{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
+.praise{font-family:var(--label);font-weight:700;font-size:1.3rem!important;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:420px;margin:14px auto 4px}
+.res{padding:8px 10px;background:#fffaf0;border:2px solid var(--ink);border-radius:6px;box-shadow:3px 3px 0 var(--ink)}
+.res .k{display:block;font-family:var(--label);font-weight:500;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+.res .v{display:block;font-family:var(--display);font-size:1.7rem;line-height:1.2;font-variant-numeric:tabular-nums}
+
+/* ---- botons petits, formularis ---- */
+.btn small{display:block;font-family:var(--body);font-weight:600;font-size:.72rem;letter-spacing:0;text-transform:none;opacity:.85}
+.card .mp-host-only{display:none}
+#map.hostmode #map-img{max-height:34vh}
+#map.hostmode .hint{display:none}
+#host-role .field{margin:6px auto}
+.card.mphost .mp-host-only{display:block}
+.btn.small{padding:8px 16px;font-size:1rem;margin-top:8px}
+.mp-row{display:flex;justify-content:center;flex-wrap:wrap;gap:4px}
+.field{display:grid;gap:4px;max-width:340px;margin:12px auto;text-align:left}
+.field span{font-family:var(--label);font-weight:700;font-size:.9rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.field input{width:100%;padding:10px 14px;font:inherit;font-size:1.3rem;color:var(--ink);background:#fffaf0;border:3px solid var(--ink);
+  border-radius:8px;box-shadow:inset 2px 2px 0 rgba(31,42,68,.12)}
+.field input:focus{outline:3px dashed var(--blue);outline-offset:3px}
+#join-pin{font-family:var(--display);font-size:2.4rem;letter-spacing:.35em;text-align:center;padding:6px 0 6px .35em}
+.err{min-height:1.4em;color:var(--red);font-weight:800}
+.medal{position:relative;display:grid;place-items:center;width:200px;height:180px;margin:6px auto 0}
+.medal::before{content:"";position:absolute;inset:4px 14px;border-radius:50%;border:3px solid var(--ink);
+  background:repeating-conic-gradient(from 0deg,var(--yellow) 0 10deg,#fbe7a6 10deg 20deg)}
+.medal img{position:relative;width:150px;height:130px;object-fit:contain;image-rendering:pixelated}
+.tag{display:inline-block;margin-top:4px;padding:4px 14px;font-family:var(--label);font-weight:700;font-size:1.2rem;letter-spacing:.06em;
+  color:#fff8e8;background:var(--ink);border-radius:4px}
+.dots::after{content:"";animation:dots 1.5s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.mp-pos{font-family:var(--display);font-size:1.6rem!important;color:var(--ink)}
+.card.mp #again,.card.mp #change{display:none}
+.card:not(.mp) .mp-only{display:none}
+
+/* ---- compte enrere ---- */
+#count{position:absolute;inset:0;z-index:20;display:grid;place-items:center;pointer-events:none;background:rgba(31,42,68,.35)}
+#count.hide{display:none}
+#count span{font-family:var(--display);font-size:min(34vmin,260px);line-height:1;color:var(--red);text-shadow:8px 8px 0 var(--ink);
+  -webkit-text-stroke:4px #fff8e8;animation:countpop .9s ease-out both}
+@keyframes countpop{from{transform:scale(1.8);opacity:0}25%{transform:scale(1);opacity:1}to{transform:scale(.9);opacity:1}}
+
+/* ---- pantalla gran del professor ---- */
+#host{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;background:var(--paper) var(--grain) 0 0/7px 7px}
+#host.hide{display:none}
+.host-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px));
+  border-bottom:3px solid var(--ink)}
+.host-top .title{margin-right:auto}
+.chip{padding:4px 14px;font-family:var(--label);font-weight:700;font-size:1.15rem;letter-spacing:.08em;text-transform:uppercase;
+  background:#fffaf0;border:2px solid var(--ink);border-radius:6px;box-shadow:3px 3px 0 var(--ink)}
+.chip b{color:var(--red);font-family:var(--display);font-weight:400;letter-spacing:.12em}
+.host-lobby{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:24px;
+  padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px))}
+.joinbox{margin:0;align-self:start}
+.joinbox p{margin:6px auto}
+#h-qr{display:grid;place-items:center;margin:8px auto;width:200px;height:200px;padding:8px;background:#fff;border:3px solid var(--ink)}
+#h-qr img,#h-qr canvas{width:100%;height:auto;image-rendering:pixelated}
+#h-url{font-family:var(--label);font-weight:700;word-break:break-all;color:var(--blue)}
+.pin{font-family:var(--display);font-size:clamp(3rem,8vw,5.5rem);line-height:1;letter-spacing:.12em;color:var(--red);text-shadow:4px 4px 0 var(--ink)}
+.lobby-right{display:flex;flex-direction:column;min-width:0}
+.pgrid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;align-content:start;margin:6px 0 12px}
+.pcard{display:grid;justify-items:center;padding:8px 6px;background:#fffaf0;border:2px solid var(--ink);border-radius:8px;
+  box-shadow:3px 3px 0 var(--ink);animation:pop .3s ease both}
+.pcard img{width:96px;height:80px;object-fit:contain;image-rendering:pixelated}
+.pcard span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--label);font-weight:700;font-size:1.1rem}
+.empty{grid-column:1/-1;padding:30px 10px;text-align:center;font-size:1.15rem;color:#4d5670;border:3px dashed rgba(31,42,68,.35);border-radius:10px}
+.stage-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:4px}
+.stage-chips button{padding:6px 14px;font-family:var(--label);font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;
+  background:#fffaf0;border:2px solid var(--ink);border-radius:6px}
+.stage-chips button[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}
+.lobby-right .btn{align-self:center}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:4px 4px 0 var(--ink)}
+.host-race{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,32%)}
+.host-race.hide,.host-lobby.hide,.host-podium.hide{display:none}
+#hcv{width:100%;height:100%;display:block;min-height:0}
+.board{display:flex;flex-direction:column;min-height:0;padding:10px 14px;border-left:3px solid var(--ink);background:var(--paper-2) var(--grain) 0 0/7px 7px}
+.board .section{margin-top:4px}
+.rows{flex:1;min-height:0;overflow:auto;margin:6px 0;padding:0;list-style:none}
+.row{display:grid;grid-template-columns:2em 44px minmax(0,1fr) 3.4em;grid-template-rows:auto auto;column-gap:8px;align-items:center;
+  padding:5px 4px;border-bottom:2px dashed rgba(31,42,68,.25)}
+.row .rk{grid-row:1/3;font-family:var(--display);font-size:1.3rem;text-align:center}
+.row img{grid-row:1/3;width:44px;height:38px;object-fit:contain;image-rendering:pixelated}
+.row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--label);font-weight:700;font-size:1.1rem}
+.row .pt{text-align:right;font-family:var(--label);font-weight:700;font-variant-numeric:tabular-nums}
+.row .bar{height:12px;border:2px solid var(--ink);border-radius:6px;background:#fffaf0;overflow:hidden}
+.row .bar i{display:block;height:100%;background:var(--red);transition:width .4s}
+.row .ac{text-align:right;font-size:.85rem;color:#4d5670;font-variant-numeric:tabular-nums}
+.row.done .bar i{background:var(--green)}
+.row.off{opacity:.45}
+.host-podium{flex:1;min-height:0;overflow:auto;text-align:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.host-podium h1{margin:4px 0 12px;font-family:var(--display);font-weight:400;font-size:2.6rem;color:var(--red);text-transform:uppercase;text-shadow:3px 3px 0 var(--ink)}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:14px;margin:0 auto 18px}
+.step{display:grid;justify-items:center;width:min(200px,30vw)}
+.step img{width:min(140px,26vw);height:110px;object-fit:contain;image-rendering:pixelated;animation:pop .5s ease both}
+.step .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--label);font-weight:700;font-size:1.3rem}
+.step .blk{width:100%;display:grid;place-items:center;font-family:var(--display);font-size:2.4rem;color:#fff8e8;border:3px solid var(--ink);
+  border-radius:6px 6px 0 0;box-shadow:5px 5px 0 var(--ink);text-shadow:3px 3px 0 var(--ink)}
+.step.p1 .blk{height:150px;background:var(--yellow)}.step.p2 .blk{height:110px;background:#b8bec9}.step.p3 .blk{height:80px;background:#c98a4b}
+.final{max-width:720px;margin:0 auto 10px;padding:0;list-style:none;text-align:left}
+.final li{display:grid;grid-template-columns:2.2em minmax(0,1fr) 5em 5em 5em;gap:8px;align-items:center;padding:6px 8px;border-bottom:2px dashed rgba(31,42,68,.25);
+  font-family:var(--label);font-weight:700;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.final li span:nth-child(n+3){text-align:right}
+.final li.hd{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red);border-bottom:2px solid var(--ink)}
+.final .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.testnote{max-width:30em;margin:10px auto 0!important;padding:8px 12px;font-size:.9rem;background:#fff1c2;border:2px dashed var(--ink);border-radius:6px}
+@media (max-width:820px){
+  .host-lobby{grid-template-columns:minmax(0,1fr)}
+  .host-race{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,55%) minmax(0,45%)}
+  .board{border-left:0;border-top:3px solid var(--ink)}
+  .final li{grid-template-columns:2em minmax(0,1fr) 4.2em 4.2em}.final li span:nth-child(5){display:none}
+}
+
+#kb{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0}
+
+@media (max-width:560px){
+  .title{font-size:1.05rem}.title i{display:none}
+  .stat{min-width:58px;padding:1px 7px 2px}.stat .k{font-size:.58rem;letter-spacing:.08em}.stat b{font-size:1.05rem}
+  .card{padding:20px 16px 22px}.card h1{font-size:1.9rem}
+  .btn{padding:11px 20px;font-size:1.1rem}
+}
+@media (prefers-reduced-motion:reduce){
+  #rider-bike,#map-wrap .spot[aria-checked="true"],#stars span,#count span,.pcard,.step img,.dots::after{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <div class="title"><span class="bike">🚴</span>Tour de France<i></i></div>
+    <div class="stats">
+      <div class="stat"><span class="k">Punts</span><b id="sc">0</b></div>
+      <div class="stat"><span class="k">Precisió</span><b><span id="ac">100</span>%</b></div>
+      <div class="stat"><span class="k">Velocitat</span><b><span id="wp">0</span><small> ppm</small></b></div>
+      <div class="stat"><span class="k">Temps</span><b id="tm">0:00</b></div>
+    </div>
+  </header>
+  <div class="routebar"><div class="route"><div class="line"></div><div class="done" id="route-done"></div><span id="me"></span></div></div>
+  <canvas id="cv"></canvas>
+
+  <div class="overlay" id="start">
+    <div class="card">
+      <p class="kicker">Joc de mecanografia</p>
+      <h1>Tour de France</h1>
+      <p>Pedala per França! Escriu en francès el nom de cada element abans d’arribar-hi i la bicicleta no s’aturarà.</p>
+      <p class="note">No cal escriure accents, majúscules, guions ni espais.</p>
+      <div class="section">Tria el teu ciclista</div>
+      <div id="chars">
+        <button class="nav" id="prev" aria-label="Ciclista anterior">◀</button>
+        <div id="rider" title="Clica per canviar">
+          <span id="rider-bike"><img id="rider-img" alt=""></span>
+        </div>
+        <button class="nav" id="next" aria-label="Ciclista següent">▶</button>
+      </div>
+      <div id="rider-count" aria-hidden="true"></div>
+      <p class="hint"><kbd>←</kbd><kbd>→</kbd> o clica per canviar</p>
+      <button class="btn" id="go">Jugar sol ▶</button>
+      <div class="section">Cursa de classe</div>
+      <div class="mp-row">
+        <button class="btn alt small" id="mp-join">🎒 Entrar amb un codi</button>
+        <button class="btn alt small" id="mp-host">📺 Crear una sala</button>
+      </div>
+    </div>
+  </div>
+  <div class="overlay hide" id="join">
+    <div class="card">
+      <p class="kicker">Cursa de classe</p>
+      <h1>Entra a la cursa</h1>
+      <form id="join-form" autocomplete="off" novalidate>
+        <label class="field"><span>Codi de la sala</span>
+          <input id="join-pin" inputmode="numeric" maxlength="4" placeholder="0000" aria-describedby="join-err"></label>
+        <label class="field"><span>El teu nom</span>
+          <input id="join-name" maxlength="14" placeholder="Nom o sobrenom" aria-describedby="join-err"></label>
+        <p class="err" id="join-err" role="alert"></p>
+        <button type="button" class="btn alt" id="join-back">◀ Enrere</button><button class="btn" id="join-go">Entrar ▶</button>
+      </form>
+    </div>
+  </div>
+  <div class="overlay hide" id="wait">
+    <div class="card">
+      <p class="kicker" id="wait-kicker">Sala</p>
+      <h1 id="wait-title">Ja ets dins!</h1>
+      <div class="medal"><img id="wait-img" alt=""></div>
+      <div><span class="tag" id="wait-name"></span></div>
+      <p id="wait-msg" class="dots">Esperant que el professor doni la sortida</p>
+      <p class="hint" id="wait-stage"></p>
+      <button class="btn alt small" id="wait-leave">Sortir de la sala</button>
+    </div>
+  </div>
+  <div class="overlay hide" id="map">
+    <div class="card">
+      <p class="kicker">Tour de France</p>
+      <h1>Tria l’etapa</h1>
+      <div id="map-wrap" role="radiogroup" aria-label="Etapa">
+        <img id="map-img" alt="Mapa de França amb les tres etapes">
+      </div>
+      <div><span id="stage-info"></span></div>
+      <p class="hint"><kbd>←</kbd><kbd>→</kbd> per moure’t · <kbd>Enter</kbd> per sortir</p>
+      <div id="host-role" hidden>
+        <div class="section">Com vols fer la cursa?</div>
+        <label class="field"><span>El teu nom (si també jugues)</span>
+          <input id="host-name" maxlength="14" placeholder="Nom o sobrenom" autocomplete="off"></label>
+        <div class="mp-row">
+          <button class="btn alt" id="as-teacher">📺 Professor<br><small>pantalla gran amb la classificació</small></button>
+          <button class="btn" id="as-player">🚴 Alumne<br><small>jo també jugo la cursa</small></button>
+        </div>
+      </div>
+      <button class="btn alt" id="back">◀ Ciclista</button><button class="btn" id="go2">Sortida! 🚴</button>
+    </div>
+  </div>
+  <div class="overlay hide" id="end">
+    <div class="card">
+      <div id="stars"></div>
+      <h1 id="end-title">Arribada a París! 🏁</h1>
+      <p class="praise" id="praise"></p>
+      <p class="mp-pos mp-only" id="mp-pos"></p>
+      <div class="results">
+        <div class="res"><span class="k">Temps</span><span class="v" id="r-tm"></span></div>
+        <div class="res"><span class="k">Paraules/min</span><span class="v" id="r-wp"></span></div>
+        <div class="res"><span class="k">Precisió</span><span class="v" id="r-ac"></span></div>
+        <div class="res"><span class="k">Punts</span><span class="v" id="r-sc"></span></div>
+      </div>
+      <button class="btn" id="again">Torna a pedalar</button><button class="btn alt" id="change">Canvia d’etapa</button>
+      <p class="hint mp-only dots" id="mp-next">Esperant la propera cursa</p>
+      <div class="mp-host-only"><button class="btn" id="e-again">Nova cursa</button><button class="btn alt" id="e-close">Tancar la sala</button></div>
+    </div>
+  </div>
+  <div id="count" class="hide" aria-live="assertive"><span></span></div>
+  <div id="host" class="hide">
+    <header class="host-top">
+      <div class="title"><span class="bike">🚴</span>Tour de France<i></i></div>
+      <span class="chip" id="h-stage"></span>
+      <span class="chip">Sala <b id="h-pin">0000</b></span>
+      <button class="btn alt small" id="h-close">Tancar la sala</button>
+    </header>
+    <section class="host-lobby" id="h-lobby">
+      <div class="card joinbox">
+        <p class="kicker">Entra a la cursa</p>
+        <div id="h-qr"></div>
+        <p>Obre <span id="h-url"></span></p>
+        <p>i escriu el codi:</p>
+        <div class="pin" id="h-pin-big">0000</div>
+        <p class="testnote" id="h-test" hidden>Mode de prova: només s’hi pot entrar des d’altres pestanyes d’aquest navegador. Per jugar amb tota la classe cal configurar Firebase.</p>
+      </div>
+      <div class="lobby-right">
+        <div class="section">Ciclistes a la sortida · <span id="h-count">0</span></div>
+        <div class="pgrid" id="h-players"></div>
+        <div class="stage-chips" id="h-stages" role="group" aria-label="Etapa"></div>
+        <button class="btn" id="h-start" disabled>Sortida! 🚴</button>
+      </div>
+    </section>
+    <section class="host-race hide" id="h-race">
+      <canvas id="hcv"></canvas>
+      <aside class="board">
+        <div class="section">Classificació</div>
+        <ol class="rows" id="h-board"></ol>
+        <button class="btn alt small" id="h-stop">Acabar la cursa</button>
+      </aside>
+    </section>
+    <section class="host-podium hide" id="h-podium">
+      <h1>Classificació final</h1>
+      <div class="podium" id="h-pod"></div>
+      <ol class="final" id="h-final"></ol>
+      <button class="btn" id="h-again">Nova cursa</button>
+    </section>
+  </div>
+  <input id="kb" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Escriu aquí">
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ============ DADES ============
+   Les imatges són a la carpeta img/ (al costat d’aquest fitxer).
+   Per afegir imatges PNG més endavant: afegeix  img:"baguette.png"  a l’element
+   (si hi ha img, es dibuixa el PNG; si no, l’emoji). */
+const SPR = {
+  c0:"img/c0.png",
+  c1:"img/c1.png",
+  c2:"img/c2.png",
+  c3:"img/c3.png",
+  c4:"img/c4.png",
+  c5:"img/c5.png",
+  c6:"img/c6.png",
+  c7:"img/c7.png",
+  champagne:"img/champagne.png",
+  baguette:"img/baguette.png",
+  vin:"img/vin.png",
+  fromage:"img/fromage.png",
+  escargots:"img/escargots.png",
+  eiffel:"img/eiffel.webp",
+  notre:"img/notre.webp",
+  arc:"img/arc.webp",
+  mime:"img/mime.png",
+  peintre:"img/peintre.png",
+  bouledogue:"img/bouledogue.png",
+  croissant:"img/croissant.png",
+  cafe:"img/cafe.png",
+  accordeo:"img/accordeo.png",
+  metro:"img/metro.png",
+  lampadaire:"img/lampadaire.png",
+  asterix:"img/asterix.png",
+  obelix:"img/obelix.png",
+  ane:"img/ane.png",
+  baigneuse:"img/baigneuse.png",
+  ballon:"img/ballon.png",
+  bateau:"img/bateau.png",
+  beret:"img/beret.png",
+  bouee:"img/bouee.png",
+  bouillabaisse:"img/bouillabaisse.png",
+  bourguignon:"img/bourguignon.png",
+  cabine:"img/cabine.png",
+  camembert:"img/camembert.png",
+  caniche:"img/caniche.png",
+  champlavande:"img/champlavande.png",
+  charcuterie:"img/charcuterie.png",
+  chateau:"img/chateau.png",
+  chateausable:"img/chateausable.png",
+  chevre:"img/chevre.png",
+  cidre:"img/cidre.png",
+  coq:"img/coq.png",
+  coquillage:"img/coquillage.png",
+  coquille:"img/coquille.png",
+  crabe:"img/crabe.png",
+  creme:"img/creme.png",
+  cremebrulee:"img/cremebrulee.png",
+  dauphin:"img/dauphin.png",
+  drapeau:"img/drapeau.png",
+  escargot:"img/escargot.png",
+  etoile:"img/etoile.png",
+  fondue:"img/fondue.png",
+  foulard:"img/foulard.png",
+  fromagerie:"img/fromagerie.png",
+  garde:"img/garde.png",
+  glace:"img/glace.png",
+  horsbord:"img/horsbord.png",
+  huitres:"img/huitres.png",
+  jus:"img/jus.png",
+  kayak:"img/kayak.png",
+  lavande:"img/lavande.png",
+  louvre:"img/louvre.webp",
+  lunettes:"img/lunettes.png",
+  lys:"img/lys.png",
+  macarons:"img/macarons.png",
+  marin:"img/marin.png",
+  mariniere:"img/mariniere.png",
+  masque:"img/masque.png",
+  meduse:"img/meduse.png",
+  mouette:"img/mouette.png",
+  moulinrouge:"img/moulinrouge.webp",
+  moustache:"img/moustache.png",
+  mouton:"img/mouton.png",
+  napoleon:"img/napoleon.png",
+  oursin:"img/oursin.png",
+  paddle:"img/paddle.png",
+  painchoc:"img/painchoc.png",
+  parasol:"img/parasol.png",
+  parisienne:"img/parisienne.png",
+  pastis:"img/pastis.png",
+  pecheur:"img/pecheur.png",
+  pelican:"img/pelican.png",
+  perle:"img/perle.png",
+  phare:"img/phare.png",
+  pieuvre:"img/pieuvre.png",
+  planchevoile:"img/planchevoile.png",
+  poisson:"img/poisson.png",
+  pont:"img/pont.png",
+  quiche:"img/quiche.png",
+  raclette:"img/raclette.png",
+  raisin:"img/raisin.png",
+  roquefort:"img/roquefort.png",
+  sac:"img/sac.png",
+  sacrecoeur:"img/sacrecoeur.webp",
+  surf:"img/surf.png",
+  obelisque:"img/obelisque.webp",
+  msm:"img/msm.png",
+  nice:"img/nice.png",
+  map:"img/map.webp",
+  street:"img/street.webp",
+  cl0:"img/cl0.webp",
+  cl1:"img/cl1.webp",
+  cl2:"img/cl2.webp",
+  cl3:"img/cl3.webp",
+  cl4:"img/cl4.webp",
+  cl5:"img/cl5.webp",
+  cl6:"img/cl6.webp",
+  cl7:"img/cl7.webp",
+  cl8:"img/cl8.webp",
+  cl9:"img/cl9.webp",
+  cl10:"img/cl10.webp",
+  surfeur:"img/surfeur.png",
+  tonneau:"img/tonneau.png",
+  tortue:"img/tortue.png",
+  transat:"img/transat.png",
+  vache:"img/vache.png",
+  vigne:"img/vigne.png",
+  voilier:"img/voilier.png"
+};
+const CLOUDS = [SPR.cl0, SPR.cl1, SPR.cl2, SPR.cl3, SPR.cl4, SPR.cl5, SPR.cl6, SPR.cl7, SPR.cl8, SPR.cl9, SPR.cl10];
+const MORE_RIDERS = [
+  {name:"Zeus",img:"img/rider01.webp"},
+  {name:"Cleòpatra",img:"img/rider02.webp"},
+  {name:"Dràcula",img:"img/rider03.webp"},
+  {name:"Pingüí",img:"img/rider04.webp"},
+  {name:"Gladiadora",img:"img/rider05.webp"},
+  {name:"Follet del bosc",img:"img/rider06.webp"},
+  {name:"Robot del futur",img:"img/rider07.webp"},
+  {name:"Detectiu",img:"img/rider08.webp"},
+  {name:"Senyor del velocípede",img:"img/rider09.webp"},
+  {name:"Bus",img:"img/rider10.webp"},
+  {name:"Pirata",img:"img/rider11.webp"},
+  {name:"Ieti",img:"img/rider12.webp"},
+  {name:"Karateka",img:"img/rider13.webp"},
+  {name:"Espantaocells",img:"img/rider14.webp"},
+  {name:"Robot",img:"img/rider15.webp"},
+  {name:"Viatger del desert",img:"img/rider16.webp"},
+  {name:"Extraterrestre",img:"img/rider17.webp"},
+  {name:"Samurai",img:"img/rider18.webp"},
+  {name:"Inventor de vapor",img:"img/rider19.webp"},
+  {name:"Mag",img:"img/rider20.webp"},
+  {name:"Bruixa",img:"img/rider21.webp"},
+  {name:"Ós",img:"img/rider22.webp"},
+  {name:"Noia de la gorra",img:"img/rider23.webp"},
+  {name:"Velo Girls",img:"img/rider24.webp"},
+  {name:"Excursionista",img:"img/rider25.webp"}
+];
+const CYCLISTS = [
+  {name:"Maillot groc",img:SPR.c0},{name:"Rosa",img:SPR.c1},{name:"França",img:SPR.c2},{name:"Esquelet",img:SPR.c3},
+  {name:"Astérix",img:SPR.c4},{name:"Turquesa",img:SPR.c5},{name:"Maillot de pois",img:SPR.c6},{name:"Urbà",img:SPR.c7}
+];
+CYCLISTS.push(...MORE_RIDERS);
+/* Les paraules són en francès; per escriure no calen accents, majúscules, guions ni espais.
+   lands: monuments (se’n trien 3 a l’atzar). arr: com es diu al cartell “Has arribat …”. */
+const it = (w,img) => ({w,img});
+const person = (w,img) => ({w,img,person:true});   // les persones es dibuixen més grans
+const STAGES = [
+  {id:"plane", name:"París", icon:"🗼", place:"París", end:"Arribada a París! 🏁",
+   landH:[.62,.74],    // Notre-Dame (tall) i el monument final, més alts que els edificis (fracció de l’alçada de pantalla)
+   final:{w:"Tour Eiffel",img:SPR.eiffel,arr:"a París"},
+   lands:[
+     {w:"Arc de Triomphe",img:SPR.arc,arr:"a l’Arc de Triomphe",tall:true},
+     {w:"Notre-Dame",img:SPR.notre,arr:"a Notre-Dame",tall:true},
+     {w:"Sacré-Cœur",img:SPR.sacrecoeur,arr:"al Sacré-Cœur, a Montmartre",tall:true},
+     {w:"Louvre",img:SPR.louvre,arr:"al Louvre",tall:true},
+     {w:"Moulin Rouge",img:SPR.moulinrouge,arr:"al Moulin Rouge",tall:true},
+     {w:"Obélisque",img:SPR.obelisque,arr:"a l’Obélisque de la Concorde",tall:true}],
+   items:[
+     it("baguette",SPR.baguette), it("croissant",SPR.croissant), it("pain au chocolat",SPR.painchoc),
+     it("macarons",SPR.macarons), it("crème brûlée",SPR.cremebrulee), it("café",SPR.cafe),
+     it("champagne",SPR.champagne), it("vin",SPR.vin), it("camembert",SPR.camembert),
+     it("fromage",SPR.fromage), it("escargots",SPR.escargots), it("quiche",SPR.quiche),
+     it("mime",SPR.mime), it("peintre",SPR.peintre), it("accordéon",SPR.accordeo),
+     it("métro",SPR.metro), it("lampadaire",SPR.lampadaire), it("bouledogue",SPR.bouledogue),
+     it("caniche",SPR.caniche), it("béret",SPR.beret), it("foulard",SPR.foulard),
+     it("marinière",SPR.mariniere), it("moustache",SPR.moustache), it("Parisienne",SPR.parisienne),
+     it("marin",SPR.marin), it("Napoléon",SPR.napoleon), it("garde",SPR.garde),
+     it("coq",SPR.coq), it("drapeau",SPR.drapeau), it("fleur de lys",SPR.lys),
+     it("bateau-mouche",SPR.bateau), it("pont",SPR.pont), it("Astérix",SPR.asterix), it("Obélix",SPR.obelix)]},
+  {id:"mount", name:"Mont-Saint-Michel", icon:"🏰", place:"Mont-Saint-Michel", end:"Arribada al Mont-Saint-Michel! 🏰",
+   final:{w:"Mont-Saint-Michel",img:SPR.msm,arr:"al Mont-Saint-Michel"},
+   lands:[
+     {w:"château",img:SPR.chateau,arr:"al château"},
+     {w:"fromagerie",img:SPR.fromagerie,arr:"a la fromagerie"}],
+   items:[
+     it("vache",SPR.vache), it("mouton",SPR.mouton), it("chèvre",SPR.chevre), it("âne",SPR.ane),
+     it("escargot",SPR.escargot), it("raclette",SPR.raclette), it("fondue",SPR.fondue),
+     it("roquefort",SPR.roquefort), it("charcuterie",SPR.charcuterie), it("bœuf bourguignon",SPR.bourguignon),
+     it("tonneau",SPR.tonneau), it("vigne",SPR.vigne), it("raisin",SPR.raisin), it("lavande",SPR.lavande),
+     it("champ de lavande",SPR.champlavande), it("cidre",SPR.cidre), it("pastis",SPR.pastis)]},
+  {id:"beach", name:"Nice", icon:"🌴", place:"Nice", end:"Arribada a Nice! 🌴",
+   final:{w:"Nice",img:SPR.nice,arr:"a Nice"},
+   landH:[0,.66],      // el monument final, molt més gran
+   lands:[
+     {w:"phare",img:SPR.phare,arr:"al phare"},
+     {w:"château de sable",img:SPR.chateausable,arr:"al château de sable"},
+     {w:"cabine de plage",img:SPR.cabine,arr:"a la cabine de plage"}],
+   items:[
+     person("surfeur",SPR.surfeur), person("baigneuse",SPR.baigneuse), person("ballon",SPR.ballon), person("pêcheur",SPR.pecheur),
+     it("parasol",SPR.parasol), it("transat",SPR.transat), it("mouette",SPR.mouette), it("crabe",SPR.crabe),
+     it("étoile de mer",SPR.etoile), it("coquille",SPR.coquille), it("coquillage",SPR.coquillage),
+     it("dauphin",SPR.dauphin), it("tortue",SPR.tortue), it("poisson",SPR.poisson), it("pélican",SPR.pelican),
+     it("pieuvre",SPR.pieuvre), it("méduse",SPR.meduse), person("planche à voile",SPR.planchevoile),
+     it("voilier",SPR.voilier), it("kayak",SPR.kayak), person("paddle",SPR.paddle), it("hors-bord",SPR.horsbord),
+     it("planche de surf",SPR.surf), it("masque",SPR.masque), it("sac de plage",SPR.sac),
+     it("lunettes de soleil",SPR.lunettes), it("crème solaire",SPR.creme), it("glace",SPR.glace),
+     it("jus d'orange",SPR.jus), it("perle",SPR.perle), it("huîtres",SPR.huitres), it("bouée",SPR.bouee),
+     it("oursin",SPR.oursin), it("bouillabaisse",SPR.bouillabaisse)]}
+];
+let stageIdx = 0, stage = STAGES[0];
+const LANDS_PER_GAME = 2, ITEMS_PER_LAND = 4;   // + el monument final de l’etapa
+// zones clicables del mapa (en % de la imatge)
+const MAP_SPOTS = {mount:[7,15,34,30], plane:[46,0,28,38], beach:[66,64,32,22]};
+
+/* ============ UTILITATS ============ */
+const $ = id => document.getElementById(id);
+const norm = c => c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const isLetter = c => /^[a-z]$/.test(norm(c));
+const keyOf = w => [...w].map(norm).join("").replace(/œ/g,"oe").replace(/æ/g,"ae").replace(/[^a-z]/g,"");
+const FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const cv = $("cv"), ctx = cv.getContext("2d");
+let W=0, H=0, S=1;
+function resize(){
+  const r = cv.getBoundingClientRect(), d = window.devicePixelRatio||1;
+  cv.width = r.width*d; cv.height = r.height*d; W = r.width; H = r.height;
+  S = Math.max(.6, Math.min(1.25, H/560));
+  ctx.setTransform(d,0,0,d,0,0);
+}
+addEventListener("resize", resize);
+
+/* ============ ESTAT ============ */
+let state = "start";           // start | play | finishing | end
+let track = [], idx = 0, dist = 0, speed = 0, finishX = 0;
+let correct = 0, errors = 0, score = 0, elapsed = 0, shake = 0, endTimer = 0;
+let fx = [], banner = {t:0,text:""};
+const images = {};
+function loadImg(s){ if(s && !images[s]){ const im=new Image(); im.src=s; images[s]=im; } }
+
+// a les curses de classe tothom ha de tenir el mateix recorregut: s’usa un generador amb llavor compartida
+let rand = Math.random;
+function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1 | a);
+  t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=rand()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function newGame(seed){
+  rand = seed != null ? mulberry32(seed) : Math.random;
+  const pool = shuffle(stage.items.slice());
+  const lands = [...shuffle(stage.lands.slice()).slice(0, LANDS_PER_GAME), {...stage.final, big:true}];
+  track = []; let x = 700;
+  lands.forEach(L => {
+    for(let i=0;i<ITEMS_PER_LAND;i++){
+      const it = pool.pop();
+      track.push({...it, x, type:"item", pos:0, key:keyOf(it.w)});
+      x += 430;
+    }
+    x += 150;
+    track.push({...L, x, type:"land", pos:0, key:keyOf(L.w)});
+    x += L.big ? 700 : 640;
+  });
+  finishX = x; track.push({type:"finish", x});
+  // muntanya: el cim és al segon monument; abans s’hi puja i després es baixa
+  peakX = stage.id==="mount" ? track.filter(t => t.type==="land")[1].x : 0;
+  track.forEach(t => loadImg(t.img));
+  idx = 0; dist = 0; speed = 0; correct = errors = score = elapsed = 0; fx = []; banner.t = 0;
+  buildRoute(); hud();
+}
+
+function buildRoute(){
+  document.querySelectorAll(".route .mk").forEach(n=>n.remove());
+  track.filter(t=>t.type==="land"||t.type==="finish").forEach(t=>{
+    const s=document.createElement("span"); s.className="mk";
+    if(t.type==="finish") s.textContent = "🏁";
+    else s.innerHTML = '<img alt="" src="'+t.img+'">';
+    s.style.left = (t.x/finishX*100)+"%"; $("me").before(s);
+  });
+}
+
+/* ============ ENTRADA DE TECLAT ============ */
+const kb = $("kb");
+function focusKb(){ kb.focus({preventScroll:true}); }
+kb.addEventListener("input", () => { for(const ch of kb.value) typeChar(ch); kb.value = ""; });
+cv.addEventListener("pointerdown", focusKb);
+addEventListener("keydown", e => {
+  if(state==="start" && (e.key==="ArrowLeft" || e.key==="ArrowRight")){
+    e.preventDefault();
+    pick(riderIdx + (e.key==="ArrowRight" ? 1 : -1));
+    return;
+  }
+  if(state==="map" && e.key.startsWith("Arrow")){
+    e.preventDefault();
+    // ordre d’oest a est: Mont-Saint-Michel, París, Nice
+    const ord = ["mount","plane","beach"].map(id => STAGES.findIndex(st => st.id===id));
+    const d = e.key==="ArrowRight" || e.key==="ArrowDown" ? 1 : -1;
+    pickStage(ord[(ord.indexOf(stageIdx) + d + ord.length) % ord.length]);
+    return;
+  }
+  if(state==="map" && e.key==="Escape"){ showStart(); return; }
+  if(state==="join" || (state==="map" && mapMode==="host")) return;   // els formularis ja gestionen l’Enter
+  if(e.key==="Enter"){
+    e.preventDefault();
+    if(state==="host"){ if(MP.meta?.state==="lobby" && !$("h-start").disabled) hostStart(); return; }
+    if(state==="start") (joinPin ? showJoin() : showMap());
+    else if(state==="map") (mapMode==="host" ? null : startGame());
+    else if(state==="end" && !MP.role) startGame();
+  }
+});
+
+function typeChar(ch){
+  if(state!=="play") return;
+  const t = track[idx];
+  if(!t || t.type==="finish") return;
+  if(cycX()+(t.x-dist) > W-30) return;       // encara no és a la pantalla
+  if(!isLetter(ch)) return;                   // ignora espais, guions…
+  if(norm(ch) === t.key[t.pos]){
+    t.pos++; correct++; score += 10;
+    if(t.pos === t.key.length) collect(t);
+  } else { errors++; shake = .3; }
+}
+
+function collect(t){
+  const sx = cycX()+(t.x-dist), land = t.type==="land";
+  const bonus = t.big ? 250 : land ? 150 : 50; score += bonus;
+  fx.push({t, x0:sx, y0:groundY()+slopeY(t.x)-(land?90:45)*S, age:0, bonus});
+  t.done = true; idx++;
+  if(land){ banner = {t:2.6, text:"Has arribat "+t.arr+"! +"+bonus}; }
+}
+
+/* ============ GEOMETRIA ============ */
+const cycX = () => W*0.2;
+const groundY = () => H*0.72;   // línia on “planten” els elements
+const roadY = () => H*0.84;     // on circula el ciclista
+
+/* ============ DESNIVELL (etapa de muntanya) ============ */
+const GRADE = .22;          // pendent: 22 %
+let peakX = 0;
+function elev(wx){          // alçada del terreny en un punt del recorregut (cim arrodonit)
+  return peakX ? GRADE*(peakX - Math.hypot(wx-peakX, 300)) : 0;
+}
+const grade = wx => (elev(wx+1) - elev(wx-1)) / 2;
+// la càmera baixa a la pujada i puja a la baixada perquè es vegi el que ve
+const camY = () => Math.max(-60, Math.min(60, grade(dist)*W*.15));
+const slopeY = wx => elev(dist) - elev(wx) + camY();   // desplaçament vertical a la pantalla
+
+/* ============ JOC ============ */
+function startGame(){
+  newGame(); state = "play";
+  ["start","map","end"].forEach(id => $(id).classList.add("hide")); focusKb();
+}
+const SCREENS = ["start","map","end","join","wait"];
+function showOnly(id){ SCREENS.forEach(s => $(s).classList.toggle("hide", s!==id)); }
+function showStart(){ showOnly("start"); state = "start"; }
+let mapMode = "solo";                                  // solo | host
+function showMap(mode="solo"){
+  mapMode = mode; showOnly("map"); state = "map";
+  $("go2").hidden = mode==="host"; $("host-role").hidden = mode!=="host"; $("map").classList.toggle("hostmode", mode==="host");
+  if(mode==="host") try{ if(!$("host-name").value) $("host-name").value = localStorage.getItem("tdf-name") || ""; }catch(e){}
+  newGame();
+}
+$("go").onclick = () => joinPin ? showJoin() : showMap(); $("go2").onclick = () => mapMode==="host" ? createRoom(false) : startGame();
+$("back").onclick = showStart; $("again").onclick = startGame;
+
+function update(dt){
+  // a la pujada es va més lent i a la baixada més ràpid
+  const idle = ["start","map","join","wait"].includes(state);
+  const MAX = 270 * (idle ? .45 : 1) * (1 - grade(dist)*1.4);
+  let cap = state==="ready" ? 0 : MAX;
+  if(state==="play"){
+    elapsed += dt;
+    const t = track[idx];
+    if(t.type==="item" || t.type==="land"){
+      const gap = t.x - dist;
+      cap = Math.max(0, Math.min(MAX, (gap-170)*3));
+    } else if(dist >= t.x-90){ state="finishing"; endTimer=1.6; }
+  }
+  if(state==="finishing"){ cap = 0; endTimer -= dt; if(endTimer<=0) endGame(); }
+  speed += (cap-speed) * Math.min(1, dt*4);
+  if(speed<.5 && cap===0) speed = 0;
+  dist += speed*dt;
+  shake = Math.max(0, shake-dt);
+  banner.t = Math.max(0, banner.t-dt);
+  fx.forEach(f => f.age += dt); fx = fx.filter(f => f.age < .8);
+}
+
+function endGame(){
+  state = "end";
+  $("end").querySelector(".card").classList.toggle("mp", !!MP.id);
+  $("end").querySelector(".card").classList.toggle("mphost", !!MP.hostPlays);
+  $("mp-next").hidden = !!MP.hostPlays;
+  if(MP.id) mpFinish();
+  $("end-title").textContent = stage.end;
+  const m = elapsed/60, wpm = m>0 ? Math.round(correct/5/m) : 0, acc = accuracy();
+  $("r-tm").textContent = fmt(elapsed); $("r-wp").textContent = wpm;
+  $("r-ac").textContent = acc+"%"; $("r-sc").textContent = score;
+  const n = acc>=95 ? 3 : acc>=85 ? 2 : 1;
+  $("stars").innerHTML = [0,1,2].map(i => '<span'+(i<n ? '' : ' class="off"')+'>⭐</span>').join("");
+  $("praise").textContent = n===3 ? "Fantàstic! Ets un campió del teclat!" : n===2 ? "Molt bé! Gairebé perfecte!" : "Bona feina! Continua practicant!";
+  $("end").classList.remove("hide");
+}
+const accuracy = () => correct+errors ? Math.round(correct/(correct+errors)*100) : 100;
+const fmt = s => (s/60|0)+":"+String(s%60|0).padStart(2,"0");
+
+function hud(){
+  $("sc").textContent = score; $("ac").textContent = accuracy();
+  const m = elapsed/60; $("wp").textContent = m>.02 ? Math.round(correct/5/m) : 0;
+  $("tm").textContent = fmt(elapsed);
+  const pct = Math.min(100, dist/finishX*100);
+  $("me").style.left = pct+"%"; $("route-done").style.width = pct+"%";
+}
+
+/* ============ DIBUIX ============ */
+function emoji(e, x, y, size, alpha=1){
+  ctx.globalAlpha = alpha; ctx.font = size+"px "+FONT;
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText(e, x, y); ctx.globalAlpha = 1;
+}
+function sizeOf(t){
+  if(t.type==="land" && stage.landH && (t.big || t.tall)) return H*stage.landH[t.big ? 1 : 0];
+  return (t.big ? 250 : t.type==="land" ? 190 : t.person ? 124 : 92)*S;
+}
+function sprite(t, x, y, size, alpha=1){
+  const im = t.img && images[t.img];
+  if(im && im.complete && im.naturalWidth){
+    const bw = t.type==="land" ? size*1.8 : t.person ? size*1.6 : t===rider ? size*1.35 : size;   // monuments i persones amples poden ocupar més amplada
+    const k = Math.min(bw/im.naturalWidth, size/im.naturalHeight), w = im.naturalWidth*k, hh = im.naturalHeight*k;
+    ctx.globalAlpha = alpha; ctx.drawImage(im, x-w/2, y-hh, w, hh); ctx.globalAlpha = 1; return hh;
+  }
+  return size;
+}
+function hills(par, base, amp, f, color){
+  ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0,H);
+  for(let x=0;x<=W+10;x+=10) ctx.lineTo(x, base + Math.sin((x+dist*par)*f)*amp + Math.sin((x+dist*par)*f*2.3)*amp*.4);
+  ctx.lineTo(W,H); ctx.fill();
+}
+function peaks(par, base, h, sp, color, snow){
+  const off = dist*par, k0 = Math.floor(off/sp)-1;
+  for(let k=k0; k<k0+W/sp+3; k++){
+    const r = Math.abs(Math.sin(k*12.9898)*43758.5453)%1;   // alçada fixa per a cada cim
+    const x = k*sp - off, ph = h*(.6+.4*r), w = sp*(1+.5*r);
+    ctx.fillStyle = color; ctx.beginPath();
+    ctx.moveTo(x-w/2, base); ctx.lineTo(x, base-ph); ctx.lineTo(x+w/2, base); ctx.fill();
+    if(snow){
+      const f = .3, y = base-ph*(1-f);
+      ctx.fillStyle = "#f4f8ff"; ctx.beginPath();
+      ctx.moveTo(x-w/2*f, y); ctx.lineTo(x, base-ph); ctx.lineTo(x+w/2*f, y);
+      ctx.lineTo(x+w*.04, y+6*S); ctx.lineTo(x-w*.05, y+3*S); ctx.fill();
+    }
+  }
+}
+function sea(gy){
+  const top = gy-H*.14, g = ctx.createLinearGradient(0,top,0,gy);
+  g.addColorStop(0,"#1f7fd6"); g.addColorStop(1,"#62c9ef");
+  ctx.fillStyle = g; ctx.fillRect(0, top, W, gy-top);
+  ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 2;
+  for(let r=0;r<3;r++){
+    const y = top+(r+1)*(gy-top)/4, sp = 110+r*40, off = (dist*(.06+r*.05)+r*50)%sp;
+    for(let x=-off; x<W; x+=sp){ ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x+12,y-5,x+24,y); ctx.stroke(); }
+  }
+}
+const rnd = (k, n) => { const v = Math.sin(k*127.1 + n*311.7)*43758.5453; return v - Math.floor(v); };
+// tira d’imatge que es repeteix en horitzontal (el carrer de París)
+function strip(src, par, bottom, h){
+  const im = images[src]; if(!im || !im.complete || !im.naturalWidth) return;
+  const w = im.naturalWidth*h/im.naturalHeight, off = ((dist*par) % w + w) % w;
+  ctx.imageSmoothingEnabled = true;
+  for(let x=-off; x<W; x+=w) ctx.drawImage(im, Math.floor(x), bottom-h, Math.ceil(w)+1, h);
+  ctx.imageSmoothingEnabled = false;
+}
+// núvols de píxels en tres capes: els llunyans, petits i lents; els propers, grans i ràpids
+const CLOUD_LAYERS = [
+  {par:.015, drift:3,  s:.5, y:.05, n:4, a:.7},
+  {par:.04,  drift:7,  s:.8, y:.12, n:3, a:.85},
+  {par:.08,  drift:12, s:1.1, y:.2, n:2, a:1}];
+function clouds(){
+  CLOUD_LAYERS.forEach((l,li) => {
+    const span = W + 500*S;
+    for(let k=0;k<l.n;k++){
+      const im = images[CLOUDS[(li*4+k) % CLOUDS.length]]; if(!im || !im.complete || !im.naturalWidth) continue;
+      const w = im.naturalWidth*l.s*S, h = im.naturalHeight*l.s*S;
+      const x = ((k*span/l.n + rnd(k,50+li)*150*S - dist*l.par - T()*l.drift) % span + span) % span - 250*S;
+      ctx.globalAlpha = l.a; ctx.drawImage(im, x, H*l.y + rnd(k,60+li)*H*.06, w, h); ctx.globalAlpha = 1;
+    }
+  });
+}
+// ---- elements de paisatge compartits ----
+const T = () => performance.now()/1000;
+function noise(k, seed){            // soroll suau i estable per a cada posició
+  const i = Math.floor(k), f = k - i, u = f*f*(3-2*f);
+  return rnd(i, seed)*(1-u) + rnd(i+1, seed)*u;
+}
+function birds(n, y0, color){       // ocells en “v” que planegen
+  ctx.strokeStyle = color; ctx.lineWidth = 2*S; ctx.lineCap = "round";
+  for(let k=0;k<n;k++){
+    const x = ((T()*(18+k*6) + k*W/n*1.7 - dist*.04) % (W+120) + (W+120)) % (W+120) - 60;
+    const y = y0 + k*22*S + Math.sin(T()*1.3+k)*6*S, a = 7*S + Math.sin(T()*5+k)*3*S;
+    ctx.beginPath(); ctx.moveTo(x-10*S, y-a*.6); ctx.quadraticCurveTo(x-4*S, y-a, x, y); ctx.quadraticCurveTo(x+4*S, y-a, x+10*S, y-a*.6); ctx.stroke();
+  }
+}
+// ---- muntanya ----
+function ridge(par, base, h, color, snowLine, seed){
+  const step = 34*S, off = dist*par, k0 = Math.floor(off/step) - 1, n = Math.ceil(W/step) + 3;
+  const hy = k => base - h*(.18 + .82*Math.pow(noise(k/4, seed)*.8 + noise(k/1.3, seed+7)*.2, 1.7) + (rnd(k, seed+3)-.5)*.05);
+  ctx.beginPath(); ctx.moveTo(-50, H);
+  for(let k=k0; k<=k0+n; k++) ctx.lineTo(k*step - off, hy(k));
+  ctx.lineTo(W+50, H); ctx.closePath();
+  ctx.fillStyle = color; ctx.fill();
+  if(snowLine){                      // neu per sobre d’una cota, amb la vora irregular
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = "#f3f7ff"; ctx.beginPath(); ctx.moveTo(-50, 0);
+    for(let k=k0; k<=k0+n; k++) ctx.lineTo(k*step - off, base - h*snowLine + (rnd(k, seed+9)-.5)*16*S);
+    ctx.lineTo(W+50, 0); ctx.fill();
+    ctx.restore();
+  }
+}
+const hillY = (x, par, base, amp, f) => base + Math.sin((x+dist*par)*f)*amp + Math.sin((x+dist*par)*f*2.3)*amp*.4;
+function pine(x, y, h, c1, c2){
+  ctx.fillStyle = "#5b3b25"; ctx.fillRect(x-h*.05, y-h*.18, h*.1, h*.18);
+  for(let j=0;j<3;j++){
+    const ty = y - h*.15 - j*h*.25, tw = h*(.42 - j*.1);
+    ctx.fillStyle = j%2 ? c2 : c1; ctx.beginPath();
+    ctx.moveTo(x-tw, ty); ctx.lineTo(x, ty - h*.42); ctx.lineTo(x+tw, ty); ctx.fill();
+  }
+}
+function forest(par, base, amp, f, color, dark, light, sp, hMin, hMax){
+  hills(par, base, amp, f, color);
+  const off = dist*par, k0 = Math.floor(off/sp) - 1;
+  for(let k=k0; k<k0+W/sp+3; k++){
+    const x = k*sp - off + rnd(k,11)*sp*.6;
+    if(rnd(k,12) < .25) continue;                     // clarianes
+    pine(x, hillY(x, par, base, amp, f) + 6*S, (hMin + rnd(k,13)*(hMax-hMin))*S, dark, light);
+  }
+}
+function chalet(x, y, s){
+  const w = 56*s, h = 34*s;
+  ctx.fillStyle = "#e8e1d2"; ctx.fillRect(x-w/2, y-h*.35, w, h*.35);               // sòcol de pedra
+  ctx.fillStyle = "#9a6236"; ctx.fillRect(x-w/2, y-h, w, h*.65);                   // fusta
+  ctx.fillStyle = "#7b4a27"; for(let j=1;j<4;j++) ctx.fillRect(x-w/2, y-h+j*h*.16, w, 1.5*s);
+  ctx.fillStyle = "#4a2e1a"; ctx.beginPath();                                       // teulada
+  ctx.moveTo(x-w*.68, y-h+2*s); ctx.lineTo(x, y-h-24*s); ctx.lineTo(x+w*.68, y-h+2*s); ctx.fill();
+  ctx.fillStyle = "#f3f7ff"; ctx.beginPath();                                       // neu a la teulada
+  ctx.moveTo(x-w*.5, y-h-6*s); ctx.lineTo(x, y-h-24*s); ctx.lineTo(x+w*.5, y-h-6*s); ctx.lineTo(x+w*.3, y-h-9*s); ctx.lineTo(x-w*.3, y-h-8*s); ctx.fill();
+  for(const dx of [-.28,.28]){                                                      // finestres amb porticons
+    const wx = x + w*dx;
+    ctx.fillStyle = "#c33b2e"; ctx.fillRect(wx-9*s, y-h*.85, 18*s, 11*s);
+    ctx.fillStyle = "#ffe9a8"; ctx.fillRect(wx-5*s, y-h*.85, 10*s, 11*s);
+    ctx.fillStyle = "#e0457b"; ctx.fillRect(wx-6*s, y-h*.85+11*s, 12*s, 3*s);        // flors
+  }
+  ctx.fillStyle = "#5a3a22"; ctx.fillRect(x-w*.55, y-h*.42, w*1.1, 2*s);           // balcó
+  for(let bx=x-w*.55; bx<x+w*.55; bx+=4*s) ctx.fillRect(bx, y-h*.42, 1.5*s, 7*s);
+}
+function meadow(par, base, amp, f, color){
+  hills(par, base, amp, f, color);
+  const sp = 520*S, off = dist*par, k0 = Math.floor(off/sp) - 1;
+  for(let k=k0; k<k0+W/sp+3; k++){
+    const x = k*sp - off + rnd(k,21)*sp*.5;
+    const y = hillY(x, par, base, amp, f) + 10*S;
+    if(rnd(k,22) < .7) chalet(x, y, S*(.8 + rnd(k,23)*.3));
+    for(let j=0;j<3;j++) pine(x + (j-1)*70*S + 120*S, hillY(x+(j-1)*70*S+120*S, par, base, amp, f) + 8*S, (34+j*8)*S, "#2f6a3a", "#3c7f45");
+  }
+}
+// ---- platja ----
+function coast(par, horizon){
+  const step = 24*S, off = dist*par, k0 = Math.floor(off/step) - 1, n = Math.ceil(W/step) + 3;
+  const lh = k => Math.max(0, noise(k/9, 31) - .42) * H*.32;
+  ctx.fillStyle = "#86a98a"; ctx.beginPath(); ctx.moveTo(-50, horizon);
+  for(let k=k0; k<=k0+n; k++) ctx.lineTo(k*step - off, horizon - lh(k));
+  ctx.lineTo(W+50, horizon); ctx.fill();
+  const cols = ["#f4c9a3","#f6e3bc","#eaa98d","#fff1dc","#f0b8b0"];
+  for(let k=k0; k<=k0+n; k++){                    // vil·les als turons
+    const l = lh(k); if(l < 14*S || rnd(k,32) < .35) continue;
+    const x = k*step - off + rnd(k,33)*10*S, y = horizon - l*(.25 + rnd(k,34)*.55), w = (9 + rnd(k,35)*7)*S;
+    ctx.fillStyle = cols[rnd(k,36)*cols.length|0]; ctx.fillRect(x, y-w*.7, w, w*.7);
+    ctx.fillStyle = "#c4643f"; ctx.fillRect(x-1*S, y-w*.7-2.5*S, w+2*S, 3*S);
+  }
+}
+function sailboat(x, y, s){
+  ctx.fillStyle = "#3a4256"; ctx.beginPath();
+  ctx.moveTo(x-16*s, y); ctx.lineTo(x+16*s, y); ctx.lineTo(x+11*s, y+6*s); ctx.lineTo(x-12*s, y+6*s); ctx.fill();
+  ctx.fillStyle = "#fbfbff"; ctx.beginPath(); ctx.moveTo(x-1*s, y-3*s); ctx.lineTo(x-1*s, y-34*s); ctx.lineTo(x-14*s, y-3*s); ctx.fill();
+  ctx.fillStyle = "#ffe0a8"; ctx.beginPath(); ctx.moveTo(x+1*s, y-3*s); ctx.lineTo(x+1*s, y-28*s); ctx.lineTo(x+12*s, y-3*s); ctx.fill();
+}
+function riviera(gy){
+  const horizon = gy - H*.17;
+  coast(.04, horizon);
+  const g = ctx.createLinearGradient(0, horizon, 0, gy);
+  g.addColorStop(0,"#1d63b8"); g.addColorStop(.6,"#2ea3df"); g.addColorStop(1,"#7fdcef");
+  ctx.fillStyle = g; ctx.fillRect(0, horizon, W, gy-horizon);
+  // reflexos del sol
+  for(let k=0;k<26;k++){
+    const x = (rnd(k,41)*W*1.3 - dist*.03*(1+rnd(k,42))) % W, xx = (x+W)%W;
+    const y = horizon + 4*S + rnd(k,43)*(gy-horizon)*.55, a = (Math.sin(T()*2.5 + k*1.7)+1)/2;
+    ctx.fillStyle = "rgba(255,255,255,"+(a*.8).toFixed(2)+")"; ctx.fillRect(xx, y, (6+rnd(k,44)*10)*S, 2*S);
+  }
+  // velers
+  for(let k=0;k<3;k++){
+    const x = ((k*W*.45 + T()*(6+k*3) - dist*.05) % (W+120) + (W+120)) % (W+120) - 60;
+    sailboat(x, horizon + (8 + k*9)*S + Math.sin(T()*1.5+k)*1.5*S, S*(.55 + k*.12));
+  }
+  // onades
+  ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 2;
+  for(let r=0;r<3;r++){
+    const y = horizon + (gy-horizon)*(.45 + r*.17), sp = 110+r*40, o = (dist*(.06+r*.05)+r*50)%sp;
+    for(let x=-o; x<W; x+=sp){ ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x+12,y-5,x+24,y); ctx.stroke(); }
+  }
+  // vora: sorra mullada i escuma que va i ve
+  const sw = Math.sin(T()*1.2)*4*S;
+  ctx.fillStyle = "#d9bf86"; ctx.fillRect(0, gy-12*S+sw, W, 14*S);
+  ctx.fillStyle = "rgba(255,255,255,.9)"; ctx.beginPath(); ctx.moveTo(0, gy-10*S+sw);
+  for(let x=0; x<=W+20; x+=20){
+    const y = gy - 10*S + sw + Math.sin((x + dist*.9)*.05 + T()*2)*3*S;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, gy-16*S+sw); ctx.lineTo(0, gy-16*S+sw); ctx.fill();
+  birds(3, H*.14, "rgba(60,70,90,.75)");
+}
+const SCENES = {
+  plane:{sky:["#2f9ff2","#86cdfb"], ground:"#cdbfae", road:"#5f6383",
+    back(gy){},
+    front(gy){ strip(SPR.street, 1, gy+H*.04, H*.5); },     // el carrer va a la mateixa velocitat que la vorera
+    decor:k => ""},
+  mount:{sky:["#3f8fdc","#e4f1ff"], ground:"#4f8f4c", road:"#62656e",
+    back(gy){
+      ridge(.03, gy-H*.08, H*.55, "#a9b6d6", .6, 1);                  // serralada llunyana
+      ridge(.07, gy-H*.05, H*.4, "#8197bd", .7, 2);                   // serralada propera
+      birds(2, H*.16, "rgba(50,40,40,.7)");                           // àguiles
+      forest(.16, gy-H*.1, 16*S, .005, "#3f7346", "#24502f", "#2e5f38", 26*S, 26, 44);
+      meadow(.32, gy-H*.04, 12*S, .006, "#5e9c55"); },
+    decor:k => k%9===0 ? "🛖" : (k%3 ? "🌲" : "🌳")},
+  beach:{sky:["#5cc8ff","#eaf8ff"], ground:"#efd8a0", road:"#7d828c",
+    back(gy){ riviera(gy); },
+    decor:k => k%4===0 ? "⛱️" : "🌴"}
+};
+const INK = "#1f2a44", PAPER = "#fbf3df", RED = "#c8382f", YELLOW = "#f2bf2f", GREEN = "#2f8a55";
+function label(t, sx, y, isTarget){
+  // rètol de paper amb ombra impresa; lletres fetes en verd i la següent marcada en groc
+  ctx.font = "700 "+Math.round((isTarget ? 27 : 20)*S)+"px 'Courier Prime',ui-monospace,Menlo,Consolas,monospace";
+  ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  let i=0, c=0;
+  if(isTarget){
+    while(i<t.w.length && c<t.pos){ c += keyOf(t.w[i]).length; i++; }
+    while(c>0 && i<t.w.length && !keyOf(t.w[i])) i++;
+  }
+  const done = t.w.slice(0,i), rest = t.w.slice(i), next = isTarget ? rest.slice(0,1) : "";
+  const wd = ctx.measureText(done).width, wr = ctx.measureText(rest).width, wn = ctx.measureText(next).width;
+  const pad = 14*S, h = (isTarget ? 44 : 34)*S, sh = (isTarget ? 4 : 3)*S;
+  const ox = isTarget && shake>0 ? Math.sin(shake*90)*6 : 0;
+  const bw = wd+wr+pad*2;
+  // el rètol no surt mai de la pantalla (important al mòbil, quan l’element tot just entra)
+  const bx = Math.max(8*S, Math.min(W-bw-12*S, sx-bw/2)) + ox, x = bx+pad, by = y-h/2;
+  ctx.globalAlpha = isTarget ? 1 : .82;
+  ctx.fillStyle = INK; ctx.beginPath(); ctx.roundRect(bx+sh, by+sh, bw, h, 6*S); ctx.fill();
+  ctx.fillStyle = PAPER; ctx.beginPath(); ctx.roundRect(bx, by, bw, h, 6*S); ctx.fill();
+  ctx.lineWidth = (isTarget ? 3 : 2)*S; ctx.strokeStyle = isTarget && shake>0 ? RED : INK; ctx.stroke();
+  if(next.trim()){ ctx.fillStyle = YELLOW; ctx.fillRect(x+wd-2*S, by+7*S, wn+4*S, h-14*S); }
+  ctx.fillStyle = GREEN; ctx.fillText(done, x, y);
+  ctx.fillStyle = INK; ctx.fillText(rest, x+wd, y);
+  ctx.globalAlpha = 1;
+}
+
+let dt0 = 0;
+function draw(){
+  ctx.imageSmoothingEnabled = false;
+  const gy = groundY(), ry = roadY(), cx = cycX();
+  // cel
+  const sky = ctx.createLinearGradient(0,0,0,gy);
+  const sc = SCENES[stage.id];
+  sky.addColorStop(0,sc.sky[0]); sky.addColorStop(1,sc.sky[1]);
+  ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+  emoji("☀️", W*.85, H*.2, 60*S);
+  clouds();
+  sc.back(gy);
+  // terra i carretera
+  const yAt = sx => slopeY(dist + (sx - cx));
+  const band = (top, bot, color) => {
+    ctx.fillStyle = color; ctx.beginPath();
+    for(let x=-10; x<=W+10; x+=10) ctx.lineTo(x, top + yAt(x));
+    for(let x=W+10; x>=-10; x-=10) ctx.lineTo(x, bot + yAt(x));
+    ctx.fill();
+  };
+  band(gy-4, H*2, sc.ground);
+  if(sc.front) sc.front(gy);
+  band(gy+H*.04, gy+H*.24, sc.road);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
+  for(let x=-((dist)%90)-90; x<W; x+=90){
+    const y = ry+H*.015+2;
+    ctx.beginPath(); ctx.moveTo(x, y+yAt(x)); ctx.lineTo(x+44, y+yAt(x+44)); ctx.stroke();
+  }
+  // arbres de decorat
+  for(let k=Math.floor((dist-cx)/260)-1; k<Math.ceil((dist+W)/260); k++){
+    const wx = k*260 + ((k*73)%90), sx = cx+(wx-dist);
+    emoji(sc.decor(k), sx, gy+H*.03+yAt(sx), (k%7===0?64:54)*S);
+  }
+  // elements
+  track.forEach((t,i) => {
+    if(t.done) return;
+    const sx = cx+(t.x-dist); if(sx<-250||sx>W+250) return;
+    const y = gy+H*.03+yAt(sx);
+    if(t.type==="finish"){ emoji("🏁", sx, y, 120*S); return; }
+    const size = sizeOf(t);
+    // ombra a terra i aureola perquè destaquin sobre el fons (groga si és el que toca escriure)
+    ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath();
+    ctx.ellipse(sx, y-2*S, Math.min(size*.38, 150*S), 6*S, 0, 0, Math.PI*2); ctx.fill();
+    ctx.shadowColor = i===idx ? "rgba(255,214,40,.95)" : "rgba(255,255,255,.9)";
+    ctx.shadowBlur = (i===idx ? 22 : 14)*S;
+    const hh = sprite(t, sx, y, size);
+    ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+    label(t, sx, Math.max(26*S, y-hh-20*S), i===idx);
+  });
+  // efectes de recollida
+  fx.forEach(f => {
+    const p = f.age/.8, x = f.x0+(cx-f.x0)*p, y = f.y0+(roadY()-90*S-f.y0)*p - Math.sin(p*Math.PI)*40;
+    sprite(f.t, x, y, sizeOf(f.t)*(1-p*.6), 1-p);
+    ctx.font = Math.round(26*S)+"px 'Alfa Slab One',Rockwell,Georgia,serif"; ctx.textAlign = "center";
+    ctx.lineWidth = 5*S; ctx.strokeStyle = INK; ctx.lineJoin = "round"; ctx.globalAlpha = 1-p*.5;
+    ctx.strokeText("+"+f.bonus, f.x0, f.y0-60*S-p*40);
+    ctx.fillStyle = YELLOW; ctx.fillText("+"+f.bonus, f.x0, f.y0-60*S-p*40); ctx.globalAlpha = 1;
+  });
+  // companys de la cursa de classe (darrere del propi ciclista)
+  if(MP.id) drawRivals(dt0);
+  // ciclista
+  // pedaleig: dos impulsos per volta de biela, amb un lleuger balanceig
+  const ph = dist*.035, moving = speed>10;
+  const bob = moving ? -Math.abs(Math.sin(ph))*3*S : 0;
+  const rock = moving ? Math.sin(ph)*.018 : 0;
+  ctx.save(); ctx.translate(cx, ry+34*S+bob+camY()); ctx.rotate(rock - Math.atan(grade(dist)));
+  const mine = MP.id && (state==="play" || state==="ready" || state==="finishing");
+  if(mine){ ctx.shadowColor = "rgba(242,191,47,.95)"; ctx.shadowBlur = 18*S; }     // a la cursa, el teu ciclista brilla
+  const rh = sprite(rider, 0, 0, 160*S);
+  ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+  ctx.restore();
+  if(mine){                                                                        // i porta l’etiqueta «TU»
+    const ty = ry+34*S+bob+camY() - rh - 14*S;
+    ctx.font = Math.round(16*S)+"px 'Alfa Slab One',Rockwell,Georgia,serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const tw = ctx.measureText("TU").width + 18*S;
+    ctx.fillStyle = INK; ctx.fillRect(cx - tw/2 + 2*S, ty - 11*S + 2*S, tw, 22*S);
+    ctx.fillStyle = RED; ctx.fillRect(cx - tw/2, ty - 11*S, tw, 22*S);
+    ctx.fillStyle = "#fff8e8"; ctx.fillText("TU", cx, ty + 1*S);
+  }
+  // missatge d’arribada
+  if(banner.t>0){
+    ctx.globalAlpha = Math.min(1, banner.t*2);
+    // cinta de cartell: vermella amb puntes, filet crema i ombra impresa
+    ctx.font = Math.round(Math.min(26*S, W/26))+"px 'Alfa Slab One',Rockwell,Georgia,serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    const w = Math.min(W-60*S, ctx.measureText(banner.text).width+56*S), h = 56*S, bx = W/2-w/2, by = H*.06, tl = 22*S;
+    ctx.fillStyle = "#8f241e";
+    for(const d of [-1,1]){
+      const ex = d<0 ? bx : bx+w;
+      ctx.beginPath(); ctx.moveTo(ex, by+10*S); ctx.lineTo(ex+d*tl, by+10*S); ctx.lineTo(ex+d*tl*.55, by+h/2+10*S);
+      ctx.lineTo(ex+d*tl, by+h+10*S); ctx.lineTo(ex, by+h+10*S); ctx.fill();
+    }
+    ctx.fillStyle = INK; ctx.fillRect(bx+5*S, by+5*S, w, h);
+    ctx.fillStyle = RED; ctx.fillRect(bx, by, w, h);
+    ctx.strokeStyle = "#fff8e8"; ctx.lineWidth = 2*S; ctx.strokeRect(bx+5*S, by+5*S, w-10*S, h-10*S);
+    ctx.fillStyle = "#fff8e8"; ctx.fillText(banner.text, W/2, by+h/2+1*S, w-30*S);
+    ctx.globalAlpha = 1;
+  }
+}
+
+
+/* ============ MULTIJUGADOR (cursa de classe) ============
+   Per jugar amb tota la classe, enganxa aquí la configuració del teu projecte de Firebase
+   (Realtime Database). Si es deixa a null, el joc funciona en MODE DE PROVA:
+   només entre pestanyes del mateix navegador. */
+const FIREBASE_CONFIG = {
+  databaseURL: "https://tour-de-france-2225c-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tour-de-france-2225c"
+};
+
+// --- mode de prova: cada sala i cada jugador és una clau de localStorage; les altres pestanyes ho reben amb l’event “storage”
+function makeLocalNet(){
+  const subs = new Set(), K = (pin, rest) => "tdf:"+pin+":"+rest;
+  const get = k => { try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } };
+  const put = (k, v) => { try{ v==null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); }catch(e){} subs.forEach(f => f()); };
+  const keys = prefix => { const out = []; try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k.startsWith(prefix)) out.push(k); } }catch(e){} return out; };
+  const players = pin => Object.fromEntries(keys(K(pin,"p:")).map(k => [k.slice(K(pin,"p:").length), get(k)]));
+  addEventListener("storage", e => { if(!e.key || e.key.startsWith("tdf:")) subs.forEach(f => f()); });
+  const watch = fn => { subs.add(fn); setTimeout(fn); return () => subs.delete(fn); };
+  return {
+    test:true, now:() => Date.now(),
+    async getMeta(pin){ return get(K(pin,"meta")); },
+    async setMeta(pin, m){ put(K(pin,"meta"), m); },
+    async updateMeta(pin, patch){ const m = get(K(pin,"meta")); if(m) put(K(pin,"meta"), {...m, ...patch}); },
+    async removeRoom(pin){ keys("tdf:"+pin+":").forEach(k => { try{ localStorage.removeItem(k); }catch(e){} }); subs.forEach(f => f()); },
+    async setPlayer(pin, id, p){ put(K(pin,"p:"+id), p); },
+    async updatePlayer(pin, id, patch){ const p = get(K(pin,"p:"+id)); if(p) put(K(pin,"p:"+id), {...p, ...patch}); },
+    async resetPlayers(pin, patch){ for(const [id,p] of Object.entries(players(pin))) put(K(pin,"p:"+id), {...p, ...patch}); },
+    watchMeta(pin, cb){ return watch(() => cb(get(K(pin,"meta")))); },
+    watchPlayers(pin, cb){ return watch(() => cb(players(pin))); },
+    onLeave(pin, id){ addEventListener("pagehide", () => this.updatePlayer(pin, id, {online:false})); },
+    onHostLeave(pin){ addEventListener("pagehide", () => this.removeRoom(pin)); }
+  };
+}
+// --- Firebase Realtime Database (rooms/<codi>/meta i rooms/<codi>/players/<id>)
+async function makeFirebaseNet(cfg){
+  const base = "https://www.gstatic.com/firebasejs/10.12.2/";
+  const {initializeApp} = await import(base+"firebase-app.js");
+  const F = await import(base+"firebase-database.js");
+  const db = F.getDatabase(initializeApp(cfg));
+  let offset = 0; F.onValue(F.ref(db, ".info/serverTimeOffset"), s => offset = s.val() || 0);
+  const r = path => F.ref(db, "rooms/"+path);
+  return {
+    test:false, now:() => Date.now() + offset,
+    async getMeta(pin){ return (await F.get(r(pin+"/meta"))).val(); },
+    setMeta:(pin, m) => F.set(r(pin+"/meta"), m),
+    updateMeta:(pin, patch) => F.update(r(pin+"/meta"), patch),
+    removeRoom:pin => F.remove(r(pin)),
+    setPlayer:(pin, id, p) => F.set(r(pin+"/players/"+id), p),
+    updatePlayer:(pin, id, patch) => F.update(r(pin+"/players/"+id), patch),
+    async resetPlayers(pin, patch){
+      const all = (await F.get(r(pin+"/players"))).val() || {}, u = {};
+      for(const id in all) for(const k in patch) u[id+"/"+k] = patch[k];
+      if(Object.keys(u).length) await F.update(r(pin+"/players"), u);
+    },
+    watchMeta(pin, cb){ return F.onValue(r(pin+"/meta"), s => cb(s.val())); },
+    watchPlayers(pin, cb){ return F.onValue(r(pin+"/players"), s => cb(s.val() || {})); },
+    onLeave(pin, id){ F.onDisconnect(r(pin+"/players/"+id)).update({online:false}); },
+    onHostLeave(pin){ F.onDisconnect(r(pin)).remove(); }
+  };
+}
+let netPromise = null;
+// si Firebase no es pot carregar (sense internet, xarxa que el bloqueja…), el joc passa al mode de prova
+const getNet = () => netPromise ||= (FIREBASE_CONFIG
+  ? makeFirebaseNet(FIREBASE_CONFIG).catch(e => { console.warn("Firebase no disponible, mode de prova", e); return makeLocalNet(); })
+  : Promise.resolve(makeLocalNet()));
+
+const MP = {role:null, net:null, pin:null, id:null, meta:null, players:{}, unsub:[], seed:null, lastSend:0, disp:{}, ending:false};
+const newSeed = () => Math.floor(Math.random()*2147483647);
+const joinPin = (new URLSearchParams(location.search).get("sala") || "").replace(/\D/g,"").slice(0,4);
+const ordinal = n => n+(n===1 ? "r" : n===2 ? "n" : n===3 ? "r" : n===4 ? "t" : "è");
+const FRESH = {progress:0, score:0, acc:100, wpm:0, finished:false, time:0, finishedAt:0};
+function ranking(players){
+  return Object.entries(players).map(([id,p]) => ({id, ...p})).filter(p => p && p.name)
+    .sort((a,b) => (b.finished - a.finished) || (a.finished ? a.finishedAt - b.finishedAt : (b.progress - a.progress) || (b.score - a.score)));
+}
+function stopWatching(){ MP.unsub.forEach(u => { try{ u(); }catch(e){} }); MP.unsub = []; }
+function stageById(id){ return Math.max(0, STAGES.findIndex(st => st.id===id)); }
+function riderImg(i){ return (CYCLISTS[i|0] || CYCLISTS[0]).img; }
+
+// compte enrere sincronitzat amb l’hora del servidor
+let countTimer = 0;
+function countdown(startAt, then){
+  const el = $("count"), span = el.querySelector("span"); let shown = null;
+  el.classList.remove("hide"); clearTimeout(countTimer);
+  const tick = () => {
+    const left = Math.ceil((startAt - MP.net.now())/1000), txt = left > 0 ? String(left) : "Allez!";
+    if(txt !== shown){ shown = txt; span.textContent = txt; span.style.animation = "none"; void span.offsetWidth; span.style.animation = ""; }
+    if(left > 0) countTimer = setTimeout(tick, 80);
+    else { then(); countTimer = setTimeout(() => el.classList.add("hide"), 800); }
+  };
+  tick();
+}
+
+// ---------- alumne ----------
+function showJoin(){
+  showOnly("join"); state = "join"; $("join-err").textContent = "";
+  if(joinPin && !$("join-pin").value) $("join-pin").value = joinPin;
+  try{ if(!$("join-name").value) $("join-name").value = localStorage.getItem("tdf-name") || ""; }catch(e){}
+  setTimeout(() => ($("join-pin").value ? $("join-name") : $("join-pin")).focus());
+}
+$("mp-join").onclick = showJoin;
+$("join-back").onclick = showStart;
+$("join-pin").oninput = e => e.target.value = e.target.value.replace(/\D/g,"").slice(0,4);
+$("join-form").onsubmit = async e => {
+  e.preventDefault();
+  const pin = $("join-pin").value, name = $("join-name").value.trim().replace(/\s+/g," ").slice(0,14);
+  const err = m => { $("join-err").textContent = m; };
+  if(!/^\d{4}$/.test(pin)) return err("El codi de la sala té 4 xifres. El trobaràs a la pantalla gran.");
+  if(!name) return err("Escriu el teu nom per sortir a la classificació.");
+  $("join-go").disabled = true; err("");
+  try{
+    const net = MP.net = await getNet();
+    const meta = await net.getMeta(pin);
+    if(!meta) return err("No hi ha cap sala amb el codi "+pin+". Revisa’l a la pantalla gran.");
+    MP.role = "player"; MP.pin = pin; MP.id = Math.random().toString(36).slice(2,10); MP.seed = null;
+    await net.setPlayer(pin, MP.id, {name, rider:riderIdx, online:true, joined:net.now(), ...FRESH});
+    net.onLeave(pin, MP.id);
+    try{ localStorage.setItem("tdf-name", name); }catch(x){}
+    $("wait-name").textContent = name; $("wait-img").src = rider.img; $("wait-kicker").textContent = "Sala "+pin;
+    MP.unsub.push(net.watchMeta(pin, onPlayerMeta));
+  }catch(x){
+    console.error(x); err("No s’ha pogut connectar amb la sala. Comprova la connexió i torna-ho a provar.");
+  }finally{ $("join-go").disabled = false; }
+};
+function showWait(title, msg){
+  showOnly("wait"); state = "wait";
+  $("wait-title").textContent = title; $("wait-msg").textContent = msg;
+  $("wait-stage").textContent = "Etapa: "+stage.icon+" "+stage.place;
+}
+function leaveRoom(message){
+  const was = MP.role==="player" && MP.net ? [MP.pin, MP.id] : null;
+  stopWatching(); Object.assign(MP, {role:null, pin:null, id:null, meta:null, seed:null, watchP:null, players:{}});   // primer deixem d’escoltar la sala
+  if(was) MP.net.updatePlayer(was[0], was[1], {online:false});
+  $("end").querySelector(".card").classList.remove("mp"); $("count").classList.add("hide");
+  if(message){ showJoin(); $("join-err").textContent = message; } else showStart();
+}
+$("wait-leave").onclick = () => leaveRoom();
+function onPlayerMeta(meta){
+  if(!meta){ if(MP.role==="player") leaveRoom("El professor ha tancat la sala."); return; }
+  const prev = MP.meta; MP.meta = meta;
+  if(meta.stage !== stage.id && state!=="play" && state!=="finishing") pickStage(stageById(meta.stage));
+  if(meta.state==="lobby"){
+    if(state!=="wait" || prev?.state!=="lobby" || prev?.stage!==meta.stage) showWait("Ja ets dins!", "Esperant que el professor doni la sortida");
+  } else if(meta.state==="countdown" || meta.state==="race"){
+    if(MP.seed !== meta.seed){
+      if(meta.state==="race" && meta.startAt < MP.net.now()-3000){
+        if(state!=="wait") showWait("La cursa ja ha començat", "Espera la propera cursa per participar-hi"); return;
+      }
+      MP.seed = meta.seed; MP.disp = {};
+      if(!MP.watchP && MP.role==="player"){ MP.watchP = MP.net.watchPlayers(MP.pin, ps => { MP.players = ps; if(state==="end") showRank(); }); MP.unsub.push(MP.watchP); }
+      pickStage(stageById(meta.stage)); newGame(meta.seed);
+      showOnly(null); state = "ready"; focusKb();
+      MP.net.updatePlayer(MP.pin, MP.id, {...FRESH, online:true});
+      countdown(meta.startAt, () => { if(state==="ready"){ state = "play"; focusKb(); } });
+    }
+  } else if(meta.state==="done"){
+    if(state==="play" || state==="finishing" || state==="ready") endGame();   // el professor ha acabat la cursa
+  }
+}
+function showRank(){
+  const list = ranking(MP.players), i = list.findIndex(p => p.id===MP.id);
+  if(i < 0 || !list[i].finished) return;
+  const medal = ["🥇","🥈","🥉"][i] || "🚴";
+  $("mp-pos").textContent = medal+" Has quedat en "+ordinal(i+1)+" lloc de "+list.length+"!";
+}
+// els companys a la pantalla de l’alumne: cadascun al punt del recorregut on és, amb el seu nom
+function drawRivals(dt){
+  const rivals = Object.entries(MP.players).filter(([id,p]) => id!==MP.id && p && p.name && p.online!==false);
+  const cx = cycX(), ry = roadY();
+  rivals.forEach(([id,p], k) => {
+    const target = Math.min(1, p.progress || 0)*finishX, cur = MP.disp[id] ?? target;
+    const wx = MP.disp[id] = cur + (target-cur)*Math.min(1, dt*3);
+    const sx = cx + (wx - dist); if(sx < -120 || sx > W+120) return;
+    const im = images[riderImg(p.rider)]; if(!im || !im.naturalWidth) return;
+    const lift = (6 + (k%4)*13)*S, moving = Math.abs(target-cur) > 2;
+    const bob = moving ? -Math.abs(Math.sin(wx*.035))*3*S : 0, h = 140*S, w = h*im.naturalWidth/im.naturalHeight;
+    ctx.save();
+    ctx.translate(sx, ry + 34*S + slopeY(wx) - lift + bob); ctx.rotate(-Math.atan(grade(wx)));
+    ctx.drawImage(im, -w/2, -h, w, h); ctx.restore();
+    // nom a sobre del casc
+    ctx.font = "700 "+Math.round(15*S)+"px Oswald,'Arial Narrow',sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const tw = ctx.measureText(p.name).width + 14*S, th = 22*S, ty = ry + 34*S + slopeY(wx) - lift - h - 8*S - (k%2)*24*S;
+    ctx.globalAlpha = .85;
+    ctx.fillStyle = p.finished ? "#2f8a55" : "#1f2a44"; ctx.beginPath(); ctx.roundRect(sx - tw/2, ty - th/2, tw, th, 4*S); ctx.fill();
+    ctx.fillStyle = "#fff8e8"; ctx.fillText(p.name, sx, ty + 1*S);
+    ctx.globalAlpha = 1;
+  });
+}
+function mpSend(force){
+  const t = performance.now(); if(!force && t - MP.lastSend < 350) return; MP.lastSend = t;
+  const m = elapsed/60;
+  MP.net.updatePlayer(MP.pin, MP.id, {progress:Math.min(1, dist/finishX), score, acc:accuracy(), wpm:m>.02 ? Math.round(correct/5/m) : 0});
+}
+function mpFinish(){
+  const done = dist >= finishX - 120, m = elapsed/60;
+  MP.net.updatePlayer(MP.pin, MP.id, {progress:done ? 1 : Math.min(1, dist/finishX), score, acc:accuracy(),
+    wpm:m>0 ? Math.round(correct/5/m) : 0, finished:done, time:done ? elapsed : 0, finishedAt:done ? MP.net.now() : 0});
+  $("mp-pos").textContent = done ? "Calculant la posició…" : "La cursa s’ha acabat abans d’arribar a la meta.";
+  showRank();
+}
+
+// ---------- professor (pantalla gran) ----------
+$("mp-host").onclick = () => showMap("host");
+$("as-teacher").onclick = () => createRoom(false);
+$("as-player").onclick = () => {
+  if(!$("host-name").value.trim()){ $("host-name").focus(); $("host-name").placeholder = "Escriu el teu nom per jugar"; return; }
+  createRoom(true);
+};
+async function createRoom(plays){
+  let net;
+  try{ net = MP.net = await getNet(); }catch(x){ console.error(x); $("stage-info").textContent = "No s’ha pogut connectar amb Firebase"; return; }
+  let pin;
+  do{ pin = String(1000 + Math.floor(Math.random()*9000)); }while(await net.getMeta(pin));
+  Object.assign(MP, {role:"host", pin, players:{}, meta:null, disp:{}, ending:false, hostPlays:!!plays, id:null, seed:null});
+  await net.setMeta(pin, {state:"lobby", stage:stage.id, seed:newSeed(), startAt:0, created:net.now()});
+  net.onHostLeave(pin);
+  if(plays){                        // l’amfitrió també corre: s’apunta com un jugador més
+    const name = $("host-name").value.trim().replace(/\s+/g," ").slice(0,14);
+    MP.id = Math.random().toString(36).slice(2,10);
+    await net.setPlayer(pin, MP.id, {name, rider:riderIdx, online:true, joined:net.now(), ...FRESH});
+    try{ localStorage.setItem("tdf-name", name); }catch(x){}
+  }
+  showOnly(null); $("host").classList.remove("hide"); state = "host";
+  $("h-pin").textContent = $("h-pin-big").textContent = pin;
+  const url = location.origin + location.pathname + "?sala=" + pin;
+  $("h-url").textContent = location.host ? location.host + location.pathname.replace(/index\.html$/,"") : "aquesta mateixa pàgina";
+  $("h-test").hidden = !net.test;
+  $("h-qr").innerHTML = ""; $("h-qr").hidden = false;
+  if(window.QRCode && !net.test) new QRCode($("h-qr"), {text:url, width:184, height:184, colorDark:"#1f2a44", colorLight:"#ffffff"});
+  else $("h-qr").hidden = true;
+  $("h-stages").innerHTML = "";
+  STAGES.forEach(st => {
+    const b = document.createElement("button"); b.textContent = st.icon+" "+st.place; b.dataset.id = st.id;
+    b.onclick = () => net.updateMeta(pin, {stage:st.id}); $("h-stages").append(b);
+  });
+  MP.unsub.push(net.watchMeta(pin, m => { MP.meta = m; onHostMeta(); }),
+                net.watchPlayers(pin, ps => { MP.players = ps; scheduleBoard(); if(state==="end" && MP.id) showRank(); }));
+}
+function onHostMeta(){
+  const m = MP.meta; if(!m) return;
+  if(MP.hostPlays){                 // l’amfitrió jugador: sala d’espera a la pantalla de sala, cursa a la seva pantalla
+    if(m.stage !== stage.id && state!=="play" && state!=="finishing") pickStage(stageById(m.stage));
+    $("h-stage").textContent = stage.icon+" "+stage.place;
+    [...$("h-stages").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.id===m.stage));
+    $("h-lobby").classList.remove("hide"); $("h-race").classList.add("hide"); $("h-podium").classList.add("hide");
+    if(m.state==="lobby"){ showOnly(null); $("host").classList.remove("hide"); state = "host"; }
+    else { $("host").classList.add("hide"); onPlayerMeta(m); }
+    scheduleBoard(); return;
+  }
+  if(m.stage !== stage.id) pickStage(stageById(m.stage));
+  $("h-stage").textContent = stage.icon+" "+stage.place;
+  [...$("h-stages").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.id===m.stage));
+  $("h-lobby").classList.toggle("hide", m.state!=="lobby");
+  $("h-race").classList.toggle("hide", m.state!=="countdown" && m.state!=="race");
+  $("h-podium").classList.toggle("hide", m.state!=="done");
+  if((m.state==="countdown" || m.state==="race") && MP.seed !== m.seed){
+    MP.seed = m.seed; MP.disp = {}; MP.ending = false; newGame(m.seed);     // el mateix recorregut que els alumnes
+    countdown(m.startAt, () => {});
+  }
+  scheduleBoard();
+}
+function hostStart(){
+  const net = MP.net, startAt = net.now() + 4000, seed = newSeed();
+  net.updateMeta(MP.pin, {state:"countdown", seed, startAt});
+  setTimeout(() => { if(MP.meta?.seed===seed) net.updateMeta(MP.pin, {state:"race"}); }, 4200);
+}
+$("h-start").onclick = hostStart;
+$("h-stop").onclick = () => MP.net.updateMeta(MP.pin, {state:"done"});
+const newRace = async () => {
+  await MP.net.resetPlayers(MP.pin, FRESH);
+  MP.net.updateMeta(MP.pin, {state:"lobby", seed:newSeed(), startAt:0});
+};
+$("h-again").onclick = newRace;
+$("e-again").onclick = newRace;
+$("e-close").onclick = () => $("h-close").onclick();
+$("h-close").onclick = async () => {
+  const net = MP.net, pin = MP.pin;
+  stopWatching(); Object.assign(MP, {role:null, pin:null, id:null, meta:null, seed:null, players:{}, hostPlays:false, watchP:null});
+  $("host").classList.add("hide"); $("count").classList.add("hide");
+  $("end").querySelector(".card").classList.remove("mp","mphost");
+  await net.removeRoom(pin); showStart();
+};
+let boardTimer = 0;
+function scheduleBoard(){ if(!boardTimer) boardTimer = setTimeout(() => { boardTimer = 0; renderHost(); }, 200); }
+function el(tag, cls, text){ const n = document.createElement(tag); if(cls) n.className = cls; if(text != null) n.textContent = text; return n; }
+function renderHost(){
+  if(MP.role!=="host" || !MP.meta) return;
+  const m = MP.meta, list = ranking(MP.players);
+  if(m.state==="lobby"){
+    const on = list.filter(p => p.online !== false).sort((a,b) => a.joined - b.joined);
+    $("h-count").textContent = on.length; $("h-start").disabled = !on.length;
+    const box = $("h-players"); box.innerHTML = "";
+    if(!on.length) box.append(el("div","empty","Encara no hi ha ningú. Escaneja el codi QR o entra a la web i escriu el codi "+MP.pin+"."));
+    on.forEach(p => { const c = el("div","pcard"), im = el("img"); im.src = riderImg(p.rider); im.alt = "";
+      c.append(im, el("span", null, p.name)); box.append(c); });
+  }
+  if(m.state==="countdown" || m.state==="race"){
+    const ol = $("h-board"); ol.innerHTML = "";
+    list.forEach((p,i) => {
+      const li = el("li", "row"+(p.finished ? " done" : "")+(p.online===false ? " off" : ""));
+      const im = el("img"); im.src = riderImg(p.rider); im.alt = "";
+      const bar = el("span","bar"), fill = el("i"); fill.style.width = Math.round((p.progress||0)*100)+"%"; bar.append(fill);
+      li.append(el("span","rk", p.finished ? (["🥇","🥈","🥉"][i] || i+1) : i+1), im, el("span","nm",p.name), el("span","pt",p.score||0),
+                bar, el("span","ac",(p.acc ?? 100)+"%"));
+      ol.append(li);
+    });
+    // quan tothom qui corre ha arribat, la cursa s’acaba sola
+    const racing = list.filter(p => p.online !== false);
+    if(m.state==="race" && racing.length && racing.every(p => p.finished) && !MP.ending){
+      MP.ending = true; setTimeout(() => { if(MP.meta?.state==="race") MP.net.updateMeta(MP.pin, {state:"done"}); }, 2500);
+    }
+  }
+  if(m.state==="done"){
+    const pod = $("h-pod"); pod.innerHTML = "";
+    [1,0,2].forEach(i => { const p = list[i]; if(!p) return;
+      const st = el("div","step p"+(i+1)), im = el("img"); im.src = riderImg(p.rider); im.alt = "";
+      st.append(im, el("span","nm",p.name), el("div","blk", i+1)); pod.append(st); });
+    const ol = $("h-final"); ol.innerHTML = "";
+    const hd = el("li","hd"); hd.append(el("span",null,"#"), el("span",null,"Nom"), el("span",null,"Temps"), el("span",null,"Punts"), el("span",null,"Precisió")); ol.append(hd);
+    list.forEach((p,i) => { const li = el("li");
+      li.append(el("span",null,i+1), el("span","nm",p.name), el("span",null,p.finished ? fmt(p.time) : "—"), el("span",null,p.score||0), el("span",null,(p.acc ?? 100)+"%"));
+      ol.append(li); });
+  }
+}
+// la carretera de la pantalla gran: tots els ciclistes en carrils, amb els monuments del recorregut
+function hostFrame(dt){
+  const m = MP.meta; if(!m || (m.state!=="countdown" && m.state!=="race")) return;
+  const c = $("hcv"), r = c.getBoundingClientRect(), d = devicePixelRatio || 1;
+  if(!r.width || !r.height) return;
+  if(c.width !== Math.round(r.width*d) || c.height !== Math.round(r.height*d)){ c.width = Math.round(r.width*d); c.height = Math.round(r.height*d); }
+  const g = c.getContext("2d"), w = r.width, h = r.height, sc = SCENES[stage.id];
+  g.setTransform(d,0,0,d,0,0); g.imageSmoothingEnabled = false;
+  const sky = g.createLinearGradient(0,0,0,h*.3); sky.addColorStop(0, sc.sky[0]); sky.addColorStop(1, sc.sky[1]);
+  g.fillStyle = sky; g.fillRect(0,0,w,h);
+  const top = h*.3, bot = h-12, mx = Math.min(170, w*.22), rw = w - mx - 50;
+  g.fillStyle = sc.ground; g.fillRect(0, top-8, w, h-top+8);
+  g.fillStyle = sc.road; g.fillRect(0, top, w, bot-top);
+  const xOf = p => mx + p*rw;
+  // monuments i meta
+  track.filter(t => t.type==="land").forEach(t => {
+    const im = images[t.img]; if(!im || !im.naturalWidth) return;
+    const ar = im.naturalWidth/im.naturalHeight; let hh = h*.24, ww = hh*ar;
+    if(ww > rw*.3){ ww = rw*.3; hh = ww/ar; }
+    g.drawImage(im, xOf(t.x/finishX) - ww/2, top - 6 - hh, ww, hh);
+  });
+  const fx0 = xOf(1);
+  for(let y=top, k=0; y<bot; y+=10, k++){ g.fillStyle = k%2 ? "#fff" : "#1f2a44"; g.fillRect(fx0-5, y, 5, 10); g.fillStyle = k%2 ? "#1f2a44" : "#fff"; g.fillRect(fx0, y, 5, 10); }
+  g.fillStyle = "#fff8e8"; g.fillRect(xOf(0)-2, top, 4, bot-top);
+  // carrils
+  const list = Object.entries(MP.players).map(([id,p]) => ({id,...p})).filter(p => p.name).sort((a,b) => a.joined - b.joined);
+  const n = Math.max(1, list.length), lane = (bot-top)/n;
+  g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 2; g.setLineDash([14,12]);
+  for(let i=1;i<n;i++){ g.beginPath(); g.moveTo(0, top+i*lane); g.lineTo(w, top+i*lane); g.stroke(); }
+  g.setLineDash([]);
+  const rank = ranking(MP.players).map(p => p.id), size = Math.max(22, Math.min(lane*1.6, 96));
+  g.font = "700 "+Math.round(Math.max(12, Math.min(18, lane*.5)))+"px Oswald,'Arial Narrow',sans-serif"; g.textBaseline = "middle";
+  list.forEach((p,i) => {
+    const target = Math.min(1, p.progress || 0), cur = MP.disp[p.id] ?? target;
+    const v = MP.disp[p.id] = cur + (target-cur)*Math.min(1, dt*3);
+    const x = xOf(v), y = top + (i+1)*lane - lane*.12, moving = Math.abs(target-cur) > .0005;
+    const im = images[riderImg(p.rider)];
+    g.globalAlpha = p.online===false ? .4 : 1;
+    if(im && im.naturalWidth){
+      const hh = size, ww = hh*im.naturalWidth/im.naturalHeight, bob = moving ? Math.abs(Math.sin(performance.now()/90 + i))*2 : 0;
+      g.drawImage(im, x-ww/2, y-hh-bob, ww, hh);
+    }
+    const label = (rank.indexOf(p.id)+1)+" · "+p.name, tw = g.measureText(label).width, lh = Math.max(16, Math.min(26, lane*.7));
+    const lx = Math.max(4, x - size*.6 - tw - 18), ly = y - size*.45;
+    g.fillStyle = "#1f2a44"; g.fillRect(lx+2, ly-lh/2+2, tw+14, lh);
+    g.fillStyle = p.finished ? "#2f8a55" : "#fbf3df"; g.fillRect(lx, ly-lh/2, tw+14, lh);
+    g.strokeStyle = "#1f2a44"; g.lineWidth = 2; g.strokeRect(lx, ly-lh/2, tw+14, lh);
+    g.fillStyle = p.finished ? "#fff8e8" : "#1f2a44"; g.fillText(label, lx+7, ly+1);
+    g.globalAlpha = 1;
+  });
+}
+if(joinPin){ $("go").textContent = "Entrar a la cursa ▶"; }
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  if(state==="host"){ hostFrame(dt); requestAnimationFrame(loop); return; }
+  update(dt); dt0 = dt; draw(); hud();
+  if(MP.id && state==="play") mpSend();
+  requestAnimationFrame(loop);
+}
+let riderIdx = 0, rider = CYCLISTS[0];
+function pick(i){
+  riderIdx = (i + CYCLISTS.length) % CYCLISTS.length;
+  rider = CYCLISTS[riderIdx];
+  const img = $("rider-img");
+  img.src = rider.img;
+  img.classList.remove("pop"); void img.offsetWidth; img.classList.add("pop");
+  img.alt = rider.name;
+  $("rider-count").textContent = (riderIdx+1)+" / "+CYCLISTS.length;
+  $("me").innerHTML = '<img alt="" src="'+rider.img+'">';
+}
+CYCLISTS.forEach(c => loadImg(c.img)); CLOUDS.forEach(loadImg); loadImg(SPR.street);
+function pickStage(i){
+  stageIdx = (i + STAGES.length) % STAGES.length;
+  stage = STAGES[stageIdx];
+  document.querySelectorAll("#map-wrap .spot").forEach((b,j) => b.setAttribute("aria-checked", j===stageIdx));
+  $("stage-info").textContent = stage.icon+" "+stage.place;
+  newGame();
+}
+$("map-img").src = SPR.map;
+STAGES.forEach((st,i) => {
+  const b = document.createElement("button"), [l,t,w,h] = MAP_SPOTS[st.id];
+  b.className = "spot"; b.setAttribute("role","radio"); b.setAttribute("aria-label", st.place);
+  Object.assign(b.style, {left:l+"%", top:t+"%", width:w+"%", height:h+"%"});
+  b.onclick = () => i!==stageIdx ? pickStage(i) : mapMode==="host" ? null : startGame();   // segon clic: sortida
+  $("map-wrap").append(b);
+});
+$("prev").onclick = () => pick(riderIdx - 1);
+$("next").onclick = () => pick(riderIdx + 1);
+$("rider").onclick = () => pick(riderIdx + 1);
+$("change").onclick = () => showMap();
+resize(); pickStage(STAGES.findIndex(st => st.id==="plane")); pick(0); state = "start";
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
