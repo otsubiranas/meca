@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La mansió de la moda</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#bfe0ff;
+    font-family:"Pixelify Sans",ui-rounded,"Trebuchet MS",system-ui,sans-serif;cursor:url(ui/cursor.png),auto}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  /* Sprout Lands UI: peces pixel art amb 9-slice, tenyides de rosa */
+  .px{position:relative;isolation:isolate}
+  .px::before{content:"";position:absolute;inset:0;z-index:-1;image-rendering:pixelated;
+    border-style:solid;border-width:var(--bw,18px);border-image:var(--img) var(--sl,6) fill / var(--bw,18px) stretch;
+    filter:hue-rotate(-48deg) saturate(1.45) brightness(1.06)}
+  .pnl{--img:url(ui/panel.png);--sl:8;--bw:24px}
+  .btn{--img:url(ui/btn.png);--sl:7;--bw:14px}
+  .btn.on{--img:url(ui/btn_on.png)}
+  .btn.dark{--img:url(ui/btn_dark.png)}
+  .btn.grey::before{filter:grayscale(1) brightness(1.05)}
+  #labels{position:fixed;inset:0;pointer-events:none}
+  .label{position:absolute;padding:6px 16px 9px;color:#9b2f66;font-weight:700;font-size:23px;letter-spacing:1px;white-space:nowrap;transform-origin:50% 100%;
+    --img:url(ui/btn.png);--sl:7;--bw:14px}
+  .label::before{content:"";position:absolute;inset:0;z-index:-1;image-rendering:pixelated;border-style:solid;border-width:14px;
+    border-image:url(ui/btn.png) 7 fill / 14px stretch;filter:hue-rotate(-48deg) saturate(1.45) brightness(1.06)}
+  .label{isolation:isolate}
+  .label.door{font-size:21px}
+  #hint{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;gap:20px;align-items:center;
+    padding:14px 26px;color:#8a2a5c;font-weight:700;font-size:20px;transition:opacity .6s}
+  #hint.hide{opacity:0}
+  .k{display:inline-block;min-width:30px;padding:3px 9px 6px;margin:0 2px;text-align:center;color:#8a2a5c;font-weight:700}
+  #count{position:fixed;right:18px;top:14px;padding:8px 18px 11px;color:#8a2a5c;font-weight:700;font-size:24px;display:flex;align-items:center;gap:8px}
+  #count img{width:27px;image-rendering:pixelated}
+  #panel{position:fixed;right:3vw;top:50%;width:min(480px,44vw);transform:translate(130%,-50%);transition:transform .35s cubic-bezier(.3,1.3,.5,1);
+    padding:26px 28px 22px}
+  #panel.show{transform:translate(0,-50%)}
+  #panel.shake{animation:shake .45s}
+  @keyframes shake{0%,100%{margin-right:0}20%{margin-right:14px}40%{margin-right:-14px}60%{margin-right:9px}80%{margin-right:-9px}}
+  #ptitle{text-align:center;font-size:36px;font-weight:700;color:#fff;letter-spacing:3px;margin-bottom:14px;text-shadow:0 3px 0 #b8457e,0 -2px 0 #b8457e,2px 0 0 #b8457e,-2px 0 0 #b8457e}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .opt{padding:8px 16px 11px;color:#8a2a5c;font-weight:700;font-size:26px;letter-spacing:1px;white-space:nowrap;transition:transform .12s}
+  .opt .ok{color:#fff;background:#e2468e;border-radius:3px}
+  .opt.match{transform:scale(1.08)}
+  .opt.on{color:#2f8a63}
+  .opt.lock{opacity:.45;text-decoration:line-through}
+  .ctitle{text-align:center;font-size:22px;font-weight:700;color:#8a2a5c;margin-bottom:12px}
+  .ctitle i{color:#e2468e;font-style:normal}
+  .sw{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .s{text-align:center}
+  .dot{width:56px;height:56px;margin:0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;
+    color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.45);border:4px solid #fff4f8;box-shadow:0 4px 0 #b8457e}
+  .s.sel .dot{border-color:#e2468e}
+  .cn{font-size:15px;font-weight:700;color:#8a2a5c;margin-top:5px}
+  #pfoot{margin-top:14px;text-align:center;color:#a0507a;font-size:17px;font-weight:700}
+  #pfoot b{padding:2px 8px 4px;color:#8a2a5c}
+  #msg{position:fixed;left:32%;top:12%;transform:translateX(-50%) scale(.6);opacity:0;padding:12px 30px 16px;
+    color:#8a2a5c;font-weight:700;font-size:30px;transition:all .25s;white-space:nowrap;display:flex;gap:12px;align-items:center}
+  #msg img{width:28px;image-rendering:pixelated}
+  #msg.show{opacity:1;transform:translateX(-50%) scale(1)}
+  #msg.bad{color:#c0283f}
+  #fx{position:fixed;inset:0;pointer-events:none}
+  .spark{position:absolute;width:30px;image-rendering:pixelated;animation:spark 1s ease-out forwards}
+  @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.4) rotate(170deg);opacity:0}}
+  #credbtn{position:fixed;right:16px;bottom:16px;padding:6px 14px 9px;color:#8a2a5c;font-weight:700;font-size:16px;cursor:pointer;user-select:none}
+  #cred{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(120,40,80,.35);z-index:50}
+  #cred.show{display:flex}
+  #cred .box{width:min(560px,86vw);padding:28px 32px 24px;color:#8a2a5c;font-size:17px;line-height:1.45}
+  #cred h2{margin:0 0 12px;text-align:center;font-size:30px;color:#fff;text-shadow:0 3px 0 #b8457e,0 -2px 0 #b8457e,2px 0 0 #b8457e,-2px 0 0 #b8457e}
+  #cred p{margin:0 0 10px} #cred b{color:#c2306f} #cred a{color:#8a2a5c}
+  #cred .close{text-align:center;margin-top:14px;font-size:15px;opacity:.8}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#ffe0ee;color:#c4367a;font-weight:700;font-size:32px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="count" class="px pnl"><img src="ui/star.png" alt=""><span id="cnum">0</span></div>
+<div id="hint" class="px pnl"><span><span class="k px btn">J</span> endavant</span><span><span class="k px btn">F</span> enrere</span><span><span class="k px btn">D</span><span class="k px btn">K</span> girar</span></div>
+<div id="panel" class="px pnl"><div id="ptitle"></div><div id="pbody"></div><div id="pfoot"></div></div>
+<div id="msg" class="px pnl"></div>
+<div id="credbtn" class="px btn">crèdits</div>
+<div id="cred"><div class="box px pnl">
+  <h2>CRÈDITS</h2>
+  <p><b>Joc:</b> Step Up Figueres</p>
+  <p><b>Personatge, roba i pentinats:</b> «Low Poly – Character Customization» d'Edu (<a href="https://edusilvart.itch.io/lowpoly-character-customization" target="_blank">edusilvart.itch.io</a>) · llicència CC BY 4.0</p>
+  <p><b>Mobles:</b> «KayKit: Furniture Bits» de Kay Lousberg (<a href="https://kaylousberg.itch.io/furniture-bits" target="_blank">kaylousberg.itch.io</a>) · CC0</p>
+  <p><b>Interfície:</b> «Sprout Lands UI Pack» de Cup Nooble (<a href="https://cupnooble.itch.io/" target="_blank">cupnooble.itch.io</a>)</p>
+  <p><b>Lletra:</b> Pixelify Sans (Google Fonts, SIL Open Font License)</p>
+  <div class="close">Clica a qualsevol lloc per tancar</div>
+</div></div><div id="fx"></div>
+<div id="loading">Carregant… 💖</div>
+<script src="engine.js"></script>
+<script src="game.js"></script>
+<script>
+  const cb=document.getElementById('credbtn'), cr=document.getElementById('cred');
+  cb.addEventListener('mousedown',e=>{e.preventDefault();cr.classList.add('show');});
+  cr.addEventListener('mousedown',e=>{if(e.target.tagName!=='A'){e.preventDefault();cr.classList.remove('show');}});
+</script>
+</body>
+</html>
