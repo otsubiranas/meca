@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poetes catalans · Viatge pels segles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=IM+Fell+DW+Pica:ital@0;1&family=Special+Elite&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3ead6; --paper2:#e9dcbf; --ink:#2b1d12; --ink2:#5a4632; --muted:#8a7559;
+  --red:#8e2b1f; --gold:#c9972e; --gold-l:#f3d98a; --silver:#a9acb0; --silver-l:#eef0f2;
+  --bronze:#a8673a; --bronze-l:#e8b48a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:"EB Garamond",Georgia,serif;color:var(--ink);
+  background:#2a2018 radial-gradient(ellipse at top,#4a3828 0%,#2a2018 70%);
+  min-height:100vh;
+}
+button{font-family:inherit;cursor:pointer}
+.screen{display:none;min-height:100vh}
+.screen.on{display:block}
+
+/* ---------- PORTADA ---------- */
+#portada{display:none;align-items:center;justify-content:center;text-align:center;color:var(--paper)}
+#portada.on{display:flex}
+.port-in{max-width:640px;padding:40px 24px}
+.port-in .sobre{letter-spacing:.35em;text-transform:uppercase;font-size:13px;color:var(--gold-l);opacity:.8}
+.port-in h1{font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:clamp(52px,9vw,92px);margin:.15em 0 .1em;color:var(--paper);text-shadow:0 2px 0 #0006}
+.port-in .sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:24px;color:#e7d6b4}
+.port-in .vers{margin:34px auto;font-family:"Cormorant Garamond",serif;font-size:21px;line-height:1.5;color:#cdb991;border-top:1px solid #6b5640;border-bottom:1px solid #6b5640;padding:18px 0}
+.port-in .vers small{display:block;font-size:15px;margin-top:6px;color:#9c8664;letter-spacing:.08em}
+.btn{background:var(--paper);color:var(--ink);border:0;padding:12px 30px;font-size:19px;border-radius:3px;box-shadow:0 3px 0 #0005;font-family:"Cormorant Garamond",serif;font-weight:700;letter-spacing:.04em}
+.btn:hover{background:#fff8e8}
+.btn.sec{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px #a8916b}
+.btn.sec:hover{background:#ffffff12}
+.port-in .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ---------- MAPA ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;color:var(--paper)}
+.topbar h2{margin:0;font-family:"UnifrakturMaguntia",serif;font-weight:400;font-size:34px}
+.topbar .cnt{font-size:16px;color:#d9c7a2;display:flex;gap:14px;align-items:center}
+#cntMed,#cntMed2{display:flex;gap:12px;align-items:center}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.dot.or{background:var(--gold)} .dot.plata{background:var(--silver)} .dot.bronze{background:var(--bronze)}
+.mapa-wrap{padding:6px 28px 40px;overflow-x:auto}
+.linia{display:flex;gap:0;min-width:1100px;position:relative;background:var(--paper);border-radius:4px;box-shadow:0 10px 40px #0008;
+  background-image:radial-gradient(circle at 20% 30%,#0000 0 60%,#a07a4a14 100%),repeating-linear-gradient(0deg,#0000 0 3px,#00000005 3px 4px)}
+.era{flex:1;padding:20px 14px 26px;border-right:1px dashed #b8a37f;position:relative;min-width:170px}
+.era:last-child{border-right:0}
+.era-cap{text-align:center;cursor:pointer;padding:6px;border-radius:4px}
+.era-cap:hover{background:#00000008}
+.era-segle{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.era-nom{font-family:"Cormorant Garamond",serif;font-weight:700;font-size:22px;line-height:1.1;margin-top:2px}
+.era-bar{height:4px;border-radius:2px;margin:10px auto 0;width:60%}
+.era.bloq .era-cap{opacity:.45}
+.parades{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:22px}
+.parada{background:none;border:0;padding:0;text-align:center;width:140px;color:var(--ink)}
+.parada .tit{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16px;line-height:1.15;margin-top:6px}
+.parada .aut{font-size:13px;color:var(--muted)}
+.parada.bloq{cursor:default;opacity:.55}
+.parada.bloq .med{filter:grayscale(1) opacity(.8)}
+.parada.actual .med{animation:respira 2.2s ease-in-out infinite}
+@keyframes respira{50%{transform:scale(1.07);box-shadow:0 0 0 6px #c9972e33,0 4px 10px #0004}}
+.parada:not(.bloq):hover .med{transform:translateY(-3px)}
+
+/* ---------- MEDALLA i GRAVAT (retrat) ---------- */
+.gravat{display:block;width:100%;height:100%;object-fit:cover}
+.med{position:relative;width:86px;height:86px;border-radius:50%;margin:0 auto;transition:transform .2s;
+  background:#cbbd9f;box-shadow:0 4px 10px #0004;padding:7px}
+.med .cara{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#e8dcc2;box-shadow:inset 0 0 0 2px #0002}
+.med.or{background:conic-gradient(from 200deg,#8a5a12,#f3d98a,#c9972e,#7a4c0c,#f6e2a0,#c9972e,#8a5a12)}
+.med.plata{background:conic-gradient(from 200deg,#6f7478,#f4f5f6,#a9acb0,#5e6266,#ffffff,#a9acb0,#6f7478)}
+.med.bronze{background:conic-gradient(from 200deg,#5e3214,#e8b48a,#a8673a,#4e2810,#efc39c,#a8673a,#5e3214)}
+.med.cap{background:#cbbd9f}
+.med .cadenat{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px}
+.med .cadenat span{background:#2b1d12cc;color:#f3ead6;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+.med.gran{width:190px;height:190px;padding:14px}
+.placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#efe3c8,#c9b48d);color:#6b5338;font-family:"Cormorant Garamond",serif;font-weight:700}
+
+/* ---------- FITXA DE CORRENT ---------- */
+.modal{position:fixed;inset:0;background:#120c08cc;display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal.on{display:flex}
+.carta{background:var(--paper);max-width:620px;width:100%;border-radius:4px;padding:38px 44px 32px;box-shadow:0 20px 60px #000a;position:relative;
+  background-image:repeating-linear-gradient(0deg,#0000 0 3px,#00000006 3px 4px)}
+.carta .segle{letter-spacing:.25em;text-transform:uppercase;font-size:13px;color:var(--muted);text-align:center}
+.carta h3{font-family:"Cormorant Garamond",serif;font-size:40px;margin:.1em 0 .3em;text-align:center;line-height:1}
+.carta .orn{text-align:center;color:var(--red);font-size:20px;margin-bottom:12px}
+.carta p{font-size:19px;line-height:1.55;margin:0 0 12px}
+.carta .poetes{font-size:16px;color:var(--ink2);font-style:italic;text-align:center;margin-top:18px}
+.carta .acc{display:flex;justify-content:center;margin-top:22px}
+.carta .btn{background:var(--ink);color:var(--paper)}
+.tanca{position:absolute;top:10px;right:14px;background:none;border:0;font-size:26px;color:var(--muted)}
+
+/* ---------- JOC (quadern) ---------- */
+#joc{padding:22px 28px 30px}
+.joc-top{display:flex;justify-content:space-between;align-items:center;color:var(--paper);margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.joc-top .torna{background:none;border:1px solid #a8916b;color:var(--paper);padding:6px 14px;border-radius:3px;font-size:15px}
+.hud{display:flex;gap:26px;font-size:15px;color:#d9c7a2}
+.hud b{display:block;font-size:26px;color:var(--paper);font-family:"Cormorant Garamond",serif;line-height:1}
+.joc-cos{display:grid;grid-template-columns:250px 1fr;gap:26px;align-items:start;max-width:1200px;margin:0 auto}
+.lateral{color:var(--paper);text-align:center}
+.oval{width:210px;height:260px;margin:0 auto;border-radius:50%;overflow:hidden;background:#d8c7a4;
+  box-shadow:0 0 0 4px #3a2b1e,0 0 0 10px #b8925a,0 0 0 12px #5a4026,0 12px 30px #0009}
+.lateral .nom{font-family:"Cormorant Garamond",serif;font-size:26px;font-weight:700;margin-top:18px;line-height:1.1}
+.lateral .vida{color:#bfa97f;font-size:15px}
+.lateral .llinda{margin-top:22px;font-size:14px;color:#bfa97f;text-align:left;background:#00000025;border-radius:4px;padding:10px 12px;line-height:1.5}
+.lateral .llinda div{display:flex;align-items:center;gap:8px}
+.prog{height:4px;background:#ffffff20;border-radius:2px;margin:16px 0 0;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--gold);transition:width .15s}
+
+.quadern{position:relative;min-width:0;border-radius:3px;padding:44px 56px 50px;min-height:430px;box-shadow:0 14px 40px #0009;outline:none}
+.q-cap{margin-bottom:22px}
+.q-titol{font-size:30px;line-height:1.1}
+.q-meta{font-size:15px;margin-top:4px;opacity:.7}
+.text{font-size:27px;line-height:1.75;white-space:normal;word-break:normal;position:relative}
+.text .w{white-space:nowrap}
+.text .c{position:relative;color:inherit;opacity:.33;transition:opacity .08s}
+.text .c.fet{opacity:1}
+.text .c.ara{opacity:1}
+.text .c.ara::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:currentColor;animation:parpelleja 1s steps(2) infinite}
+.text .c.sp.ara::after{left:2px;right:2px}
+@keyframes parpelleja{50%{opacity:.2}}
+.text .c.malament{color:var(--err,#b3261e)!important;opacity:1}
+.text .ret{opacity:.35;font-size:.7em;margin-left:4px}
+.text .ret.fet{opacity:.15}
+.taca{position:absolute;pointer-events:none;width:34px;height:34px;left:50%;top:50%;margin:-17px 0 0 -17px;opacity:.5;z-index:0}
+.sortida-ajuda{font-size:14px;opacity:.55;margin-top:26px}
+.clica{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#0000;font-size:18px}
+.quadern:not(:focus-within) .clica.mostra{display:flex}
+
+/* estils de quadern per època */
+.q-medieval{background:#ecdcb4;color:#2e1a0c;font-family:"Cormorant Garamond",serif;
+  background-image:radial-gradient(ellipse at 15% 20%,#c9a86a40,transparent 40%),radial-gradient(ellipse at 85% 80%,#b0864a40,transparent 45%),radial-gradient(ellipse at 60% 10%,#fff6,transparent 50%);
+  box-shadow:inset 0 0 60px #8a5f2a55,0 14px 40px #0009;--err:#a3261b}
+.q-medieval .q-titol{font-family:"UnifrakturMaguntia",serif;color:#8e2b1f;font-size:36px}
+.q-medieval .text{font-weight:600}
+.q-medieval .caplletra{float:left;font-family:"UnifrakturMaguntia",serif;font-size:84px;line-height:.8;color:#8e2b1f;margin:8px 12px 0 0;padding:6px 10px;border:2px solid #c9972e;background:#f6e9c6;box-shadow:inset 0 0 0 3px #ecdcb4,inset 0 0 0 4px #c9972e}
+
+.q-renaixenca{background:#f1e6cc;color:#2b2014;font-family:"IM Fell DW Pica",serif;
+  background-image:linear-gradient(90deg,#0000 54px,#c0504d55 54px 55px,#0000 55px),repeating-linear-gradient(180deg,#0000 0 46px,#7d9ab64d 46px 47px);
+  background-position:0 0,0 96px;--err:#b3261e}
+.q-renaixenca .text{line-height:47px;font-size:26px}
+.q-renaixenca .q-titol{font-style:italic}
+
+.q-modernisme{background:#f6eedc;color:#22301f;font-family:"EB Garamond",serif;
+  border:14px solid transparent;border-image:linear-gradient(135deg,#9bb07a,#d9c27a,#c58f6b,#9bb07a) 1;--err:#a0302a}
+.q-modernisme .q-titol{font-family:"Cormorant Garamond",serif;font-style:italic;color:#56703f;font-size:34px}
+.q-modernisme .q-cap::after{content:"❦";display:block;color:#b08a4f;font-size:22px;margin-top:6px}
+
+.q-avantguarda{background:#fbfaf6;color:#111;font-family:"Special Elite","Courier New",monospace;--err:#d11a1a;
+  background-image:linear-gradient(0deg,#0000 calc(100% - 10px),#d11a1a 0)}
+.q-avantguarda .q-titol{font-family:"Special Elite",monospace;text-transform:uppercase;letter-spacing:.08em;font-size:26px}
+.q-avantguarda .q-titol::before{content:"";display:inline-block;width:18px;height:18px;background:#d11a1a;border-radius:50%;margin-right:12px;vertical-align:-1px}
+.q-avantguarda .text{font-size:23px}
+
+/* ---------- RESULTAT ---------- */
+.res{text-align:center;max-width:520px}
+.res h3{font-size:34px}
+.res .medtxt{font-family:"Cormorant Garamond",serif;font-size:26px;font-weight:700;margin-top:16px}
+.res .avis{color:var(--red);font-size:17px;margin-top:6px}
+.res .stats{display:flex;justify-content:center;gap:30px;margin:20px 0 6px}
+.res .stats div{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.res .stats b{display:block;font-family:"Cormorant Garamond",serif;font-size:34px;color:var(--ink);letter-spacing:0;text-transform:none}
+.res .rec{font-size:16px;color:var(--ink2);min-height:22px}
+.res .rec.nou{color:var(--red);font-weight:600}
+.res .errs{font-size:15px;color:var(--muted);margin-top:4px}
+.res .acc{gap:10px;flex-wrap:wrap}
+.res .btn.clar{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink2)}
+.cau{animation:cau .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes cau{from{transform:translateY(-60px) scale(.6) rotate(-20deg);opacity:0}}
+.res .pista{font-size:14px;color:var(--muted);margin-top:14px}
+
+/* ---------- ÀLBUM ---------- */
+#album{padding-bottom:40px}
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px;padding:6px 28px;max-width:1200px;margin:0 auto}
+.fitxa{background:var(--paper);border-radius:4px;padding:22px 16px 18px;text-align:center;box-shadow:0 8px 24px #0007;cursor:pointer;border:0;color:var(--ink)}
+.fitxa:hover{transform:translateY(-2px)}
+.fitxa .med{width:120px;height:120px;padding:9px}
+.fitxa .n{font-family:"Cormorant Garamond",serif;font-weight:700;font-size:21px;margin-top:12px;line-height:1.1}
+.fitxa .v{font-size:14px;color:var(--muted)}
+.fitxa .mini{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.mini i{width:14px;height:14px;border-radius:50%;background:#d6c9ad;display:block;box-shadow:inset 0 0 0 1px #0002}
+.mini i.or{background:var(--gold)} .mini i.plata{background:var(--silver)} .mini i.bronze{background:var(--bronze)}
+.fitxa.buida{opacity:.55}
+.det{max-width:760px}
+.det .cap{display:flex;gap:26px;align-items:center}
+.det .cap .med{flex:none}
+.det h3{text-align:left;font-size:36px}
+.det .vida{color:var(--muted);font-size:16px}
+.det .bio{font-size:18px;line-height:1.5;margin:18px 0}
+.det .obra{border-top:1px solid #cbb994;padding:14px 0 6px}
+.det .obra h4{margin:0;font-family:"Cormorant Garamond",serif;font-size:22px;display:flex;align-items:center;gap:10px}
+.det .obra .r{font-size:14px;color:var(--muted)}
+.det .obra pre{font-family:"Cormorant Garamond",serif;font-size:18px;line-height:1.45;white-space:pre-wrap;margin:8px 0 0;color:var(--ink2)}
+.det .scroll{max-height:70vh;overflow:auto;padding-right:6px}
+.reset{background:none;border:0;color:#a08b67;font-size:14px;text-decoration:underline;display:block;margin:26px auto 0}
+
+@media (max-width:820px){
+  .joc-cos{grid-template-columns:1fr}
+  .oval{width:140px;height:175px}
+  .quadern{padding:28px 24px}
+  .text{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<section id="portada" class="screen on">
+  <div class="port-in">
+    <div class="sobre">Joc de mecanografia</div>
+    <h1>Poetes catalans</h1>
+    <div class="sub">Un viatge pels segles, vers a vers</div>
+    <div class="vers">“Veles e vents han mos desigs complir,<br>faent camins dubtosos per la mar.”<small>AUSIÀS MARCH · SEGLE XV</small></div>
+    <div class="btns">
+      <button class="btn" id="bComenca">Comença el viatge</button>
+      <button class="btn sec" id="bAlbum0">Àlbum de medalles</button>
+    </div>
+  </div>
+</section>
+
+<!-- MAPA -->
+<section id="mapa" class="screen">
+  <div class="topbar">
+    <h2>Viatge pels segles</h2>
+    <div class="cnt"><span id="cntMed"></span><button class="btn sec" id="bAlbum">Àlbum</button></div>
+  </div>
+  <div class="mapa-wrap"><div class="linia" id="linia"></div></div>
+</section>
+
+<!-- JOC -->
+<section id="joc" class="screen">
+  <div class="joc-top">
+    <button class="torna" id="bTorna">← Mapa</button>
+    <div class="hud">
+      <div>Velocitat<b id="hPpm">0</b>ppm</div>
+      <div>Precisió<b id="hPrec">100</b>%</div>
+      <div>Temps<b id="hTemps">0:00</b>&nbsp;</div>
+    </div>
+  </div>
+  <div class="joc-cos">
+    <div class="lateral">
+      <div class="oval" id="jRetrat"></div>
+      <div class="nom" id="jNom"></div>
+      <div class="vida" id="jVida"></div>
+      <div class="prog"><i id="jProg"></i></div>
+      <div class="llinda" id="jLlinda"></div>
+    </div>
+    <div class="quadern" id="quadern" tabindex="0">
+      <div class="q-cap"><div class="q-titol" id="qTitol"></div><div class="q-meta" id="qMeta"></div></div>
+      <div class="text" id="qText"></div>
+      <div class="sortida-ajuda">Escriu el text tal com és: majúscules, accents i signes compten. Al final de cada vers, prem <b>Intro</b> o l’espai. · <b>Esc</b> per sortir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ÀLBUM -->
+<section id="album" class="screen">
+  <div class="topbar">
+    <h2>Àlbum de medalles</h2>
+    <div class="cnt"><span id="cntMed2"></span><button class="btn sec" id="bTornaMapa">Mapa</button></div>
+  </div>
+  <div class="album-grid" id="albumGrid"></div>
+  <button class="reset" id="bReset">Esborrar tot el progrés</button>
+</section>
+
+<div class="modal" id="modal"><div class="carta" id="carta"></div></div>
+
+<script>
+/* =========================================================
+   DADES
+   Per afegir un poeta: afegeix-lo a POETES (amb el retrat a retrats/)
+   i els seus textos a TEXTOS, dins de l'època que toqui.
+   ========================================================= */
+const ERES = [
+  { id:'medieval', nom:'Edat Mitjana', segles:'Segles XIII–XIV', color:'#8e2b1f', quadern:'medieval',
+    desc:[
+      'El català neix com a llengua escrita entre els segles XII i XIII. Els primers poetes de la Corona d’Aragó escrivien en occità, la llengua dels trobadors, però a poc a poc la prosa i el vers en català guanyen terreny.',
+      'Ramon Llull (Mallorca, c. 1232–1316) és el primer gran autor que fa servir el català per a la filosofia, la ciència i la literatura. Amb ell, una llengua romànica parlava per primer cop de tot.'
+    ]},
+  { id:'segledor', nom:'Segle d’Or', segles:'Segle XV', color:'#b0812a', quadern:'medieval',
+    desc:[
+      'El segle XV és l’època d’esplendor de les lletres catalanes, amb València com a gran centre cultural. Els poetes abandonen l’occità i escriuen en la seva pròpia llengua.',
+      'Ausiàs March trenca amb la tradició trobadoresca: en lloc de cantar l’amor ideal, parla del jo, dels dubtes i de les contradiccions del desig. És una veu moderna dins l’edat mitjana.'
+    ]},
+  { id:'renaixenca', nom:'Renaixença', segles:'Segle XIX', color:'#3b6a8f', quadern:'renaixenca',
+    desc:[
+      'Després del Segle d’Or vénen tres segles, del XVI al XVIII, que tradicionalment s’han anomenat la Decadència: la noblesa i la cort escriuen en castellà i el català queda sobretot en la cultura popular.',
+      'Al segle XIX, amb el Romanticisme, arriba la Renaixença: es recupera l’orgull per la llengua, la història i el paisatge. El 1859 es restauren els Jocs Florals, i Jacint Verdaguer, amb una llengua rica i viva, en serà el gran poeta.'
+    ]},
+  { id:'mallorquina', nom:'Escola Mallorquina', segles:'Finals del segle XIX', color:'#4f7f6a', quadern:'renaixenca',
+    desc:[
+      'A Mallorca, un grup de poetes desenvolupa una veu pròpia, de gust clàssic: forma perfecta, serenor i el paisatge de l’illa com a símbol.',
+      'Miquel Costa i Llobera i Joan Alcover en són les dues figures principals. Els seus poemes s’han convertit en emblemes: un pi que resisteix el vent i una dona que fila el destí de Mallorca.'
+    ]},
+  { id:'modernisme', nom:'Modernisme', segles:'1890–1911', color:'#6f8a4c', quadern:'modernisme',
+    desc:[
+      'A finals del segle XIX, Catalunya es vol posar al dia amb Europa. El Modernisme mira cap al futur, cap a la ciutat i cap a l’art nou, i deixa enrere l’enyorança del passat.',
+      'Joan Maragall n’és el poeta central. Defensa la “paraula viva”: escriure com raja l’emoció, sense artificis, fins a trobar el ritme natural de les coses.'
+    ]},
+  { id:'avantguarda', nom:'Avantguardes', segles:'1916–1924', color:'#c2261e', quadern:'avantguarda',
+    desc:[
+      'Als anys de la Primera Guerra Mundial arriben a Barcelona els corrents més trencadors: el futurisme, el cubisme, els cal·ligrames. La poesia juga amb la tipografia, la velocitat i la ciutat moderna.',
+      'Joan Salvat-Papasseit, que havia fet de vigilant nocturn al port, escriu una poesia d’avantguarda però sincera i apassionada, plena de vida i de compromís social.'
+    ]},
+];
+
+const POETES = {
+  llull:     { nom:'Ramon Llull', vida:'Mallorca, c. 1232 – 1316', retrat:'retrats/llull.jpg',
+    bio:'Filòsof, místic i escriptor. Als trenta anys va deixar la vida de cort per dedicar-se a Déu i a convèncer els no creients amb la raó. Va escriure centenars d’obres en català, llatí i àrab, com el Llibre d’Amic e Amat o el Blanquerna.' },
+  march:     { nom:'Ausiàs March', vida:'Gandia o València, 1400 – 1459', retrat:'retrats/march.jpg',
+    bio:'Cavaller valencià, va lluitar a les campanyes del rei Alfons el Magnànim per la Mediterrània. És el primer gran poeta que escriu en català i no en occità. Els seus versos, intensos i introspectius, han influït poetes de tots els segles.' },
+  aribau:    { nom:'Bonaventura Carles Aribau', vida:'Barcelona, 1798 – 1862', retrat:'retrats/aribau.jpg',
+    bio:'Economista i escriptor. Treballava a Madrid quan va escriure La pàtria (1833) per felicitar el seu cap, el banquer Gaspar Remisa. El poema, ple d’enyorança per la terra, es va convertir en el símbol de l’inici de la Renaixença.' },
+  verdaguer: { nom:'Jacint Verdaguer', vida:'Folgueroles, 1845 – Vallvidrera, 1902', retrat:'retrats/verdaguer.jpg',
+    bio:'Sacerdot, conegut com a Mossèn Cinto. Va fer de capellà en vaixells que anaven a Amèrica i va recórrer a peu el Pirineu. Amb L’Atlàntida i Canigó va donar al català una llengua literària moderna. És considerat el poeta nacional de Catalunya.' },
+  costa:     { nom:'Miquel Costa i Llobera', vida:'Pollença, 1854 – Palma, 1922', retrat:'retrats/costa.jpg',
+    bio:'Sacerdot i poeta mallorquí, gran coneixedor dels clàssics grecs i llatins. El pi de Formentor (1875), escrit quan tenia vint-i-un anys, és un dels poemes més estimats de la literatura catalana.' },
+  alcover:   { nom:'Joan Alcover', vida:'Palma, 1854 – 1926', retrat:'retrats/alcover.jpg',
+    bio:'Advocat i poeta. Va començar escrivint en castellà i, ja gran, va decidir fer-ho només en català. La seva vida va estar marcada per la mort de quatre fills i de la seva dona. La Balanguera és l’himne oficial de Mallorca.' },
+  maragall:  { nom:'Joan Maragall', vida:'Barcelona, 1860 – 1911', retrat:'retrats/maragall.jpg',
+    bio:'Periodista i poeta, figura central del Modernisme. Va escriure articles valents sobre la Setmana Tràgica i va defensar una poesia espontània, la “paraula viva”. El Cant espiritual és considerat el seu testament poètic.' },
+  salvat:    { nom:'Joan Salvat-Papasseit', vida:'Barcelona, 1894 – 1924', retrat:'retrats/salvat.jpg',
+    bio:'De família obrera, va treballar de petit i de jove en feines diverses, com la de vigilant nocturn al Moll de la Fusta. Autodidacte i compromès, va portar les avantguardes a la poesia catalana. Va morir de tuberculosi als trenta anys.' },
+};
+
+const TEXTOS = [
+  { id:'llull-cant', poeta:'llull', era:'medieval', titol:'Cant de Ramon', any:'c. 1300', versos:[
+    'Són creat e ésser m\'és dat',
+    'a servir Déu que fos honrat,',
+    'e són caüt en mant pecat',
+    'e en ira de Déu fui pausat.',
+    'Jesús me venc crucificat,',
+    'volc que Déus fos per mi amat.' ]},
+  { id:'march-veles', poeta:'march', era:'segledor', titol:'Veles e vents', any:'segle XV', versos:[
+    'Veles e vents han mos desigs complir,',
+    'faent camins dubtosos per la mar.',
+    'Mestre i ponent contra d\'ells veig armar:',
+    'xaloc, llevant, los deuen subvenir',
+    'ab llurs amics lo grec e lo migjorn,',
+    'fent humils precs al vent tremuntanal',
+    'que en son bufar los sia parcial',
+    'e que tots cinc complesquen mon retorn.' ]},
+  { id:'aribau-patria', poeta:'aribau', era:'renaixenca', titol:'La pàtria', any:'1833', versos:[
+    'Adéu-siau, turons, per sempre adéu-siau;',
+    'oh serres desiguals, que allí en la pàtria mia',
+    'dels núvols e del cel de lluny vos distingia',
+    'per lo repòs etern, per lo color més blau.' ]},
+  { id:'verdaguer-emigrant', poeta:'verdaguer', era:'renaixenca', titol:'L\'emigrant', any:'1894', versos:[
+    'Dolça Catalunya,',
+    'pàtria del meu cor,',
+    'quan de tu s\'allunya',
+    'd\'enyorança es mor.',
+    'Hermosa vall, bressol de ma infantesa,',
+    'blanc Pirineu,',
+    'marges i rius, ermita al cel suspesa,',
+    'per sempre adéu!',
+    'Arpes del bosc, pinsans i caderneres,',
+    'cantau, cantau,',
+    'jo dic plorant a boscos i riberes:',
+    'adéu-siau!' ]},
+  { id:'verdaguer-virolai', poeta:'verdaguer', era:'renaixenca', titol:'Virolai', any:'1880', versos:[
+    'Rosa d\'abril, morena de la serra,',
+    'de Montserrat estel,',
+    'il·luminau la catalana terra;',
+    'guiau-nos cap al cel.',
+    'Amb serra d\'or los Angelets serraren',
+    'eixos turons per fer-vos un palau;',
+    'Reina del Cel que els Serafins baixaren,',
+    'dau-nos abric dins vostre mantell blau.' ]},
+  { id:'verdaguer-canigo', poeta:'verdaguer', era:'renaixenca', titol:'Canigó', any:'1886', versos:[
+    'Lo Canigó és una magnòlia immensa',
+    'que en un rebrot del Pirineu se bada;',
+    'per abelles té fades que la volten,',
+    'per papallons los cisnes i les àligues.',
+    'Formen son càlzer escarides serres',
+    'que plateja l\'hivern i l\'estiu daura,',
+    'grandiós beire on beu olors l\'estrella,',
+    'los aires rellentor, los núvols aigua.' ]},
+  { id:'costa-pi', poeta:'costa', era:'mallorquina', titol:'El pi de Formentor', any:'1875', versos:[
+    'Mon cor estima un arbre! Més vell que l\'olivera,',
+    'més poderós que el roure, més verd que el taronger,',
+    'conserva de ses fulles l\'eterna primavera,',
+    'i lluita amb les ventades que assalten la ribera,',
+    'com un gegant guerrer.' ]},
+  { id:'alcover-balanguera', poeta:'alcover', era:'mallorquina', titol:'La Balanguera', any:'1903', versos:[
+    'La Balanguera misteriosa,',
+    'com una aranya d\'art subtil,',
+    'buida que buida sa filosa,',
+    'de nostra vida treu el fil.',
+    'Com una parca bé cavil·la',
+    'teixint la tela per demà.',
+    'La Balanguera fila, fila,',
+    'la Balanguera filarà.' ]},
+  { id:'maragall-vaca', poeta:'maragall', era:'modernisme', titol:'La vaca cega', any:'1893', versos:[
+    'Topant de cap en una i altra soca,',
+    'avançant d\'esma pel camí de l\'aigua,',
+    'se\'n ve la vaca tota sola. És cega.',
+    'D\'un cop de roc llançat amb massa traça,',
+    'el vailet va buidar-li un ull, i en l\'altre',
+    'se li ha posat un tel: la vaca és cega.',
+    'Ve a abeurar-se a la font com ans solia,',
+    'mes no amb el ferm posat d\'altres vegades',
+    'ni amb ses companyes, no: ve tota sola.' ]},
+  { id:'maragall-cant', poeta:'maragall', era:'modernisme', titol:'Cant espiritual', any:'1910', versos:[
+    'Si el món ja és tan formós, Senyor, si es mira',
+    'amb la pau vostra a dintre de l\'ull nostre,',
+    'què més ens podeu dar en una altra vida?',
+    'Per \'xò estic tan gelós dels ulls, i el rostre,',
+    'i el cos que m\'heu donat, Senyor, i el cor',
+    'que s\'hi mou sempre... i temo tant la mort!' ]},
+  { id:'salvat-nocturn', poeta:'salvat', era:'avantguarda', titol:'Nocturn per a acordió', any:'1921', versos:[
+    'Heus aquí: jo he guardat fusta al moll.',
+    '(Vosaltres no sabeu',
+    'què és',
+    'guardar fusta al moll:',
+    'però jo he vist la pluja',
+    'a barrals',
+    'sobre els bots,',
+    'i dessota els taulons arraulir-se el preu fet de l\'angoixa:',
+    'sota els flandes',
+    'i els melis,',
+    'sota els cedres sagrats.' ]},
+];
+
+/* Llindes de les medalles (adults) */
+const LLINDA = {
+  minPrec: 90,                        // per sota: sense medalla
+  plata:   { prec: 95, ppm: 30 },
+  or:      { prec: 98, ppm: 45 },
+};
+function medallaDe(ppm, prec){
+  if (prec < LLINDA.minPrec) return null;
+  if (prec >= LLINDA.or.prec && ppm >= LLINDA.or.ppm) return 'or';
+  if (prec >= LLINDA.plata.prec && ppm >= LLINDA.plata.ppm) return 'plata';
+  return 'bronze';
+}
+const RANG = { or:3, plata:2, bronze:1 };
+const NOM_MED = { or:'Medalla d’or', plata:'Medalla de plata', bronze:'Medalla de bronze' };
+
+/* =========================================================
+   PROGRÉS (localStorage)
+   ========================================================= */
+const CLAU = 'poetes-catalans-v1';
+let P = { rec:{}, eres:[] };
+try { const s = JSON.parse(localStorage.getItem(CLAU)); if (s && s.rec) P = s; } catch(e){}
+function desa(){ try { localStorage.setItem(CLAU, JSON.stringify(P)); } catch(e){} }
+
+function desbloquejat(i){ return i === 0 || !!(P.rec[TEXTOS[i-1].id] && P.rec[TEXTOS[i-1].id].med); }
+function eraVista(id){ return P.eres.includes(id); }
+
+/* =========================================================
+   UTILITATS
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function inicials(nom){ return nom.split(' ').filter(w=>w.length>2 && w[0]===w[0].toUpperCase()).slice(0,2).map(w=>w[0]).join(''); }
+function cara(pid, mida){
+  const p = POETES[pid];
+  if (p.retrat) return `<img class="gravat" src="${p.retrat}" alt="${esc(p.nom)}">`;
+  return `<div class="placeholder" style="font-size:${mida||28}px">${inicials(p.nom)}</div>`;
+}
+function medallaHTML(pid, tipus, extra){
+  return `<div class="med ${tipus||'cap'} ${extra||''}"><div class="cara">${cara(pid, extra==='gran'?64:28)}</div></div>`;
+}
+function millorDelPoeta(pid){
+  let m = null;
+  TEXTOS.filter(t=>t.poeta===pid).forEach(t=>{ const r=P.rec[t.id]; if(r&&r.med&&(!m||RANG[r.med]>RANG[m])) m=r.med; });
+  return m;
+}
+function comptaMedalles(){
+  const c={or:0,plata:0,bronze:0};
+  Object.values(P.rec).forEach(r=>{ if(r.med) c[r.med]++; });
+  return `<span><i class="dot or"></i>${c.or}</span><span><i class="dot plata"></i>${c.plata}</span><span><i class="dot bronze"></i>${c.bronze}</span><span style="opacity:.7">de ${TEXTOS.length}</span>`;
+}
+function mostra(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('#'+id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function obreModal(html){ $('#carta').innerHTML = html; $('#modal').classList.add('on'); }
+function tancaModal(){ $('#modal').classList.remove('on'); }
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') tancaModal(); });
+
+/* =========================================================
+   MAPA
+   ========================================================= */
+function pintaMapa(){
+  $('#cntMed').innerHTML = comptaMedalles();
+  const primerPendent = TEXTOS.findIndex((t,i)=>desbloquejat(i) && !(P.rec[t.id]&&P.rec[t.id].med));
+  let html = '';
+  ERES.forEach(era=>{
+    const idx = TEXTOS.map((t,i)=>i).filter(i=>TEXTOS[i].era===era.id);
+    const bloq = !desbloquejat(idx[0]);
+    html += `<div class="era ${bloq?'bloq':''}">
+      <div class="era-cap" data-era="${era.id}" ${bloq?'':'title="Llegeix sobre aquesta època"'}>
+        <div class="era-segle">${era.segles}</div>
+        <div class="era-nom">${era.nom}</div>
+        <div class="era-bar" style="background:${era.color}"></div>
+      </div><div class="parades">`;
+    idx.forEach(i=>{
+      const t = TEXTOS[i], ok = desbloquejat(i), r = P.rec[t.id];
+      html += `<button class="parada ${ok?'':'bloq'} ${i===primerPendent?'actual':''}" data-i="${i}" ${ok?'':'disabled'}>
+        <div class="med ${r&&r.med?r.med:'cap'}"><div class="cara">${cara(t.poeta,24)}</div>${ok?'':'<div class="cadenat"><span>🔒</span></div>'}</div>
+        <div class="tit">${esc(t.titol)}</div><div class="aut">${esc(POETES[t.poeta].nom)}</div>
+      </button>`;
+    });
+    html += `</div></div>`;
+  });
+  $('#linia').innerHTML = html;
+  document.querySelectorAll('.parada:not(.bloq)').forEach(b=>b.onclick=()=>obreText(+b.dataset.i));
+  document.querySelectorAll('.era:not(.bloq) .era-cap').forEach(b=>b.onclick=()=>cartaEra(b.dataset.era));
+}
+
+function cartaEra(eraId, despres){
+  const era = ERES.find(e=>e.id===eraId);
+  const poetes = [...new Set(TEXTOS.filter(t=>t.era===eraId).map(t=>POETES[t.poeta].nom))];
+  obreModal(`
+    <button class="tanca" aria-label="Tanca">×</button>
+    <div class="segle">${era.segles}</div>
+    <h3>${era.nom}</h3>
+    <div class="orn" style="color:${era.color}">✦ ✦ ✦</div>
+    ${era.desc.map(p=>`<p>${p}</p>`).join('')}
+    <div class="poetes">En aquesta etapa: ${poetes.join(', ')}</div>
+    <div class="acc"><button class="btn" id="bEraOk">${despres?'Comença a escriure':'Tanca'}</button></div>`);
+  const fi = ()=>{ tancaModal(); if(!eraVista(eraId)){P.eres.push(eraId);desa();} if(despres) despres(); };
+  $('#bEraOk').onclick = fi;
+  $('.carta .tanca').onclick = ()=>{ tancaModal(); };
+  setTimeout(()=>$('#bEraOk').focus(),50);
+}
+
+/* =========================================================
+   JOC
+   ========================================================= */
+let J = null;   // estat de la partida
+let rellotge = null;
+
+function obreText(i){
+  const t = TEXTOS[i];
+  if (!eraVista(t.era)) { cartaEra(t.era, ()=>comencaText(i)); return; }
+  comencaText(i);
+}
+
+function comencaText(i){
+  const t = TEXTOS[i], p = POETES[t.poeta], era = ERES.find(e=>e.id===t.era);
+  const text = t.versos.join('\n');
+  J = { i, t, text, pos:0, tecles:0, errors:0, errPos:new Set(), errLletres:{}, inici:null, fi:null, errAra:false };
+
+  $('#jRetrat').innerHTML = cara(t.poeta, 60);
+  $('#jNom').textContent = p.nom;
+  $('#jVida').textContent = p.vida;
+  const r = P.rec[t.id];
+  $('#jLlinda').innerHTML = `
+    <div><i class="dot or"></i>Or: ${LLINDA.or.prec} % i ${LLINDA.or.ppm} ppm</div>
+    <div><i class="dot plata"></i>Plata: ${LLINDA.plata.prec} % i ${LLINDA.plata.ppm} ppm</div>
+    <div><i class="dot bronze"></i>Bronze: ${LLINDA.minPrec} % de precisió</div>
+    ${r?`<div style="margin-top:6px;color:#e7d6b4">Rècord: ${r.ppm} ppm · ${r.prec} %</div>`:''}`;
+
+  const q = $('#quadern');
+  q.className = 'quadern q-' + era.quadern;
+  $('#qTitol').textContent = t.titol;
+  $('#qMeta').textContent = `${p.nom} · ${t.any}`;
+
+  // text caràcter a caràcter
+  let html = '', primer = true, enParaula = false;
+  const tancaParaula = ()=>{ if (enParaula) { html += '</span>'; enParaula = false; } };
+  [...text].forEach((ch, k)=>{
+    if (ch === '\n') { tancaParaula(); html += `<span class="c ret" data-k="${k}">↵</span><br>`; return; }
+    if (era.quadern==='medieval' && primer) {
+      primer = false;
+      html += `<span class="caplletra"><span class="c" data-k="${k}">${esc(ch)}</span></span>`; return;
+    }
+    primer = false;
+    if (ch === ' ') { tancaParaula(); html += `<span class="c sp" data-k="${k}">&nbsp;</span>`; return; }
+    if (!enParaula) { html += '<span class="w">'; enParaula = true; }
+    html += `<span class="c" data-k="${k}">${esc(ch)}</span>`;
+  });
+  tancaParaula();
+  $('#qText').innerHTML = html;
+  J.spans = [...document.querySelectorAll('#qText .c')];
+  marcaActual();
+  actualitzaHud();
+  mostra('joc');
+  q.focus();
+}
+
+function marcaActual(){
+  J.spans.forEach(s=>s.classList.remove('ara'));
+  if (J.pos < J.spans.length) J.spans[J.pos].classList.add('ara');
+  $('#jProg').style.width = (100*J.pos/J.text.length)+'%';
+}
+
+function coincideix(esperat, tecla){
+  if (tecla === esperat) return true;
+  if (esperat === '\n' && (tecla === ' ')) return true;
+  if (esperat === '\'' && (tecla === '’' || tecla === '´')) return true;
+  if (esperat === '·' && tecla === '.') return false;
+  return false;
+}
+
+function taca(span){
+  if (span.querySelector('.taca')) return;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 40 40'); svg.classList.add('taca');
+  const n = 7 + Math.floor(Math.random()*4); let d='';
+  for(let a=0;a<n;a++){ const ang=a/n*Math.PI*2, rr=9+Math.random()*7; d+=(a?'L':'M')+(20+Math.cos(ang)*rr).toFixed(1)+' '+(20+Math.sin(ang)*rr).toFixed(1); }
+  svg.innerHTML = `<path d="${d}Z" fill="currentColor" opacity=".55"/><circle cx="${6+Math.random()*6}" cy="${28+Math.random()*6}" r="2" fill="currentColor" opacity=".4"/><circle cx="${32+Math.random()*4}" cy="${8+Math.random()*6}" r="1.5" fill="currentColor" opacity=".4"/>`;
+  svg.style.transform = `rotate(${Math.random()*360}deg)`;
+  svg.style.color = getComputedStyle($('#quadern')).getPropertyValue('--err') || '#a00';
+  span.appendChild(svg);
+}
+
+function tecla(e){
+  if (!J || !$('#joc').classList.contains('on') || $('#modal').classList.contains('on')) return;
+  if (e.key === 'Escape') { aturaRellotge(); pintaMapa(); mostra('mapa'); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey && e.key.length!==1) return;
+  if (e.key === 'Dead' || e.key === 'Shift' || e.key === 'CapsLock') return;
+  let k = e.key === 'Enter' ? '\n' : (e.key.length === 1 ? e.key : null);
+  if (k === null) return;
+  e.preventDefault();
+  if (J.pos >= J.text.length) return;
+  if (!J.inici) { J.inici = performance.now(); rellotge = setInterval(actualitzaHud, 250); }
+
+  const esperat = J.text[J.pos];
+  const span = J.spans[J.pos];
+  J.tecles++;
+  if (coincideix(esperat, k)) {
+    span.classList.remove('malament');
+    span.classList.add('fet');
+    J.pos++;
+    marcaActual();
+    if (J.pos >= J.text.length) { acaba(); return; }
+  } else {
+    J.errors++;
+    J.errPos.add(J.pos);
+    const nomL = esperat==='\n'?'Intro':esperat===' '?'espai':esperat;
+    J.errLletres[nomL] = (J.errLletres[nomL]||0)+1;
+    span.classList.add('malament');
+    taca(span);
+  }
+  actualitzaHud();
+}
+document.addEventListener('keydown', tecla);
+
+function calcula(){
+  const ara = J.fi || performance.now();
+  const min = J.inici ? Math.max((ara - J.inici)/60000, 1/600) : 0;
+  const ppm = J.inici ? Math.round((J.pos/5)/min) : 0;
+  const prec = J.tecles ? Math.round(1000*(J.tecles - J.errors)/J.tecles)/10 : 100;
+  return { ppm, prec, seg: J.inici ? Math.round((ara-J.inici)/1000) : 0 };
+}
+function mmss(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function actualitzaHud(){
+  if (!J) return;
+  const c = calcula();
+  $('#hPpm').textContent = c.ppm;
+  $('#hPrec').textContent = String(c.prec).replace('.',',');
+  $('#hTemps').textContent = mmss(c.seg);
+}
+function aturaRellotge(){ clearInterval(rellotge); rellotge = null; }
+
+function acaba(){
+  J.fi = performance.now();
+  aturaRellotge(); actualitzaHud();
+  const c = calcula();
+  const med = medallaDe(c.ppm, c.prec);
+  const t = J.t, ant = P.rec[t.id];
+  let recNou = false;
+  if (!ant) { P.rec[t.id] = { ppm:c.ppm, prec:c.prec, med }; recNou = !!med; }
+  else {
+    const millorMed = !ant.med || (med && RANG[med] > RANG[ant.med]);
+    const millorPpm = med && c.ppm > ant.ppm && (!ant.med || RANG[med] >= RANG[ant.med]);
+    if (millorMed || millorPpm) { P.rec[t.id] = { ppm:c.ppm, prec:c.prec, med: millorMed ? med : ant.med }; recNou = true; }
+  }
+  desa();
+
+  const errs = Object.entries(J.errLletres).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const seguent = J.i + 1 < TEXTOS.length ? J.i + 1 : null;
+  const potSeguir = seguent !== null && desbloquejat(seguent);
+  const novaEra = potSeguir && TEXTOS[seguent].era !== t.era;
+  const r = P.rec[t.id];
+
+  let missatgeRec = '';
+  if (med && recNou && ant && ant.med) missatgeRec = '<div class="rec nou">Nou rècord!</div>';
+  else if (ant && ant.med) missatgeRec = `<div class="rec">Rècord: ${r.ppm} ppm · ${String(r.prec).replace('.',',')} %</div>`;
+  else missatgeRec = '<div class="rec"></div>';
+
+  let pista = '';
+  if (med === 'bronze') pista = `Per a la plata cal un ${LLINDA.plata.prec} % de precisió i ${LLINDA.plata.ppm} ppm.`;
+  if (med === 'plata')  pista = `Per a l’or cal un ${LLINDA.or.prec} % de precisió i ${LLINDA.or.ppm} ppm.`;
+
+  obreModal(`
+    <div class="res" style="margin:0 auto">
+      <div class="segle">${esc(t.titol)} · ${esc(POETES[t.poeta].nom)}</div>
+      <div style="margin-top:20px" class="cau">${medallaHTML(t.poeta, med||'cap', 'gran')}</div>
+      <div class="medtxt">${med ? NOM_MED[med] : 'Sense medalla'}</div>
+      ${med ? '' : `<div class="avis">Cal arribar al ${LLINDA.minPrec} % de precisió per guanyar una medalla.</div>`}
+      <div class="stats">
+        <div><b>${c.ppm}</b>ppm</div>
+        <div><b>${String(c.prec).replace('.',',')}%</b>precisió</div>
+        <div><b>${mmss(c.seg)}</b>temps</div>
+      </div>
+      ${missatgeRec}
+      ${errs.length ? `<div class="errs">Tecles on t’has equivocat més: ${errs.map(([l,n])=>`<b>${esc(l)}</b> (${n})`).join(', ')}</div>` : '<div class="errs">Cap error. Text perfecte!</div>'}
+      ${pista ? `<div class="pista">${pista}</div>` : ''}
+      <div class="acc" style="display:flex;justify-content:center;margin-top:22px">
+        <button class="btn clar" id="rRepeteix">Torna-hi</button>
+        <button class="btn clar" id="rMapa">Mapa</button>
+        ${potSeguir ? `<button class="btn" id="rSeguent">${novaEra?'Nova època →':'Següent poema →'}</button>` : ''}
+      </div>
+      ${!potSeguir && seguent===null && med ? '<div class="pista">Has arribat al final del viatge! Mira el teu àlbum de medalles.</div>' : ''}
+    </div>`);
+  $('#rRepeteix').onclick = ()=>{ tancaModal(); comencaText(J.i); };
+  $('#rMapa').onclick = ()=>{ tancaModal(); pintaMapa(); mostra('mapa'); };
+  if (potSeguir) $('#rSeguent').onclick = ()=>{ tancaModal(); obreText(seguent); };
+  setTimeout(()=>{ const b=$('#rSeguent')||$('#rRepeteix'); b.focus(); },60);
+}
+
+$('#bTorna').onclick = ()=>{ aturaRellotge(); pintaMapa(); mostra('mapa'); };
+
+/* =========================================================
+   ÀLBUM
+   ========================================================= */
+function pintaAlbum(){
+  $('#cntMed2').innerHTML = comptaMedalles();
+  const ordre = [...new Set(TEXTOS.map(t=>t.poeta))];
+  $('#albumGrid').innerHTML = ordre.map(pid=>{
+    const p = POETES[pid], m = millorDelPoeta(pid);
+    const ts = TEXTOS.filter(t=>t.poeta===pid);
+    return `<button class="fitxa ${m?'':'buida'}" data-p="${pid}">
+      ${medallaHTML(pid, m||'cap')}
+      <div class="n">${esc(p.nom)}</div><div class="v">${esc(p.vida)}</div>
+      <div class="mini">${ts.map(t=>{const r=P.rec[t.id];return `<i class="${r&&r.med?r.med:''}" title="${esc(t.titol)}"></i>`;}).join('')}</div>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('.fitxa').forEach(b=>b.onclick=()=>fitxaPoeta(b.dataset.p));
+}
+function fitxaPoeta(pid){
+  const p = POETES[pid], m = millorDelPoeta(pid);
+  const ts = TEXTOS.filter(t=>t.poeta===pid);
+  const era = ERES.find(e=>e.id===ts[0].era);
+  $('#carta').classList.add('det');
+  obreModal(`
+    <button class="tanca" aria-label="Tanca">×</button>
+    <div class="scroll">
+    <div class="cap">${medallaHTML(pid, m||'cap', 'gran')}
+      <div><div class="segle" style="text-align:left">${era.nom} · ${era.segles}</div><h3>${esc(p.nom)}</h3><div class="vida">${esc(p.vida)}</div></div>
+    </div>
+    <div class="bio">${esc(p.bio)}</div>
+    ${ts.map(t=>{ const r=P.rec[t.id]; return `<div class="obra">
+      <h4>${r&&r.med?`<i class="dot ${r.med}" style="width:14px;height:14px"></i>`:'<i class="dot" style="background:#d6c9ad;width:14px;height:14px"></i>'}${esc(t.titol)} <span class="r">(${t.any})</span></h4>
+      <div class="r">${r ? `${r.med?NOM_MED[r.med]:'Sense medalla'} · rècord ${r.ppm} ppm · ${String(r.prec).replace('.',',')} %` : 'Encara no l’has escrit'}</div>
+      <pre>${esc(t.versos.join('\n'))}</pre></div>`; }).join('')}
+    </div>`);
+  $('.carta .tanca').onclick = ()=>{ tancaModal(); $('#carta').classList.remove('det'); };
+}
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') $('#carta').classList.remove('det'); });
+
+/* =========================================================
+   NAVEGACIÓ
+   ========================================================= */
+$('#bComenca').onclick = ()=>{ pintaMapa(); mostra('mapa'); };
+$('#bAlbum0').onclick = $('#bAlbum').onclick = ()=>{ pintaAlbum(); mostra('album'); };
+$('#bTornaMapa').onclick = ()=>{ pintaMapa(); mostra('mapa'); };
+$('#bReset').onclick = ()=>{
+  obreModal(`<h3 style="font-size:30px">Esborrar el progrés?</h3>
+    <p style="text-align:center">Perdràs totes les medalles i els rècords.</p>
+    <div class="acc" style="gap:10px"><button class="btn" id="bResNo">Cancel·la</button>
+    <button class="btn" id="bResSi" style="background:var(--red)">Esborra-ho tot</button></div>`);
+  $('#bResNo').onclick = tancaModal;
+  $('#bResSi').onclick = ()=>{ P = { rec:{}, eres:[] }; desa(); tancaModal(); pintaAlbum(); };
+};
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape' && $('#modal').classList.contains('on')) { tancaModal(); $('#carta').classList.remove('det'); }
+});
+</script>
+</body>
+</html>
