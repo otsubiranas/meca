@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ctrl+Virus · Dreceres de teclat</title>
+<link rel="icon" href="img/icones/bitxo.png">
+<link rel="stylesheet" href="css/98.css">
+<link rel="stylesheet" href="css/joc.css">
+</head>
+<body>
+
+<!-- ============ PORTADA ============ -->
+<section id="portada" class="pantalla activa">
+  <div class="window finestra-portada">
+    <div class="title-bar"><div class="title-bar-text">ALERTA.EXE</div>
+      <div class="title-bar-controls"><button aria-label="Close" tabindex="-1"></button></div></div>
+    <div class="window-body">
+      <h1 class="titol-joc"><span class="glitch" data-t="CTRL+VIRUS">CTRL+VIRUS</span></h1>
+      <p class="historia">Uns virus han contaminat l'ordinador de l'escola. Esborren frases, barregen paràgrafs i s'amaguen dins de les paraules.
+      Tu ets <b>el hacker</b> que ho pot arreglar… <b>sense ratolí</b>. Només tens la teva caixa d'eines: les <b>dreceres de teclat</b>.</p>
+      <div id="caixa-eines" class="caixa-eines"></div>
+      <div class="botons-portada">
+        <button id="b-comenca" class="gran">Comença (Enter)</button>
+        <button id="b-credits">Crèdits</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MAPA ============ -->
+<section id="mapa" class="pantalla">
+  <div class="barra-sup"><span class="logo">CTRL+VIRUS</span><span class="ajuda-mapa">Tria una missió amb les fletxes i prem <span class="tecla">Enter</span></span>
+    <span class="dreta"><button id="b-portada">Portada</button> <button id="b-so" class="b-so">So: sí</button></span></div>
+  <div id="zones" class="zones"></div>
+</section>
+
+<!-- ============ JOC ============ -->
+<section id="joc" class="pantalla">
+  <div class="barra-sup">
+    <span class="logo">CTRL+VIRUS</span>
+    <span id="nom-nivell"></span>
+    <span class="dreta"><span class="marcador"><img src="img/icones/gabia.png" alt=""> <b id="m-gabia">0</b></span>
+      <span class="marcador"><img src="img/icones/bitxo.png" alt=""> errors <b id="m-errors">0</b></span>
+      <span class="marcador"><img src="img/icones/rellotge.png" alt=""> <b id="m-temps">0:00</b></span>
+      <button id="b-mapa" tabindex="-1">Mapa (Esc)</button></span>
+  </div>
+  <div class="area-joc">
+    <div class="window finestra-doc" id="finestra">
+      <div class="title-bar"><div class="title-bar-text" id="titol-finestra">Bloc de notes</div>
+        <div class="title-bar-controls"><button aria-label="Minimize" tabindex="-1"></button><button aria-label="Maximize" tabindex="-1"></button><button aria-label="Close" tabindex="-1"></button></div></div>
+      <div class="menu-fals"><span><u>F</u>itxer</span><span><u>E</u>dita</span><span><u>C</u>erca</span><span>A<u>j</u>uda</span></div>
+      <div id="cerca" class="cerca amagat"><img src="img/icones/lupa.png" alt=""> Cerca: <span id="cerca-text"></span><span class="cur-cerca"></span> <span class="petit">(Enter per cercar · Esc per tancar)</span></div>
+      <div id="zona" class="zona"><div id="doc" class="doc"></div></div>
+      <div class="status-bar"><p class="status-bar-field" id="estat-esq">Llest</p><p class="status-bar-field" id="estat-dreta"></p></div>
+    </div>
+    <div class="panell">
+      <div class="terminal">
+        <div class="terminal-cap"><img src="img/icones/hacker.png" alt=""> hacker@escola:~$</div>
+        <div id="terminal-linies" class="terminal-linies"></div>
+      </div>
+      <div class="window missio">
+        <div class="title-bar"><div class="title-bar-text">Missió</div></div>
+        <div class="window-body"><ul id="tasques" class="tasques"></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="barra-tecles" id="barra-tecles"></div>
+</section>
+
+<!-- ============ RESULTAT ============ -->
+<div id="resultat" class="capa amagat">
+  <div class="window finestra-resultat">
+    <div class="title-bar"><div class="title-bar-text" id="res-titol">Missió completada</div></div>
+    <div class="window-body">
+      <div id="res-estrelles" class="estrelles"></div>
+      <div id="res-dades" class="res-dades"></div>
+      <div class="botons-portada"><button id="res-seg" class="gran">Següent (Enter)</button><button id="res-mapa">Mapa (Esc)</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CRÈDITS ============ -->
+<div id="credits" class="capa amagat">
+  <div class="window finestra-credits">
+    <div class="title-bar"><div class="title-bar-text">Crèdits</div></div>
+    <div class="window-body">
+      <h3>Ctrl+Virus</h3>
+      <p>Joc de dreceres de teclat de Step Up Figueres.</p>
+      <h4>Recursos gràfics i sonors</h4>
+      <ul>
+        <li><b>Slime</b> (els virus) — Rick Hoppmann, tinyworlds.org. Llicència CC0.</li>
+        <li><b>1-bit Pixel Icons</b> (les eines) — Nikoichu, nikoichu.itch.io/pixel-icons. Llicència CC0.</li>
+        <li><b>Interface Sounds</b> (els sons) — Kenney, kenney.nl. Llicència CC0.</li>
+        <li><b>98.css</b> (les finestres) — Jordan Scales, github.com/jdan/98.css. Llicència MIT:
+          <details><summary>Text de la llicència</summary><pre class="llicencia">Copyright 2020 Jordan Scales
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre></details></li>
+      </ul>
+      <div class="botons-portada"><button id="b-tanca-credits" class="gran">Tanca (Esc)</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="avis" class="avis amagat"></div>
+
+<script src="js/motor.js"></script>
+<script src="js/nivells.js"></script>
+<script>J.inicia();</script>
+</body>
+</html>
